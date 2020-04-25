@@ -26,6 +26,18 @@ router.get('/titles/js/n3ds/olv.js', function (req, res) {
 router.get('/titles/js/n3ds/olv.locale-en.js', function (req, res) {
     res.sendFile(path.join(__dirname + '../../../../portal/js/n3ds/olv.locale-en.js'));
 });
+/* GET played titles. */
+router.get('/settings/played_title_ids', function (req, res) {
+    res.sendStatus(200);;
+});
+/* GET check update */
+router.get('/check_update.json', function (req, res) {
+    res.sendStatus(200);
+});
+/* GET local list */
+router.get('/local_list.json', function (req, res) {
+    res.sendStatus(200);
+});
 router.post('/posts', function (req, res) {
     res.sendStatus(200);
 });
