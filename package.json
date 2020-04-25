@@ -1,0 +1,30 @@
+{
+  "name": "pretendoverse",
+  "version": "1.0.0",
+  "description": "Miiverse API Server",
+  "main": "./src/server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jemma",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "express-subdomain": "^1.0.5",
+    "fs-extra": "^9.0.0",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.27",
+    "mongoose": "^5.8.3",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "^1.10.0",
+    "xmlbuilder": "^13.0.2",
+    "xmlbuilder2": "0.0.4"
+  },
+  "devDependencies": {
+    "object-to-xml": "^2.0.0"
+  }
+}

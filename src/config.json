@@ -1,0 +1,13 @@
+{
+    "http": {
+        "port": 8080
+    },
+    "mongoose": {
+        "uri": "mongodb://localhost:27017",
+        "database": "Miiverse",
+        "options": {
+            "useNewUrlParser": true,
+            "useUnifiedTopology": true
+        }
+    }
+}
