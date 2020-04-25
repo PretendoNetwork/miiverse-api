@@ -1,4 +1,4 @@
 module.exports = {
 	DISCOVERY: require('./discovery'),
-	PORTAL: require('./portal'),
+	CTR: require('./ctr'),
 };

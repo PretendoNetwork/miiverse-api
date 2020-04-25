@@ -11,6 +11,7 @@ const router = express.Router();
 // Router to handle the subdomain restriction
 const miiverse = express.Router();
 const portal = express.Router();
+const ctr = express.Router();
 
 // Create subdomains
 logger.info('[MIIVERSE] Creating \'discovery\' subdomain');
@@ -18,7 +19,7 @@ router.use(subdomain('discovery.olv', miiverse));
 
 logger.info('[MIIVERSE] Creating \'portal\' subdomain');
 router.use(subdomain('portal.olv', portal));
-router.use(subdomain('ctr-portal.olv', portal));
+router.use(subdomain('ctr.olv', ctr));
 
 logger.info('[MIIVERSE] Importing middleware');
 miiverse.use(sessionMiddleware);
@@ -26,6 +27,6 @@ miiverse.use(pnidMiddleware);
 
 // Setup routes
 miiverse.use('/v1/endpoint', routes.DISCOVERY);
-portal.use('/', routes.PORTAL);
+ctr.use('/', routes.CTR);
 
 module.exports = router;
