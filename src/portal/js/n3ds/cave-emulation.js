@@ -219,26 +219,26 @@ if (typeof cave === "undefined") {
 
         capture_getLowerImageDetail: function(width, height, quality, format) {
             console.log('cave.capture_getLowerImageDetail('+
-                [width, height, quality, format].join(', ')
-                +')');
+                        [width, height, quality, format].join(', ')
+                        +')');
         },
 
         capture_getUpperImageLeftDetail: function(width, height, quality, format) {
             console.log('cave.capture_getUpperImageLeftDetail('+
-                [width, height, quality, format].join(', ')
-                +')');
+                        [width, height, quality, format].join(', ')
+                        +')');
         },
 
         capture_getUpperImageRightDetail: function(width, height, quality, format) {
             console.log('cave.capture_getUpperImageRightDetail('+
-                [width, height, quality, format].join(', ')
-                +')');
+                        [width, height, quality, format].join(', ')
+                        +')');
         },
 
         capture_getUpperImage3DDetail: function(width, height, quality, format) {
             console.log('cave.capture_getUpperImage3DDetail('+
-                [width, height, quality, format].join(', ')
-                +')');
+                        [width, height, quality, format].join(', ')
+                        +')');
         },
 
         capture_notifyUpdatedLocalList: function() {
@@ -389,7 +389,7 @@ if (typeof cave === "undefined") {
             console.log('cave.convertTimeToString(' + unixTime + ')');
             var date = new Date(unixTime * 1000);
             return date.getFullYear() + '-' + this._toDoubleDigits( date.getMonth() + 1 ) + '-' + this._toDoubleDigits(date.getDate())
-                + ' ' + this._toDoubleDigits(date.getHours()) + ':' + this._toDoubleDigits(date.getMinutes()) + ':' + this._toDoubleDigits(date.getSeconds());
+            + ' ' + this._toDoubleDigits(date.getHours()) + ':' + this._toDoubleDigits(date.getMinutes()) + ':' + this._toDoubleDigits(date.getSeconds());
         },
         _toDoubleDigits: function (num) {
             num +="";
