@@ -4,9 +4,13 @@ const database = require('../../../database');
 var router = express.Router();
 var path = require("path");
 
-/* GET discovery server. */
+/* GET portal server. */
 router.get('/titles/show', function (req, res) {
-    res.sendFile(path.join(__dirname + '/portal.html'));
+    res.sendFile(path.join(__dirname + '../../../../portal/index.html'));
+});
+/* GET olv.js server. */
+router.get('/js/olv.js', function (req, res) {
+    res.sendFile(path.join(__dirname + '../../../../portal/js/olv.js'));
 });
 
 router.post('/posts', function (req, res) {
