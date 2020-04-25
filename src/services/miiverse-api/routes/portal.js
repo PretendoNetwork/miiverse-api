@@ -5,7 +5,7 @@ var router = express.Router();
 var path = require("path");
 
 /* GET discovery server. */
-router.get('/', function (req, res) {
+router.get('/titles/show', function (req, res) {
     res.sendFile(path.join(__dirname + '/portal.html'));
 });
 
