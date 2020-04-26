@@ -70,7 +70,6 @@ async function getPostsByCommunity(community, numberOfPosts) {
 
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
     verifyConnected();
-    console.log(community.title_id);
     return POST.find({
         title_id: community.title_id,
         search_key: search_key
