@@ -15,10 +15,13 @@ const  CommunitySchema = new Schema({
     },
     icon: String,
     title_ids: {
-        type: [Number],
+        type: [String],
         default: undefined
     },
-    title_id: String,
+    title_id: {
+        type: [String],
+        default: undefined
+    },
     community_id: String,
     is_recommended: {
         type: Number,
