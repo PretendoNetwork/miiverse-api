@@ -2,6 +2,13 @@ const { Schema, model } = require('mongoose');
 //just testing pull requests
 const PostSchema = new Schema({
     body: String,
+    app_data: String,
+    painting: String,
+    screenshot: String,
+    search_key: {
+        type: [String],
+        default: undefined
+    },
     community_id: String,
     country_id: Number,
     created_at: String,
@@ -63,9 +70,9 @@ PostSchema.methods.downEmpathy = async function() {
     await this.save();
 };
 
-const MiiversePost = model('MiiversePost', PostSchema);
+const POST = model('POST', PostSchema);
 
 module.exports = {
     PostSchema,
-    MiiversePost
+    POST
 };

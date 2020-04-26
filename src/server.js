@@ -1,5 +1,4 @@
 process.title = 'Pretendo - Miiverse';
-
 const express = require('express');
 const morgan = require('morgan');
 const xmlparser = require('./middleware/xml-parser');
@@ -19,6 +18,7 @@ app.disable('x-powered-by');
 logger.info('Setting up Middleware');
 app.use(morgan('dev'));
 app.use(express.json());
+
 app.use(express.urlencoded({
     extended: true
 }));

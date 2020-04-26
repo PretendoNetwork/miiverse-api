@@ -43,6 +43,18 @@ async function getTopicByCommunityID(communityID) {
     });
 }
 
+async function getCommunityByTitleID(title_id) {
+    verifyConnected();
+
+    if (typeof communityID !== 'string') {
+        return null;
+    }
+
+    return TOPIC.findOne({
+        title_id: title_id
+    });
+}
+
 async function getDiscoveryHosts() {
     verifyConnected();
     return ENDPOINT.findOne({

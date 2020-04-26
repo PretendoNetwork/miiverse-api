@@ -25,6 +25,7 @@
     "xmlbuilder2": "0.0.4"
   },
   "devDependencies": {
+    "multer": "^1.4.2",
     "object-to-xml": "^2.0.0"
   }
 }
