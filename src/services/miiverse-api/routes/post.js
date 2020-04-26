@@ -8,22 +8,33 @@ var upload = multer();
 
 /* GET post titles. */
 router.post('/', upload.none(), function (req, res, next) {
-
-    let paramPack = req.get('x-nintendo-parampack');
-    let paramPackData = processHeaders.data.decodeParamPack(paramPack);
+    let paramPackData = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
     /*let dec = Buffer.from(paramPack, "base64").toString("ascii");
     dec = dec.slice(1, -1).split("\\");
     const paramPackData = {};
     for (let i = 0; i < dec.length; i += 2) {
         paramPackData[dec[i].trim()] = dec[i + 1].trim();
     }*/
-    const creationDate = moment().format('YYYY-MM-DDTHH:MM:SS');
+    const creationDate = moment().format('YYYY-MM-DD HH:MM:SS');
+    let appData = "";
+    if (req.body.app_data) {
+        appData = req.body.app_data.replace(/\0/g, "").trim();
+    }
+    let painting = "";
+    if (req.body.painting) {
+        painting = req.body.painting.replace(/\0/g, "").trim();
+    }
+    let screenshot = "";
+    if (req.body.screenshot) {
+        screenshot = req.body.screenshot.replace(/\0/g, "").trim();
+    }
     const document = {
         body: req.body.body,
-        app_data: req.body.app_data,
-        painting: req.body.painting,
-        screenshot: req.body.screenshot,
+        app_data: appData,
+        painting: painting,
+        screenshot: screenshot,
         search_key: req.body.search_key,
+        topic_tag: req.body.topic_tag,
         community_id: req.body.community_id,
         country_id: paramPackData.country_id,
         created_at: creationDate,

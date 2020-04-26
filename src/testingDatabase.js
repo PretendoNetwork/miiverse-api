@@ -1,22 +1,11 @@
 const { ENDPOINT } = require('./models/endpoint');
 const database = require('./database');
 
-
-
-const doc = {
-    has_error: 0,
-    version: 1,
-    endpoint: {
-        host: "host1",
-        api_host: "host2",
-        portal_host: "host3",
-        n3ds_host: "host4"
-    }
-};
-const newEndpoint = new ENDPOINT(doc);
 database.connect().then(async yeet => {
-    const temp = await database.getServerConfig();
-    console.log(temp);
+    const temp = await database.getCommunityByID('0');
+    console.log(temp.name);
+    const temp2 = await database.getPostsByCommunityKey(temp, 2, 'Warawara_03');
+    console.log(temp2[1].painting.length);
 });
 //database.getDiscoveryHosts().then(r => console.log(r.endpoint));
 

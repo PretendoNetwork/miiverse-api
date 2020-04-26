@@ -17,6 +17,7 @@ logger.info('[MIIVERSE] Creating \'discovery\' subdomain');
 router.use(subdomain('discovery.olv', discovery));
 logger.info('[MIIVERSE] Creating \'api\' subdomain');
 router.use(subdomain('api.olv', api));
+router.use(subdomain('d4c59198', api));
 
 
 logger.info('[MIIVERSE] Importing middleware');
@@ -26,5 +27,6 @@ discovery.use(pnidMiddleware);
 // Setup routes
 discovery.use('/v1/endpoint', routes.DISCOVERY);
 api.use('/v1/posts', routes.POST);
+api.use('/v1/communities/', routes.COMMUNITY);
 
 module.exports = router;

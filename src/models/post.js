@@ -9,6 +9,10 @@ const PostSchema = new Schema({
         type: [String],
         default: undefined
     },
+    topic_tag: {
+        type: [String],
+        default: undefined
+    },
     community_id: String,
     country_id: Number,
     created_at: String,
@@ -52,7 +56,7 @@ const PostSchema = new Schema({
         default: 0
     },
     screen_name: String,
-    title_id: Number,
+    title_id: String,
 });
 
 

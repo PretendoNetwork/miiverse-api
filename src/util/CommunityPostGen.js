@@ -9,39 +9,39 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("request_name", "posts").up()
             .e("topic")
-            .e("community_id", community.id).up()
+            .e("community_id", community.community_id).up()
             .up()
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
             xml = xml.e("post")
-                .e("app_data", posts[i].appData).up()
+                .e("app_data", posts[i].app_data).up()
                 .e("body", posts[i].body).up()
-                .e("community_id", community.id).up()
+                .e("community_id", community.community_id).up()
                 .e("country_id", "254").up()
-                .e("created_at", moment(posts[i].created).tz("GMT").format("YYYY-MM-DD hh:mm:ss")).up()
+                .e("created_at", posts[i].created_at).up()
                 .e("feeling_id", "1").up()
-                .e("id", posts[i].id).up()
+                .e("id", i + 1).up()
                 .e("is_autopost", "0").up()
                 .e("is_community_private_autopost", "0").up()
                 .e("is_spoiler", "0").up()
                 .e("is_app_jumpable", "0").up()
-                .e("empathy_count", posts[i].empathy).up()
+                .e("empathy_count", posts[i].empathy_count).up()
                 .e("language_id", "1").up()
                 .e("number", "0").up();
             if (posts[i].painting) {
                 xml = xml.e("painting")
                     .e("format", "tga").up()
                     .e("content", posts[i].painting).up()
-                    .e("size", posts[i].paintingSz).up()
+                    .e("size", posts[i].painting.length).up()
                     .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                     .up();
             }
-            xml = xml.e("pid", posts[i].pid).up()
+            xml = xml.e("pid", i + 1).up()
                 .e("platform_id", "1").up()
                 .e("region_id", "4").up()
                 .e("reply_count", "0").up()
-                .e("screen_name", posts[i].screenName).up()
-                .e("title_id", posts[i].tid).up()
+                .e("screen_name", posts[i].screen_name).up()
+                .e("title_id", posts[i].title_id).up()
                 .up();
         }
 
@@ -61,27 +61,27 @@ class CommunityPostGen {
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("post");
-        if (post.appData) {
-            xml = xml.e("app_data", post.appData).up();
+        if (post.app_data) {
+            xml = xml.e("app_data", post.app_data).up();
         }
         xml = xml.e("body", post.body).up()
-            .e("community_id", post.communityID).up()
+            .e("community_id", post.community_id).up()
             .e("country_id", "254").up()
-            .e("created_at", moment(post.created).tz("GMT").format("YYYY-MM-DD hh:mm:ss")).up()
+            .e("created_at", post.created_at).up()
             .e("feeling_id", "1").up()
             .e("id", post.id).up()
             .e("is_autopost", "0").up()
             .e("is_community_private_autopost", "0").up()
             .e("is_spoiler", "0").up()
             .e("is_app_jumpable", "0").up()
-            .e("empathy_count", post.empathy).up()
+            .e("empathy_count", post.empathy_count).up()
             .e("language_id", "1").up()
             .e("number", "0").up();
         if (post.painting) {
             xml = xml.e("painting")
                 .e("format", "tga").up()
                 .e("content", post.painting).up()
-                .e("size", post.paintingSz).up()
+                .e("size", post.painting.length).up()
                 .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                 .up();
         }
@@ -89,8 +89,8 @@ class CommunityPostGen {
             .e("platform_id", "1").up()
             .e("region_id", "4").up()
             .e("reply_count", "0").up()
-            .e("screen_name", post.screenName).up()
-            .e("title_id", post.tid).up()
+            .e("screen_name", post.screen_name).up()
+            .e("title_id", post.title_id).up()
             .up();
         return xml.end({ pretty: true, allowEmpty: true });
     }
