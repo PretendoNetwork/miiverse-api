@@ -65,9 +65,7 @@ router.post('/*/empathies', upload.none(), function (req, res, next) {
     let pid = req.originalUrl.replace('/v1/posts/', '').replace('/empathies','').trim();
     database.connect().then(async emp => {
         const post = await database.getPostByID(pid);
-        console.log(post.empathy_count);
         await post.upEmpathy();
-        console.log(post.empathy_count);
     });
     res.status(200);
     res.send();
