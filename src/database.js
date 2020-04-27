@@ -60,6 +60,14 @@ async function getCommunityByID(community_id) {
     });
 }
 
+async function getPostByID(postID) {
+    verifyConnected();
+
+    return POST.findOne({
+        id: postID
+    });
+}
+
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
 
@@ -99,5 +107,6 @@ module.exports = {
     getDiscoveryHosts,
     getPostsByCommunity,
     getPostsByCommunityKey,
+    getPostByID,
     getServerConfig
 };

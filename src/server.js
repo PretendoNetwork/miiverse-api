@@ -30,7 +30,7 @@ app.use(miiverse);
 // 404 handler
 logger.info('Creating 404 status handler');
 app.use((request, response) => {
-    logger.warn(request.protocol + '://' + request.get('host') + request.originalUrl);
+    //logger.warn(request.protocol + '://' + request.get('host') + request.originalUrl);
     response.status(404);
     response.send();
 });

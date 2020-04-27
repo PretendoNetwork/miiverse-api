@@ -20,7 +20,7 @@ class CommunityPostGen {
                 .e("country_id", "254").up()
                 .e("created_at", posts[i].created_at).up()
                 .e("feeling_id", "1").up()
-                .e("id", i + 1).up()
+                .e("id", posts[i].id).up()
                 .e("is_autopost", "0").up()
                 .e("is_community_private_autopost", "0").up()
                 .e("is_spoiler", "0").up()

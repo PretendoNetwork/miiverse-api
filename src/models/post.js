@@ -1,10 +1,13 @@
 const { Schema, model } = require('mongoose');
 //just testing pull requests
 const PostSchema = new Schema({
+    title_id: String,
+    screen_name: String,
     body: String,
     app_data: String,
     painting: String,
     screenshot: String,
+    url: String,
     search_key: {
         type: [String],
         default: undefined
@@ -55,8 +58,6 @@ const PostSchema = new Schema({
         type: Number,
         default: 0
     },
-    screen_name: String,
-    title_id: String,
 });
 
 
