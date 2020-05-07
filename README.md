@@ -11,4 +11,5 @@ First install [NodeJS](https://nodejs.org) and [MongoDB](https://mongodb.com). D
 # Currently implemented endpoints
 - [GET] https://discovery.olv.nintendo.net/v1/endpoint
 - [GET] https://api.olv.nintendo.net/v1/communities/0/posts
+- [GET] https://discovery.olv.nintendo.net/v1/people
 - [POST] https://api.olv.nintendo.net/v1/posts
