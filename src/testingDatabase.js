@@ -1,7 +1,10 @@
 const { COMMUNITY } = require('./models/communities');
+const { USER } = require('./models/user');
 const database = require('./database');
+const util = require('./util/authentication');
+const moment = require('moment');
 
-database.connect().then(async yeet => {
+/**database.connect().then(async yeet => {
     const doc0 = {
         empathy_count: 0,
         id: 0,
@@ -49,6 +52,29 @@ console.log(snowflake.nextId());
 console.log(snowflake.nextId());
 console.log(uid.getUniqueID());*/
 
+util.data.processUser('1346301359');
+/*database.connect().then(async yeet => {
+    let pidr = await database.getUserByPID(pid);
+    if(pidr != null)
+        console.log(pidr);
+    else
+        console.log("no user exists");
+    const newUsr = {
+        pid: pid,
+        created_at: moment().format('YYYY-MM-DD HH:mm:SS'),
+        account_status: 0,
+        mii: "AwAAEEJ4VAIDBdLCgWl0xBYACARJKQAAAAhmAHQAYgA6AGQAZgBmAGoAZABpAAAAIgAeARJqYww3NEUUAhQVbggAACkAUkhQRwBhAGIAaQBlACAAQQBuAG4AAAAAANLs",
+        official: false
+    };
+    const newUsrObj = new USER(newUsr);
+    newUsrObj.save();
+});*/
+
+/**let data = 'cBW4iaphrOOGDnLXodAtLJr1bImHcKUsd0stwucPe09CPDK5FjKQSYx/VhH8JVMtE2bhwDPmdEHMwbuTI/Gsi5/YCNJrmTUVmh90Q7SQ3r8LmwTyFGi9B5pzWPRR7HY7mmprQ8fnsTxn5SLXfBY9wbDMUhBOgseixW9Ekz3UiHRvaLEkStsHfRZOaUmM/ezsw3H/hs1irwBaP+LBBSAyTGPCuJYr3rwYeL8KZ0v5m9xvFFnHHdfcbLUDki3/4SvLv11HeA==';
+let tknBuffer = Buffer.from(data, 'base64');
+console.log(tknBuffer);
+let token = util.data.decryptToken(tknBuffer);
+console.log("Token: " + token.readUInt32LE(0x2));**/
 
 //database.getDiscoveryHosts().then(r => console.log(r.endpoint));
 

@@ -1,16 +1,16 @@
 var express = require('express');
 var router = express.Router();
 const database = require('../../../database');
-const comPostGen = require('../../../util/CommunityPostGen');
+const pplPostGen = require('../../../util/peoplePostGen');
 const processHeaders = require('../../../util/authentication');
 
 /* GET post titles. */
-router.get('/0/posts', function (req, res) {
+router.get('/', function (req, res) {
     database.connect().then(async e => {
         /*  Parse out parameters from URL and headers */
-        const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+        //const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         //"[0:1]=1407375153523200"
-        let community = await database.getCommunityByTitleID(paramPack.title_id);
+        let community = await database.getCommunityByTitleID(1407375153321472);
         if(community != null)
         {
             let posts;
@@ -22,9 +22,9 @@ router.get('/0/posts', function (req, res) {
             /*  Build formatted response and send it off. */
             let response;
             if(req.query.with_mii === 1)
-                response = await comPostGen.PostsResponseWithMii(posts, community);
+                response = await pplPostGen.PostsResponseWithMii(posts, community);
             else
-                response = await comPostGen.PostsResponse(posts, community);
+                response = await pplPostGen.PostsResponse(posts, community);
             res.contentType("application/xml");
             res.send(response);
         }

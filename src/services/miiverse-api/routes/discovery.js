@@ -1,11 +1,41 @@
 var express = require('express');
 var xml = require('object-to-xml');
 const database = require('../../../database');
+const util = require('../../../util/authentication');
 var router = express.Router();
 
 /* GET discovery server. */
 router.get('/', function (req, res) {
     database.connect().then(async e => {
+        try
+        {
+            let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+            let usrObj;
+            usrObj = await util.data.processUser(pid);
+            switch (usrObj.account_status) {
+                case 0:
+                    break;
+                case 1:
+                case 2:
+                case 3:
+                    res.set("Content-Type", "application/xml");
+                    res.statusCode = 400;
+                    response = {
+                        result: {
+                            has_error: 1,
+                            version: 1,
+                            code: 400,
+                            error_code: 7,
+                            message: "POSTING_FROM_NNID"
+                        }
+                    };
+                    res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            }
+        }
+        catch (e)
+        {
+            //console.error(e);
+        }
         const discovery = await database.getDiscoveryHosts();
         switch(discovery.has_error)
         {
