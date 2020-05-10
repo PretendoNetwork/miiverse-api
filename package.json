@@ -23,6 +23,9 @@
     "morgan": "^1.10.0",
     "node-rsa": "^1.0.8",
     "node-snowflake": "0.0.1",
+    "pako": "^1.0.11",
+    "pngjs": "^5.0.0",
+    "tga": "^1.0.3",
     "xmlbuilder": "^13.0.2",
     "xmlbuilder2": "0.0.4"
   },

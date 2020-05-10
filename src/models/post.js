@@ -6,6 +6,7 @@ const PostSchema = new Schema({
     body: String,
     app_data: String,
     painting: String,
+    painting_uri: String,
     screenshot: String,
     url: String,
     search_key: {

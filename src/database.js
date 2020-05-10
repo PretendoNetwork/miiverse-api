@@ -46,6 +46,11 @@ async function getTopicByCommunityID(communityID) {
     });
 }
 
+async function getCommunities(numberOfPosts) {
+    verifyConnected();
+    return COMMUNITY.find({}).limit(numberOfPosts);
+}
+
 async function getCommunityByTitleID(title_id) {
     verifyConnected();
     return COMMUNITY.findOne({
@@ -71,10 +76,9 @@ async function getPostByID(postID) {
 
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
-
     return POST.find({
         title_id: community.title_id
-    }).limit(numberOfPosts.value);
+    }).limit(numberOfPosts);
 }
 
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
@@ -109,8 +113,7 @@ async function getServerConfig() {
 
 module.exports = {
     connect,
-    getTopicByName,
-    getTopicByCommunityID,
+    getCommunities,
     getCommunityByTitleID,
     getCommunityByID,
     getDiscoveryHosts,

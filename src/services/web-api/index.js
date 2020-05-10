@@ -9,25 +9,15 @@ const routes = require('./routes');
 const router = express.Router();
 
 // Router to handle the subdomain restriction
-const discovery = express.Router();
 const api = express.Router();
 
 // Create subdomains
-logger.info('[MIIVERSE] Creating \'discovery\' subdomain');
-router.use(subdomain('discovery.olv', discovery));
-logger.info('[MIIVERSE] Creating \'api\' subdomain');
-router.use(subdomain('api.olv', api));
-router.use(subdomain('d551f9ba', api));
-
-
-logger.info('[MIIVERSE] Importing middleware');
-discovery.use(sessionMiddleware);
-discovery.use(pnidMiddleware);
+logger.info('[MIIVERSE] Creating \'web api\' subdomain');
+router.use(subdomain('web.olv', api));
 
 // Setup routes
-discovery.use('/v1/endpoint', routes.DISCOVERY);
-api.use('/v1/posts', routes.POST);
+api.use('/', routes.PORTAL);
 api.use('/v1/communities/', routes.COMMUNITY);
-api.use('/v1/people/', routes.PEOPLE);
+api.use('/v1/post/', routes.POST);
 
 module.exports = router;
