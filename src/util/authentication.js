@@ -6,9 +6,9 @@ const xmlParser = require('xml2json');
 const request = require("request");
 const moment = require('moment');
 const { USER } = require('../models/user');
-let TGA = require('tga');
-let pako = require('pako');
-let PNG = require('pngjs').PNG;
+const TGA = require('tga');
+const pako = require('pako');
+const PNG = require('pngjs').PNG;
 
 let methods = {
     processUser: function(pid) {
@@ -47,26 +47,6 @@ let methods = {
             });
         });
     },
-    processPainting: function (painting) {
-        let paintingBuffer = Buffer.from(painting, 'base64');
-        let output = '';
-        try
-        {
-            output = pako.inflate(paintingBuffer);
-        }
-        catch (err)
-        {
-            console.log(err);
-        }
-        let tga = new TGA(Buffer.from(output));
-        let png = new PNG({
-            width: tga.width,
-            height: tga.height
-        });
-        png.data = tga.pixels;
-        let pngBuffer = PNG.sync.write(png);
-        return `data:image/png;base64,${pngBuffer.toString('base64')}`;
-    },
     decodeParamPack: function (paramPack) {
         /*  Decode base64 */
         let dec = Buffer.from(paramPack, "base64").toString("ascii");
@@ -86,7 +66,6 @@ let methods = {
         return PID;
 
     },
-
     decryptToken: function(token) {
 
     // Access and refresh tokens use a different format since they must be much smaller
@@ -142,6 +121,26 @@ let methods = {
     }
 
     return decryptedBody;
-}
+},
+    processPainting: function (painting) {
+        let paintingBuffer = Buffer.from(painting, 'base64');
+        let output = '';
+        try
+        {
+            output = pako.inflate(paintingBuffer);
+        }
+        catch (err)
+        {
+            console.log(err);
+        }
+        let tga = new TGA(Buffer.from(output));
+        let png = new PNG({
+            width: tga.width,
+            height: tga.height
+        });
+        png.data = tga.pixels;
+        let pngBuffer = PNG.sync.write(png);
+        return `data:image/png;base64,${pngBuffer.toString('base64')}`;
+    },
 };
 exports.data = methods;
