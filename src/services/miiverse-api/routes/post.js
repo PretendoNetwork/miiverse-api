@@ -23,10 +23,8 @@ router.post('/', upload.none(), async function (req, res, next) {
             appData = req.body.app_data.replace(/\0/g, "").trim();
         }
         let painting = "";
-        let painting_uri = "";
         if (req.body.painting) {
             painting = req.body.painting.replace(/\0/g, "").trim();
-            //painting_uri = util.data.processPainting(painting);
         }
         let screenshot = "";
         if (req.body.screenshot) {
@@ -38,7 +36,6 @@ router.post('/', upload.none(), async function (req, res, next) {
             body: req.body.body,
             app_data: appData,
             painting: painting,
-            painting_uri: painting_uri,
             screenshot: screenshot,
             url: req.body.url,
             search_key: req.body.search_key,

@@ -6,9 +6,6 @@ const xmlParser = require('xml2json');
 const request = require("request");
 const moment = require('moment');
 const { USER } = require('../models/user');
-const TGA = require('tga');
-const pako = require('pako');
-const PNG = require('pngjs').PNG;
 
 let methods = {
     processUser: function(pid) {
@@ -47,6 +44,7 @@ let methods = {
             });
         });
     },
+
     decodeParamPack: function (paramPack) {
         /*  Decode base64 */
         let dec = Buffer.from(paramPack, "base64").toString("ascii");
@@ -66,61 +64,62 @@ let methods = {
         return PID;
 
     },
+
     decryptToken: function(token) {
 
-    // Access and refresh tokens use a different format since they must be much smaller
-    // Assume a small length means access or refresh token
-    if (token.length <= 32) {
+        // Access and refresh tokens use a different format since they must be much smaller
+        // Assume a small length means access or refresh token
+        if (token.length <= 32) {
+            const cryptoPath = `${__dirname}/../certs/access`;
+            const aesKey = Buffer.from(fs.readFileSync(`${cryptoPath}/aes.key`, { encoding: 'utf8' }), 'hex');
+
+            const iv = Buffer.alloc(16);
+
+            const decipher = crypto.createDecipheriv('aes-128-cbc', aesKey, iv);
+
+            let decryptedBody = decipher.update(token);
+            decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
+
+            return decryptedBody;
+        }
+
         const cryptoPath = `${__dirname}/../certs/access`;
-        const aesKey = Buffer.from(fs.readFileSync(`${cryptoPath}/aes.key`, { encoding: 'utf8' }), 'hex');
 
-        const iv = Buffer.alloc(16);
+        const cryptoOptions = {
+            private_key: fs.readFileSync(`${cryptoPath}/private.pem`),
+            hmac_secret: fs.readFileSync(`${cryptoPath}/secret.key`)
+        };
 
-        const decipher = crypto.createDecipheriv('aes-128-cbc', aesKey, iv);
+        const privateKey = new NodeRSA(cryptoOptions.private_key, 'pkcs1-private-pem', {
+            environment: 'browser',
+            encryptionScheme: {
+                'hash': 'sha256',
+            }
+        });
 
-        let decryptedBody = decipher.update(token);
+        const cryptoConfig = token.subarray(0, 0x90);
+        const signature = token.subarray(0x90, 0xA4);
+        const encryptedBody = token.subarray(0xA4);
+
+        const encryptedAESKey = cryptoConfig.subarray(0, 128);
+        const iv = cryptoConfig.subarray(128);
+
+        const decryptedAESKey = privateKey.decrypt(encryptedAESKey);
+
+        const decipher = crypto.createDecipheriv('aes-128-cbc', decryptedAESKey, iv);
+
+        let decryptedBody = decipher.update(encryptedBody);
         decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
+
+        const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
+        const calculatedSignature = hmac.digest();
+
+        if (!calculatedSignature.equals(signature)) {
+            console.log('Token signature did not match');
+            return null;
+        }
 
         return decryptedBody;
     }
-
-    const cryptoPath = `${__dirname}/../certs/access`;
-
-    const cryptoOptions = {
-        private_key: fs.readFileSync(`${cryptoPath}/private.pem`),
-        hmac_secret: fs.readFileSync(`${cryptoPath}/secret.key`)
-    };
-
-    const privateKey = new NodeRSA(cryptoOptions.private_key, 'pkcs1-private-pem', {
-        environment: 'browser',
-        encryptionScheme: {
-            'hash': 'sha256',
-        }
-    });
-
-    const cryptoConfig = token.subarray(0, 0x90);
-    const signature = token.subarray(0x90, 0xA4);
-    const encryptedBody = token.subarray(0xA4);
-
-    const encryptedAESKey = cryptoConfig.subarray(0, 128);
-    const iv = cryptoConfig.subarray(128);
-
-    const decryptedAESKey = privateKey.decrypt(encryptedAESKey);
-
-    const decipher = crypto.createDecipheriv('aes-128-cbc', decryptedAESKey, iv);
-
-    let decryptedBody = decipher.update(encryptedBody);
-    decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
-
-    const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
-    const calculatedSignature = hmac.digest();
-
-    if (!calculatedSignature.equals(signature)) {
-        console.log('Token signature did not match');
-        return null;
-    }
-
-    return decryptedBody;
-},
 };
 exports.data = methods;
