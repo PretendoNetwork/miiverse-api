@@ -122,25 +122,5 @@ let methods = {
 
     return decryptedBody;
 },
-    processPainting: function (painting) {
-        let paintingBuffer = Buffer.from(painting, 'base64');
-        let output = '';
-        try
-        {
-            output = pako.inflate(paintingBuffer);
-        }
-        catch (err)
-        {
-            console.log(err);
-        }
-        let tga = new TGA(Buffer.from(output));
-        let png = new PNG({
-            width: tga.width,
-            height: tga.height
-        });
-        png.data = tga.pixels;
-        let pngBuffer = PNG.sync.write(png);
-        return `data:image/png;base64,${pngBuffer.toString('base64')}`;
-    },
 };
 exports.data = methods;

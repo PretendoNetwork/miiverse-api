@@ -26,7 +26,7 @@ router.post('/', upload.none(), async function (req, res, next) {
         let painting_uri = "";
         if (req.body.painting) {
             painting = req.body.painting.replace(/\0/g, "").trim();
-            painting_uri = util.data.processPainting(painting);
+            //painting_uri = util.data.processPainting(painting);
         }
         let screenshot = "";
         if (req.body.screenshot) {
@@ -65,6 +65,9 @@ router.post('/', upload.none(), async function (req, res, next) {
     catch (e)
     {
         console.error(e);
+    }
+    finally
+    {
         res.set("Content-Type", "application/xml");
         res.statusCode = 400;
         response = {
