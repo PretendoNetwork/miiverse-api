@@ -62,7 +62,6 @@ router.post('/', upload.none(), async function (req, res, next) {
         };
         const newPost = new POST(document);
         newPost.save();
-        console.log('post completed');
         res.sendStatus(200);
     }
     catch (e)

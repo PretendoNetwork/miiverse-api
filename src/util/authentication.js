@@ -21,7 +21,7 @@ let methods = {
                 else
                 {
                     await request({
-                        url: "http://account.miiverse.cc/v1/api/miis?pids=" + pid,
+                        url: "http://account.jemverse.xyz/v1/api/miis?pids=" + pid,
                         headers: {
                             'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
                             'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a'
@@ -41,6 +41,8 @@ let methods = {
                             newUsrObj.save();
                             resolve(newUsr);
                         }
+                        else
+                            reject();
                     })
 
                 }
@@ -66,11 +68,12 @@ let methods = {
         {
             let B64token = Buffer.from(token, 'base64');
             let decryptedToken = this.decryptToken(B64token);
-            return decryptedToken.readUInt32LE(0x2);
+            let pid = decryptedToken.readUInt32LE(0x2);
+            return pid;
         }
         catch(e)
         {
-            console.log(e);
+            console.error("The token was incorrect")
         }
 
     },
@@ -92,7 +95,6 @@ let methods = {
 
             return decryptedBody;
         }
-
         const cryptoPath = `${__dirname}/../certs/access`;
 
         const cryptoOptions = {
@@ -121,13 +123,11 @@ let methods = {
         let decryptedBody = decipher.update(encryptedBody);
         decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
         const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
-
         const calculatedSignature = hmac.digest();
         if (!calculatedSignature.equals(signature)) {
             console.log('Token signature did not match');
             return null;
         }
-
         return decryptedBody;
     },
     processPainting: function (painting) {
@@ -139,7 +139,7 @@ let methods = {
         }
         catch (err)
         {
-            console.log(err);
+            console.error(err);
         }
         let tga = new TGA(Buffer.from(output));
         let png = new PNG({
