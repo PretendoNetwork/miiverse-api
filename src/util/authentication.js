@@ -62,9 +62,16 @@ let methods = {
         return out;
     },
     processServiceToken: function(token) {
-        let B64token = Buffer.from(token, 'base64');
-        let decryptedToken = this.decryptToken(B64token);
-        return decryptedToken.readUInt32LE(0x2);
+        try
+        {
+            let B64token = Buffer.from(token, 'base64');
+            let decryptedToken = this.decryptToken(B64token);
+            return decryptedToken.readUInt32LE(0x2);
+        }
+        catch(e)
+        {
+            console.log(e);
+        }
 
     },
 

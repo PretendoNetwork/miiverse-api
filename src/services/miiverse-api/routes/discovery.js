@@ -34,7 +34,7 @@ router.get('/', function (req, res) {
         }
         catch (e)
         {
-            //console.error(e);
+            console.error(e);
         }
         const discovery = await database.getDiscoveryHosts();
         switch(discovery.has_error)
