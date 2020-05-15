@@ -62,9 +62,6 @@ router.post('/', upload.none(), async function (req, res, next) {
     catch (e)
     {
         console.error(e);
-    }
-    finally
-    {
         res.set("Content-Type", "application/xml");
         res.statusCode = 400;
         response = {

@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const NodeRSA = require('node-rsa');
 const fs = require('fs-extra');
 const database = require('../database');
+const config = require('../config.json');
 const xmlParser = require('xml2json');
 const request = require("request");
 const moment = require('moment');
@@ -58,10 +59,12 @@ let methods = {
         return out;
     },
     processServiceToken: function(token) {
+        console.log(token);
         let B64token = Buffer.from(token, 'base64');
+        console.log(B64token);
         let decryptedToken = this.decryptToken(B64token);
-        let PID = decryptedToken.readUInt32LE(0x2);
-        return PID;
+        console.log(decryptedToken);
+        return decryptedToken.readUInt32LE(0x2);
 
     },
 
@@ -87,7 +90,7 @@ let methods = {
 
         const cryptoOptions = {
             private_key: fs.readFileSync(`${cryptoPath}/private.pem`),
-            hmac_secret: fs.readFileSync(`${cryptoPath}/secret.key`)
+            hmac_secret: config.secret
         };
 
         const privateKey = new NodeRSA(cryptoOptions.private_key, 'pkcs1-private-pem', {
@@ -110,10 +113,12 @@ let methods = {
 
         let decryptedBody = decipher.update(encryptedBody);
         decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
-
+        console.log("secret: " + cryptoOptions.hmac_secret);
         const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
-        const calculatedSignature = hmac.digest();
 
+        const calculatedSignature = hmac.digest();
+        console.log(calculatedSignature);
+        console.log(signature);
         if (!calculatedSignature.equals(signature)) {
             console.log('Token signature did not match');
             return null;
