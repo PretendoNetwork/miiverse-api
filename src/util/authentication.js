@@ -73,7 +73,8 @@ let methods = {
         }
         catch(e)
         {
-            console.error("The token was incorrect")
+            console.error("The token was incorrect");
+            return null;
         }
 
     },
