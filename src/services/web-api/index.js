@@ -14,9 +14,12 @@ const api = express.Router();
 // Create subdomains
 logger.info('[MIIVERSE] Creating \'web api\' subdomain');
 router.use(subdomain('web.olv', api));
+router.use(subdomain('ctr.olv', api));
+router.use(subdomain('portal.olv', api));
 
 // Setup routes
 api.use('/', routes.PORTAL);
+api.use('/titles/show', routes.PORTAL);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/post/', routes.POST);
 
