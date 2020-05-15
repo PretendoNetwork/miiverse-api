@@ -11,7 +11,6 @@ router.get('/list', function (req, res) {
         //const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         //"[0:1]=1407375153523200"
         let community = await database.getCommunities(5);
-        console.log(community.length);
         let body = '<form action="">\n' +
             '    <select id="communities" onchange="getPosts(this.value)">' +
             '        <option value="">Select a community:</option>\n';

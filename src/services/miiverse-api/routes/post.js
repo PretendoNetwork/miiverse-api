@@ -26,6 +26,10 @@ router.post('/', upload.none(), async function (req, res, next) {
         if (req.body.painting) {
             painting = req.body.painting.replace(/\0/g, "").trim();
         }
+        let paintingURI = "";
+        if (req.body.painting) {
+            paintingURI = await util.data.processPainting(painting);
+        }
         let screenshot = "";
         if (req.body.screenshot) {
             screenshot = req.body.screenshot.replace(/\0/g, "").trim();
@@ -36,6 +40,7 @@ router.post('/', upload.none(), async function (req, res, next) {
             body: req.body.body,
             app_data: appData,
             painting: painting,
+            painting_uri: paintingURI,
             screenshot: screenshot,
             url: req.body.url,
             search_key: req.body.search_key,
@@ -57,6 +62,7 @@ router.post('/', upload.none(), async function (req, res, next) {
         };
         const newPost = new POST(document);
         newPost.save();
+        console.log('post completed');
         res.sendStatus(200);
     }
     catch (e)

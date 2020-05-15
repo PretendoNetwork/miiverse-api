@@ -7,6 +7,9 @@ const xmlParser = require('xml2json');
 const request = require("request");
 const moment = require('moment');
 const { USER } = require('../models/user');
+let TGA = require('tga');
+let pako = require('pako');
+let PNG = require('pngjs').PNG;
 
 let methods = {
     processUser: function(pid) {
@@ -59,11 +62,8 @@ let methods = {
         return out;
     },
     processServiceToken: function(token) {
-        console.log(token);
         let B64token = Buffer.from(token, 'base64');
-        console.log(B64token);
         let decryptedToken = this.decryptToken(B64token);
-        console.log(decryptedToken);
         return decryptedToken.readUInt32LE(0x2);
 
     },
@@ -113,18 +113,35 @@ let methods = {
 
         let decryptedBody = decipher.update(encryptedBody);
         decryptedBody = Buffer.concat([decryptedBody, decipher.final()]);
-        console.log("secret: " + cryptoOptions.hmac_secret);
         const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
 
         const calculatedSignature = hmac.digest();
-        console.log(calculatedSignature);
-        console.log(signature);
         if (!calculatedSignature.equals(signature)) {
             console.log('Token signature did not match');
             return null;
         }
 
         return decryptedBody;
-    }
+    },
+    processPainting: function (painting) {
+        let paintingBuffer = Buffer.from(painting, 'base64');
+        let output = '';
+        try
+        {
+            output = pako.inflate(paintingBuffer);
+        }
+        catch (err)
+        {
+            console.log(err);
+        }
+        let tga = new TGA(Buffer.from(output));
+        let png = new PNG({
+            width: tga.width,
+            height: tga.height
+        });
+        png.data = tga.pixels;
+        let pngBuffer = PNG.sync.write(png);
+        return `data:image/png;base64,${pngBuffer.toString('base64')}`;
+    },
 };
 exports.data = methods;

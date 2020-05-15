@@ -8,9 +8,7 @@ router.get('/', function (req, res) {
         //const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         //"[0:1]=1407375153523200"
         let community = await database.getCommunityByID(req.query.community_id);
-        console.log(community);
         let posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
-        console.log(posts.length);
         let body = '<table id="posts"><tbody><tr>' +
             '<th onClick="sortTable(0)">Screen Name</th>' +
             '<th onClick="sortTable(1)">Body Text</th>' +
