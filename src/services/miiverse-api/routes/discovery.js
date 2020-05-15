@@ -12,13 +12,14 @@ router.get('/', function (req, res) {
         {
             let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
             let usrObj;
-            usrObj = await util.data.processUser(pid);
-            if(usrObj == null)
+            if(pid == null)
             {
                 throw new Error('The User token was not valid');
             }
             else
             {
+                usrObj = await util.data.processUser(pid);
+                console.log(usrObj);
                 switch (usrObj.account_status) {
                     case 0:
                         break;

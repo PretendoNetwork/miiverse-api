@@ -15,14 +15,14 @@ router.post('/', upload.none(), async function (req, res, next) {
     {
         let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-        let usrObj;
-        usrObj = await util.data.processUser(pid);
-        if(usrObj == null)
+        if(pid == null)
         {
             throw new Error('The User token was not valid');
         }
         else
         {
+            let usrObj;
+            usrObj = await util.data.processUser(pid);
             const creationDate = moment().format('YYYY-MM-DD HH:MM:SS');
             let appData = "";
             if (req.body.app_data) {
