@@ -19,7 +19,7 @@ router.get('/', function (req, res) {
         '    }\n' +
         '</style>\n' +
         '<body>\n' +
-        '<h1>Miiverse Temp Admin Pannel</h1>\n' +
+        '<h1>Pretendo Miiverse Demo</h1>\n' +
         '\n' +
         '<form action="" id="communitySelection">\n' +
         '</form>\n' +
@@ -87,18 +87,18 @@ router.get('/admin/communities/new', function (req, res) {
         '  <input type="text" id="description" name="description"><br>\n' +
         '  \n' +
         '  <label for="title_ids">USA Title ID:</label><br>\n' +
-        '  <input type="text" id="title_ids" name="title_ids"><br>\n' +
+        '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
         '  <label for="title_ids">EUR Title ID:</label><br>\n' +
-        '  <input type="text" id="title_ids" name="title_ids"><br>\n' +
+        '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
         '  <label for="title_ids">JPN Title ID:</label><br>\n' +
-        '  <input type="text" id="title_ids" name="title_ids"><br>\n' +
+        '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
         '  <label for="icon">System Icon (B64 TGA):</label><br>\n' +
         '  <input type="text" id="icon" name="icon"><br>\n' +
         '  \n' +
-        '  <label for="browser_icon">Browser Icon URI:</label><br>\n' +
+        '  <label for="browser_icon">Browser Icon URL:</label><br>\n' +
         '  <input type="text" id="browser_icon" name="browser_icon"><br>\n' +
         '  \n' +
         '  Is Recommended?\n' +

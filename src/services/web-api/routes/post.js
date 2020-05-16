@@ -18,7 +18,7 @@ router.get('/', function (req, res) {
             '<th>Screen Name</th>' +
             '<th>Body Text</th>' +
             '<th>Yeah Count</th>' +
-            '<th">Painting</th>' +
+            '<th>Painting</th>' +
             '</tr>';
         for(let i = 0; i < posts.length; i++)
         {

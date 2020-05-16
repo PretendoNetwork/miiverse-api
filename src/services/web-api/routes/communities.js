@@ -40,7 +40,7 @@ router.post('/new', upload.none(), async function (req, res, next) {
         community_id: snowflake.nextId(),
         is_recommended: req.body.is_recommended,
         name: req.body.name,
-        browser_icon: req.body.browser_icon[0],
+        browser_icon: req.body.browser_icon,
         browser_header: req.body.browser_header,
         description: req.body.description,
     };
