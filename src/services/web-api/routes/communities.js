@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
 const database = require('../../../database');
+var multer  = require('multer');
+const snowflake = require('node-snowflake').Snowflake;
+var upload = multer();
+const { COMMUNITY } = require('../../../models/communities');
 const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/authentication');
 
@@ -24,6 +28,26 @@ router.get('/list', function (req, res) {
             + '<html><head>' + '</head><body>' + body + '</body></html>');
 
     });
+});
+router.post('/new', upload.none(), async function (req, res, next) {
+    const document = {
+        empathy_count: 0,
+        id: snowflake.nextId(),
+        has_shop_page: req.body.has_shop_page,
+        icon: req.body.icon,
+        title_ids: req.body.title_ids,
+        title_id: req.body.title_ids,
+        community_id: snowflake.nextId(),
+        is_recommended: req.body.is_recommended,
+        name: req.body.name,
+        browser_icon: req.body.browser_icon[0],
+        browser_header: req.body.browser_header,
+        description: req.body.description,
+    };
+    const newCommunity = new COMMUNITY(document);
+    newCommunity.save();
+    res.sendStatus(200)
+
 });
 
 module.exports = router;

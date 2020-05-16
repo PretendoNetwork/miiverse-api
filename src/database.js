@@ -74,6 +74,14 @@ async function getPostByID(postID) {
     });
 }
 
+async function getPostsByUserID(userID) {
+    verifyConnected();
+
+    return POST.find({
+        pid: userID
+    });
+}
+
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
@@ -119,7 +127,7 @@ module.exports = {
     getDiscoveryHosts,
     getPostsByCommunity,
     getPostsByCommunityKey,
+    getPostsByUserID,
     getPostByID,
     getUserByPID,
-    getServerConfig
 };

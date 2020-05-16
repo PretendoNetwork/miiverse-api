@@ -21,6 +21,8 @@ router.use(subdomain('portal.olv', api));
 api.use('/', routes.PORTAL);
 api.use('/titles/show', routes.PORTAL);
 api.use('/v1/communities/', routes.COMMUNITY);
-api.use('/v1/post/', routes.POST);
+api.use('/v1/posts/', routes.POST);
+api.use('/posts/', routes.POST);
+api.use('/users/', routes.USERS);
 
 module.exports = router;

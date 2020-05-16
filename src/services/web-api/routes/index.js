@@ -1,5 +1,5 @@
 module.exports = {
-	//DISCOVERY: require('./discovery'),
+	USERS: require('./users'),
 	POST: require('./post'),
 	COMMUNITY: require('./communities'),
 	PORTAL: require('./portal'),

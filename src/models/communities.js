@@ -28,6 +28,9 @@ const  CommunitySchema = new Schema({
         default: 0
     },
     name: String,
+    browser_icon: String,
+    browser_header: String,
+    description: String,
 });
 
 CommunitySchema.methods.upEmpathy = async function() {
