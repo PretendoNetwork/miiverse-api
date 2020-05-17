@@ -113,6 +113,14 @@ router.get('/admin/communities/new', function (req, res) {
         '  <input type="radio" id="noShopPage" name="has_shop_page" value="0">\n' +
         '  <label for="noShopPage">False</label><br>\n' +
         '  \n' +
+        '  Platform  \n' +
+        '  <input type="radio" id="WiiU" name="platform_ID" value="0">\n' +
+        '  <label for="platform_ID">Wii U</label>\n' +
+        '  <input type="radio" id="3DS" name="platform_ID" value="1">\n' +
+        '  <label for="platform_ID">3DS</label>\n' +
+        '  <input type="radio" id="Both" name="platform_ID" value="2">\n' +
+        '  <label for="platform_ID">Both</label><br>\n' +
+        '  \n' +
         '  <input type="submit" value="Submit">\n' +
         '</form>\n' +
         '\n' +

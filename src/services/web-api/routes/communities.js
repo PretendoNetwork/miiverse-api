@@ -34,6 +34,7 @@ router.post('/new', upload.none(), async function (req, res, next) {
         empathy_count: 0,
         id: snowflake.nextId(),
         has_shop_page: req.body.has_shop_page,
+        platform_id: req.body.platform_ID,
         icon: req.body.icon,
         title_ids: req.body.title_ids,
         title_id: req.body.title_ids,
