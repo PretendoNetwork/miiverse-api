@@ -27,6 +27,7 @@ const  CommunitySchema = new Schema({
         type: Number,
         default: 0
     },
+    platform_id: Number,
     name: String,
     browser_icon: String,
     browser_header: String,

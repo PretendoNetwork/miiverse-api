@@ -58,7 +58,7 @@ router.get('/', function (req, res) {
         '                document.getElementById("Posts").innerHTML = this.responseText;\n' +
         '            }\n' +
         '        };\n' +
-        '        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100", true);\n' +
+        '        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100&format=0", true);\n' +
         '        xhttp.send();\n' +
         '    }\n' +
         'getCommunities()' +

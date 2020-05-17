@@ -13,7 +13,13 @@ router.get('/', function (req, res) {
         '    <meta charset="UTF-8">\n' +
         '    <title>3DS Miiverse</title>\n' +
         '    <style>\n' +
-        '        @charset \'UTF-8\';\n' +
+        '    table,th,td {\n' +
+        '        border : 1px solid black;\n' +
+        '        border-collapse: collapse;\n' +
+        '    }\n' +
+        '    th,td {\n' +
+        '        padding: 5px;\n' +
+        '    }\n' +
         '        body {\n' +
         '            width: 400px;\n' +
         '            font-size: 14px;\n' +
@@ -26,10 +32,6 @@ router.get('/', function (req, res) {
         '            background: #eeeeee url(\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAAAAAAdwx7eAAAA4ElEQVR4Ae3Yt5LDQAwDUP7/x94SOyuqdGJl+wJY0OcA1Jo3CpsE278N8EUH+N4QLVq06Jeio5N2nnZEgV41ehXoicHTA5Om86brt03QG/Km+dvGxtELedPDHX/EfeRtY/1JR6yZ8nBQ8ZH2XHFLkxd/n19vxPhHzPCvz/gPk+E/upVmQWl+GT8JMvwEM+am+dsm6KjQUaCBvRRAtGjRokWLFi1atOjPogPoP7r3/3D0/yb1/9x1/JI2/kjXf//ZHsL4roAvLfqrlv6CqKfWaijjGirEhuJT/XU3LVq0aNFHOlH+pCn6LDkAAAAASUVORK5CYII=\');\n' +
         '            background-attachment: fixed;\n' +
         '            min-height: 460px;\n' +
-        '        }\n' +
-        '        table {\n' +
-        '            border-collapse: collapse;\n' +
-        '            border-spacing: 0;\n' +
         '        }\n' +
         '        .window {\n' +
         '            text-align: center;\n' +
@@ -107,24 +109,23 @@ router.get('/', function (req, res) {
         '            document.getElementById("Posts").innerHTML = "";\n' +
         '            return;\n' +
         '        }\n' +
-        '       if (str === -1) {\n' +
+        '        if (str === -1) {\n' +
         '            var a = document.getElementById(\'communities\');\n' +
-        '            str = a.options[a.selectedIndex].value;' +
-        '            console.log(str);' +
-        '        }\n' +
+        '            str = a.options[a.selectedIndex].value;            console.log(str);        }\n' +
         '        xhttp = new XMLHttpRequest();\n' +
         '        xhttp.onreadystatechange = function() {\n' +
         '            if (this.readyState === 4 && this.status === 200) {\n' +
         '                document.getElementById("Posts").innerHTML = this.responseText;\n' +
         '            }\n' +
         '        };\n' +
-        '        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100", true);\n' +
+        '        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100&format=1", true);\n' +
         '        xhttp.send();\n' +
         '    }\n' +
-        'getCommunities()' +
+        '    getCommunities()\n' +
         '</script>\n' +
-        '\n' +
         '</body>\n' +
-        '</html>\n'
+        '</html>'
     )
 });
+
+module.exports = router;
