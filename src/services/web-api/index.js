@@ -19,7 +19,7 @@ router.use(subdomain('portal.olv', api));
 
 // Setup routes
 api.use('/', routes.PORTAL);
-api.use('/titles/show', routes.PORTAL);
+api.use('/titles/show', routes.CTR);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/posts/', routes.POST);
 api.use('/posts/', routes.POST);

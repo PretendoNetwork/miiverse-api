@@ -3,4 +3,5 @@ module.exports = {
 	POST: require('./post'),
 	COMMUNITY: require('./communities'),
 	PORTAL: require('./portal'),
+	CTR: require('./ctr'),
 };
