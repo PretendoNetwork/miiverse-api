@@ -3,10 +3,19 @@ var router = express.Router();
 const database = require('../../../database');
 var multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
-var upload = multer();
+const consts = require('../../../consts.json');
 const { COMMUNITY } = require('../../../models/communities');
-const comPostGen = require('../../../util/CommunityPostGen');
-const processHeaders = require('../../../util/authentication');
+// configure multer
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.body.title_ids[0] + '-' + file.fieldname + '.png') //Appending .jpg
+    }
+});
+
+var upload = multer({ storage: storage });
 
 /* GET post titles. */
 router.get('/list', function (req, res) {
@@ -20,7 +29,7 @@ router.get('/list', function (req, res) {
             '        <option value="">Select a community:</option>\n';
         for(let i = 0; i < community.length; i++)
         {
-            body += '<option value=' + community[i].community_id + '>' + community[i].name + '</option>';
+            body += '<option id=' + community[i].community_id + ' name=' + community[i].title_id[0] + ' value=' + community[i].community_id + '>' + community[i].name + '</option>';
         }
         body += '    </select> </form>';
         body += '<button type="button" onClick="getPosts(-1)">Refresh Table</button>';
@@ -29,7 +38,13 @@ router.get('/list', function (req, res) {
 
     });
 });
-router.post('/new', upload.none(), async function (req, res, next) {
+router.get('/uploads/*', function (req, res) {
+    let fileName = req.originalUrl.replace('/v1/communities/uploads/', '').trim();
+    res.sendFile(fileName, { root: './uploads/' });
+});
+router.post('/new', upload.fields([{name: 'browserIcon', maxCount: 1}, { name: 'browserHeader', maxCount: 1}]), async function (req, res, next) {
+    const files = JSON.parse(JSON.stringify(req.files));
+    res.send(files);
     const document = {
         empathy_count: 0,
         id: snowflake.nextId(),
@@ -41,13 +56,13 @@ router.post('/new', upload.none(), async function (req, res, next) {
         community_id: snowflake.nextId(),
         is_recommended: req.body.is_recommended,
         name: req.body.name,
-        browser_icon: req.body.browser_icon,
-        browser_header: req.body.browser_header,
+        browser_icon: '/v1/communities/uploads/' + files.browserIcon[0].filename,
+        browser_header: '/v1/communities/uploads/' + files.browserHeader[0].filename,
         description: req.body.description,
     };
     const newCommunity = new COMMUNITY(document);
     newCommunity.save();
-    res.sendStatus(200)
+    //res.sendStatus(200)
 
 });
 

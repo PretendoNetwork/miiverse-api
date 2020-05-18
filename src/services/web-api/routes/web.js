@@ -79,28 +79,30 @@ router.get('/admin/communities/new', function (req, res) {
         '\n' +
         '<p>Fill out all the information below. Title ID\'s must be in the decimal value form, not the hex form</p>\n' +
         '\n' +
-        '<form action="/v1/communities/new" target="_blank" method="post">\n' +
+        '<form action="/v1/communities/new" enctype="multipart/form-data" target="_blank" method="post">\n' +
         '  <label for="name">Community Name:</label><br>\n' +
         '  <input type="text" id="name" name="name"><br>\n' +
         '  \n' +
         '  <label for="description">Description:</label><br>\n' +
         '  <input type="text" id="description" name="description"><br>\n' +
         '  \n' +
-        '  <label for="title_ids">USA Title ID:</label><br>\n' +
+        '  <label for="title_ids">Title ID 1:</label><br>\n' +
         '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
-        '  <label for="title_ids">EUR Title ID:</label><br>\n' +
+        '  <label for="title_ids">Title ID 2:</label><br>\n' +
         '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
-        '  <label for="title_ids">JPN Title ID:</label><br>\n' +
+        '  <label for="title_ids">Title ID 3:</label><br>\n' +
         '  <input type="text" id="title_ids" name="title_ids[]"><br>\n' +
         '  \n' +
         '  <label for="icon">System Icon (B64 TGA):</label><br>\n' +
         '  <input type="text" id="icon" name="icon"><br>\n' +
         '  \n' +
-        '  <label for="browser_icon">Browser Icon URL:</label><br>\n' +
-        '  <input type="text" id="browser_icon" name="browser_icon"><br>\n' +
+        'Browser Icon<br>\n' +
+        '<input type="file" id="browserIcon" accept="image/png" name="browserIcon"><br>\n' +
         '  \n' +
+        'Browser Banner<br>\n' +
+        '<input type="file" id="browserHeader" accept="image/png" name="browserHeader"><br>\n' +
         '  Is Recommended?\n' +
         '  <input type="radio" id="isRecomended" name="is_recommended" value="1">\n' +
         '  <label for="isRecomended">True</label>\n' +

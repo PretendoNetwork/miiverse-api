@@ -61,7 +61,8 @@ router.get('/', function (req, res) {
                     + '<html><head>' + '</head><body>' + body + '</body></html>');
                 break;
             case 1:
-                body = '<table id="posts"><tbody><tr>' +
+                body =
+                    '<table id="posts"><tbody><tr>' +
                     '<th><img src="' + community.browser_icon + '" width="50%" height=auto></th>' +
                     '<th><img src="' + platformIDTag + '" width=auto height="75%"></th>' +
                     '</tr>';
