@@ -101,8 +101,10 @@ router.get('/admin/communities/new', function (req, res) {
         'Browser Icon<br>\n' +
         '<input type="file" id="browserIcon" accept="image/png" name="browserIcon"><br>\n' +
         '  \n' +
-        'Browser Banner<br>\n' +
-        '<input type="file" id="browserHeader" accept="image/png" name="browserHeader"><br>\n' +
+        '3DS Browser Banner<br>\n' +
+        '<input type="file" id="CTRbrowserHeader" accept="image/png" name="CTRbrowserHeader"><br>\n' +
+        'Wii U Browser Banner<br>\n' +
+        '<input type="file" id="WiiUbrowserHeader" accept="image/png" name="WiiUbrowserHeader"><br>\n' +
         '  Is Recommended?\n' +
         '  <input type="radio" id="isRecomended" name="is_recommended" value="1">\n' +
         '  <label for="isRecomended">True</label>\n' +

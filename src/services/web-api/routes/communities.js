@@ -5,16 +5,9 @@ var multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
 const consts = require('../../../consts.json');
 const { COMMUNITY } = require('../../../models/communities');
+let PNG = require('pngjs').PNG;
 // configure multer
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, req.body.title_ids[0] + '-' + file.fieldname + '.png') //Appending .jpg
-    }
-});
-
+var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
 /* GET post titles. */
@@ -38,13 +31,28 @@ router.get('/list', function (req, res) {
 
     });
 });
+router.get('/images', function (req, res) {
+    database.connect().then(async e => {
+        let community = await database.getCommunityByID(req.query.community_id);
+        let response = {
+            name: community.name,
+            description: community.description,
+            platform_id: community.platform_id,
+            CTR_browser_header: community.CTR_browser_header,
+            WiiU_browser_header: community.WiiU_browser_header,
+            browser_icon: community.browser_icon
+        };
+        res.send(response);
+
+    });
+});
 router.get('/uploads/*', function (req, res) {
     let fileName = req.originalUrl.replace('/v1/communities/uploads/', '').trim();
     res.sendFile(fileName, { root: './uploads/' });
 });
-router.post('/new', upload.fields([{name: 'browserIcon', maxCount: 1}, { name: 'browserHeader', maxCount: 1}]), async function (req, res, next) {
+router.post('/new', upload.fields([{name: 'browserIcon', maxCount: 1}, { name: 'CTRbrowserHeader', maxCount: 1}, { name: 'WiiUbrowserHeader', maxCount: 1}]), async function (req, res, next) {
     const files = JSON.parse(JSON.stringify(req.files));
-    res.send(files);
+    console.log(files);
     const document = {
         empathy_count: 0,
         id: snowflake.nextId(),
@@ -56,13 +64,14 @@ router.post('/new', upload.fields([{name: 'browserIcon', maxCount: 1}, { name: '
         community_id: snowflake.nextId(),
         is_recommended: req.body.is_recommended,
         name: req.body.name,
-        browser_icon: '/v1/communities/uploads/' + files.browserIcon[0].filename,
-        browser_header: '/v1/communities/uploads/' + files.browserHeader[0].filename,
+        browser_icon: `data:image/png;base64,${req.files.browserIcon[0].buffer.toString('base64')}`,
+        CTR_browser_header: `data:image/png;base64,${req.files.CTRbrowserHeader[0].buffer.toString('base64')}`,
+        WiiU_browser_header:  `data:image/png;base64,${req.files.WiiUbrowserHeader[0].buffer.toString('base64')}`,
         description: req.body.description,
     };
     const newCommunity = new COMMUNITY(document);
     newCommunity.save();
-    //res.sendStatus(200)
+    res.sendStatus(200)
 
 });
 

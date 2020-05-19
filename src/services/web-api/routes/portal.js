@@ -6,7 +6,7 @@ const processHeaders = require('../../../util/authentication');
 
 /* GET post titles. */
 router.get('/', function (req, res) {
-    res.sendFile("ctr.html", { root: 'src/html' });
+    res.sendFile("portal.html", { root: 'src/html' });
 });
 
 module.exports = router;

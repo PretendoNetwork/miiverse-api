@@ -13,7 +13,6 @@ router.get('/', function (req, res) {
         let formatType = parseInt(req.query.format);
         let body = '';
         let platformIDTag = '';
-        console.log(community.platform_id);
         switch(parseInt(community.platform_id))
         {
             case 0:
@@ -85,7 +84,12 @@ router.get('/', function (req, res) {
                     + '<html><head>' + '</head><body>' + body + '</body></html>');
                 break;
             case 2:
-                console.log('case 2');
+                let response = [];
+                for(let i = 0; i < posts.length; i++)
+                {
+                    response.push(posts[i]);
+                }
+                res.send(JSON.stringify(response));
                 break;
         }
     });

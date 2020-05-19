@@ -10,16 +10,20 @@ const router = express.Router();
 
 // Router to handle the subdomain restriction
 const api = express.Router();
+const portal = express.Router();
 
 // Create subdomains
 logger.info('[MIIVERSE] Creating \'web api\' subdomain');
 router.use(subdomain('web.olv', api));
 router.use(subdomain('ctr.olv', api));
-router.use(subdomain('portal.olv', api));
+router.use(subdomain('portal.olv', portal));
 
 // Setup routes
-api.use('/', routes.PORTAL);
+api.use('/', routes.WEB);
 api.use('/titles/show', routes.CTR);
+portal.use('/titles/show', routes.PORTAL);
+portal.use('/v1/communities/', routes.COMMUNITY);
+portal.use('/v1/posts/', routes.POST);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/posts/', routes.POST);
 api.use('/posts/', routes.POST);

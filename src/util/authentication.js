@@ -50,7 +50,6 @@ let methods = {
             });
         });
     },
-
     decodeParamPack: function (paramPack) {
         /*  Decode base64 */
         let dec = Buffer.from(paramPack, "base64").toString("ascii");
@@ -78,7 +77,6 @@ let methods = {
         }
 
     },
-
     decryptToken: function(token) {
 
         // Access and refresh tokens use a different format since they must be much smaller
