@@ -1,9 +1,8 @@
 const express = require('express');
 const subdomain = require('express-subdomain');
-const sessionMiddleware = require('../../middleware/session');
-const pnidMiddleware = require('../../middleware/pnid');
 const logger = require('../../logger');
 const routes = require('./routes');
+const bodyParser = require('body-parser');
 
 // Main router for endpointsindex.js
 const router = express.Router();
@@ -25,6 +24,7 @@ portal.use('/titles/', routes.PORTAL);
 portal.use('/v1/communities/', routes.COMMUNITY);
 portal.use('/v1/posts/', routes.POST);
 portal.use('/posts', routes.NEWPOST);
+portal.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/posts/', routes.POST);
 api.use('/posts/', routes.POST);

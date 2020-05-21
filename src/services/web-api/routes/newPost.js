@@ -16,15 +16,15 @@ router.post('/', upload.none(), async function (req, res, next) {
     if (req.body.app_data) {
         appData = req.body.app_data.replace(/\0/g, "").trim();
     }
-    let painting = "";
+    let painting;
     if (req.body.painting) {
         painting = req.body.painting.replace(/\0/g, "").trim();
     }
-    let paintingURI = "";
+    let paintingURI;
     if (req.body.painting) {
         paintingURI = await util.data.processPainting(painting);
     }
-    let screenshot = "";
+    let screenshot;
     if (req.body.screenshot) {
         screenshot = req.body.screenshot.replace(/\0/g, "").trim();
     }
