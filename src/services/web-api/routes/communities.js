@@ -38,6 +38,7 @@ router.get('/images', function (req, res) {
             name: community.name,
             description: community.description,
             platform_id: community.platform_id,
+            title_id: community.title_id[0],
             CTR_browser_header: community.CTR_browser_header,
             WiiU_browser_header: community.WiiU_browser_header,
             browser_icon: community.browser_icon
