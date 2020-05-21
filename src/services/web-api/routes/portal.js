@@ -11,5 +11,11 @@ router.get('/show', function (req, res) {
 /*router.get('/wiiu-emulation.js', function (req, res) {
     res.sendFile("wiiu-emulation.js", { root: 'html' });
 });*/
+router.get('/portal.js', function (req, res) {
+    res.sendFile("portal.js", { root: 'src/html' });
+});
+router.get('/portal.css', function (req, res) {
+    res.sendFile("portal.css", { root: 'src/html' });
+});
 
 module.exports = router;

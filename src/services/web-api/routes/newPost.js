@@ -5,12 +5,11 @@ var xml = require('object-to-xml');
 const { POST } = require('../../../models/post');
 const util = require('../../../util/authentication');
 const database = require('../../../database');
-var multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
-var upload = multer();
+const bodyParser = require('body-parser');
 
 /* GET post titles. */
-router.post('/', upload.none(), async function (req, res, next) {
+router.post('/', bodyParser({limit: '5mb'}), async function (req, res, next) {
     const creationDate = moment().format('YYYY-MM-DD HH:MM:SS');
     let appData = "";
     if (req.body.app_data) {
@@ -60,7 +59,7 @@ router.post('/', upload.none(), async function (req, res, next) {
     res.sendStatus(200);
 });
 
-router.post('/*/empathies', upload.none(), function (req, res, next) {
+router.post('/*/empathies', function (req, res, next) {
     let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let pid = req.originalUrl.replace('/v1/posts/', '').replace('/empathies','').trim();
     database.connect().then(async emp => {
