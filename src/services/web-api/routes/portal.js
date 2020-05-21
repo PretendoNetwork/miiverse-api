@@ -5,8 +5,11 @@ const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/authentication');
 
 /* GET post titles. */
-router.get('/', function (req, res) {
+router.get('/show', function (req, res) {
     res.sendFile("portal.html", { root: 'src/html' });
 });
+/*router.get('/wiiu-emulation.js', function (req, res) {
+    res.sendFile("wiiu-emulation.js", { root: 'html' });
+});*/
 
 module.exports = router;

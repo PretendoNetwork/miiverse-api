@@ -3,6 +3,9 @@ var router = express.Router();
 const database = require('../../../database');
 const consts = require('../../../consts.json');
 
+router.get('/*/check_can_post.json', function (req, res) {
+    res.send({"success":1,"remaining_today_posts":30});
+});
 router.get('/*', function (req, res) {
     database.connect().then(async e => {
         let PID = req.originalUrl.replace('/users/', '').trim();
