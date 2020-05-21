@@ -52,7 +52,6 @@ router.get('/uploads/*', function (req, res) {
 });
 router.post('/new', upload.fields([{name: 'browserIcon', maxCount: 1}, { name: 'CTRbrowserHeader', maxCount: 1}, { name: 'WiiUbrowserHeader', maxCount: 1}]), async function (req, res, next) {
     const files = JSON.parse(JSON.stringify(req.files));
-    console.log(files);
     const document = {
         empathy_count: 0,
         id: snowflake.nextId(),
