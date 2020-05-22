@@ -81,11 +81,17 @@ async function getPostsByUserID(userID) {
     });
 }
 
-async function getPostsByCommunity(community, numberOfPosts) {
+async function getHotPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
         title_id: community.title_id
     }).sort({empathy_count: -1}).limit(numberOfPosts);
+}
+async function getPostsByCommunity(community, numberOfPosts) {
+    verifyConnected();
+    return POST.find({
+        title_id: community.title_id
+    }).limit(numberOfPosts);
 }
 
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
@@ -125,6 +131,7 @@ module.exports = {
     getCommunityByID,
     getDiscoveryHosts,
     getPostsByCommunity,
+    getHotPostsByCommunity,
     getPostsByCommunityKey,
     getPostsByUserID,
     getPostByID,

@@ -55,6 +55,7 @@ const PostSchema = new Schema({
     pid: Number,
     platform_id: Number,
     region_id: Number,
+    parent_post: Number,
     reply_count: {
         type: Number,
         default: 0
@@ -72,6 +73,20 @@ PostSchema.methods.upEmpathy = async function() {
 PostSchema.methods.downEmpathy = async function() {
     const empathy = this.get('empathy_count');
     this.set('empathy_count', empathy - 1);
+
+    await this.save();
+};
+
+PostSchema.methods.upReply = async function() {
+    const replyCount = this.get('reply_count');
+    this.set('reply_count', replyCount + 1);
+
+    await this.save();
+};
+
+PostSchema.methods.downReply = async function() {
+    const replyCount = this.get('reply_count');
+    this.set('reply_count', replyCount - 1);
 
     await this.save();
 };

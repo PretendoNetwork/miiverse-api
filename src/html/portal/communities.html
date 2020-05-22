@@ -104,19 +104,7 @@
 </div>
 
     </div>
-    <ul class="list-content-with-icon-column" id="community-top-content">
-		<li id="community-4490545270232728351" class="">
-			<span class="icon-container"><img src="/img/title-icon-default.png" class="icon"></span>
-			<a href="/titles/4490545270232728350/4490545270232728351" data-pjax="#body" class="scroll to-community-button"></a>
-			<div class="body">
-				<div class="body-content">
-				<span class="community-name title">GameName (UniqueID: 0x01769)</span>
-				<span class="platform-tag platform-tag-wiiu"></span>
-				<span class="text">Wii U Games</span>
-				</div>
-			</div>
-		</li>
-    </ul>
+    OLV_WIIU_NEW_COMMUNITIES
     <a href="/communities/categories/wiiu_all" data-pjax="#body" class="more-button scroll">Show More</a>
 
     <h2 class="headline headline-special">Special</h2>
@@ -185,43 +173,5 @@
 
 <button type="button" class="accesskey-L" style="display: none;"></button><button type="button" class="accesskey-R" style="display: none;"></button><button type="button" class="accesskey-Y" style="display: none;">
 </button>
-<script>
-    getCommunities()
-    function getCommunities() {
-        var xhttp;
-        xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState === 4 && this.status === 200) {
-                var communities = JSON.parse(this.responseText);
-                var communityBody = '<ul class="list-content-with-icon-column" id="community-top-content">';
-                for(var i = 0; i < communities.length; i++)
-                {
-                    communityBody += '<li id="community-' + communities[i].community_id + '" class="">' +
-								'<span class="icon-container"><img src="' + communities[i].browser_icon + '" class="icon"></span>' +
-								'<a href="/titles/' + communities[i].community_id + '" data-pjax="#body" class="scroll to-community-button"></a>' +
-								'<div class="body">' +
-								'<div class="body-content">' +
-								'<span class="community-name title">' + communities[i].name + '</span>';
-								switch(parseInt(communities[i].platform_id))
-								{
-									case 0:
-										communityBody += '<span class="platform-tag platform-tag-wiiu"></span><span class="text">Wii U Games</span>';
-										break;
-									case 1:
-										communityBody += '<span class="platform-tag platform-tag-3ds"></span><span class="text">3DS Games</span>';
-										break;
-									case 2:
-										communityBody += '<span class="platform-tag platform-tag-wiiu-3ds"></span><span class="text">Both Platform Games</span>';
-										break;
-								}
-					}
-                document.getElementById("community-top-content").innerHTML = communityBody + '</div></div></li>';
-
-            }
-        };
-        xhttp.open("GET", "/v1/communities/list?format=1", true);
-        xhttp.send();
-    }
-</script>
 </body>
 </html>

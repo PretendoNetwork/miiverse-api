@@ -22,9 +22,9 @@
         </div>
         <menu class="tab-header">
             <li id="tab-header-post" class="tab-button selected" data-show-post-button="1">
-                <a href="/titles/14866558072985245728/14866558073038702637/new" data-pjax-replace="1" data-pjax="#community-tab-body" data-pjax-cache-container="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="new-post">All Posts</span></a>
+                <a onclick="getPosts('COMMUNITY_TITLE_ID_STANDIN', 0)" data-pjax-replace="1" data-pjax="#community-tab-body" data-pjax-cache-container="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="new-post">All Posts</span></a>
             </li>
-            <li id="tab-header-hot-post" class="tab-button"><a href="/titles/14866558072985245728/14866558073038702637/hot" data-pjax="#community-tab-body" data-pjax-cache-container="#body" data-pjax-replace="1" data-sound="SE_WAVE_SELECT_TAB"><span>Popular posts</span></a></li>
+            <li id="tab-header-hot-post" class="tab-button"><a onclick="getPosts('COMMUNITY_TITLE_ID_STANDIN', 1)" data-pjax="#community-tab-body" data-pjax-cache-container="#body" data-pjax-replace="1" data-sound="SE_WAVE_SELECT_TAB"><span>Popular posts</span></a></li>
         </menu>
         <div id="title-settings-page" class="window-page none" data-modal-types="title-settings">
             <div class="window">
@@ -158,7 +158,7 @@
 </div>
 </div>
 <script>
-    function getPosts(str) {
+    function getPosts(str, type) {
         var xhttp;
         if (str === "") {
             document.getElementById("Posts").innerHTML = "";
@@ -175,6 +175,7 @@
                 var postBody = '';
                 for(var i = 0; i < posts.length; i++)
                 {
+                    console.log(posts[i]);
                     postBody += '<div id="post-' + posts[i].id + '" class="post scroll post-subtype-default" data-post-permalink-url="/posts/' + posts[i].id + '">\n' +
                         '<a href="1" class="user-icon-container scroll-focus" data-pjax="#body"><img src="" class="user-icon"></a>\n' +
                         '          <div class="post-body-content">\n' +
@@ -188,6 +189,17 @@
                     if(posts[i].screenshot !== undefined && posts[i].screenshot !== '')
                         postBody += '<p class="post-content-text">' + posts[i].body + '</p>'+
                             '<p class="post-content-memo"><img src="data:image/png;base64,' + posts[i].screenshot +'" class="post-screenshot"></p>';
+                    if(posts[i].url !== undefined)
+                    {
+                        var ytLink = posts[i].url;
+                        console.log(ytLink);
+                        postBody += '<div class="post-content">' +
+                            '<div class="title-capture-container video-container">' +
+                            '<a class="video-thumbnail" href="/posts/' + posts[i].id + '" data-pjax="#body">' +
+                            '<span><img width="120" height="90" src="https://i.ytimg.com/vi/' + ytLink.replace("https://www.youtube.com/watch?v=", "") +'/default.jpg">' +
+                            '</span></a></div>' +
+                            '<p class="post-content-text">' + posts[i].body + '</p></div>';
+                    }
                     else if(posts[i].painting_uri !== undefined && posts[i].painting_uri !== '')
                         postBody += '<p class="post-content-memo"><img src="' + posts[i].painting_uri +'" class="post-memo"></p>';
                     else
@@ -208,8 +220,8 @@
 
             }
         };
-        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100&format=2", true);
+        xhttp.open("GET", "/v1/posts?community_id=" + str + "&limit=100&format=2&type=" + type, true);
         xhttp.send();
     }
-    getPosts('COMMUNITY_TITLE_ID_STANDIN')
+    getPosts('COMMUNITY_TITLE_ID_STANDIN', 0)
 </script>

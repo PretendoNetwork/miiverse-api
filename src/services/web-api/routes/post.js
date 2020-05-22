@@ -9,7 +9,17 @@ router.get('/', function (req, res) {
         //const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         //"[0:1]=1407375153523200"
         let community = await database.getCommunityByID(req.query.community_id);
-        let posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
+        let posts;
+        console.log(parseFloat(req.query.community_id));
+        switch(parseFloat(req.query.type))
+        {
+            case 0:
+                posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
+                break;
+            case 1:
+                posts = await database.getHotPostsByCommunity(community, parseInt(req.query.limit));
+                break;
+        }
         let formatType = parseInt(req.query.format);
         let body = '';
         let platformIDTag = '';
