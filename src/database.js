@@ -60,7 +60,6 @@ async function getCommunityByTitleID(title_id) {
 
 async function getCommunityByID(community_id) {
     verifyConnected();
-
     return COMMUNITY.findOne({
         community_id: community_id
     });
@@ -86,7 +85,7 @@ async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
         title_id: community.title_id
-    }).limit(numberOfPosts);
+    }).sort({empathy_count: -1}).limit(numberOfPosts);
 }
 
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {

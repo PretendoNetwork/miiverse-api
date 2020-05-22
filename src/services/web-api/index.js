@@ -17,15 +17,14 @@ router.use(subdomain('ctr.olv', api));
 router.use(subdomain('portal.olv', portal));
 
 // Setup routes
-api.use('/', routes.WEB);
+api.use('/web', routes.WEB);
 api.use('/titles/show', routes.CTR);
-portal.use('/titles/', routes.PORTAL);
+portal.use('/', routes.PORTAL);
 portal.use('/v1/communities/', routes.COMMUNITY);
 portal.use('/v1/posts/', routes.POST);
-portal.use('/posts', routes.NEWPOST);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/posts/', routes.POST);
-api.use('/posts/', routes.POST);
+api.use('/post/', routes.POST);
 api.use('/users/', routes.USERS);
 portal.use('/users/', routes.USERS);
 

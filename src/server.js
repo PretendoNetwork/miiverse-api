@@ -21,7 +21,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use(express.urlencoded({
-    extended: true
+    extended: true,
+    limit: '5mb',
+    parameterLimit: 100000
 }));
 app.use(xmlparser);
 

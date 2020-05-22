@@ -17,18 +17,31 @@ router.get('/list', function (req, res) {
         //const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         //"[0:1]=1407375153523200"
         let community = await database.getCommunities(5);
-        let body = '<form action="">\n' +
-            '    <select id="communities" onchange="getPosts(this.value)">' +
-            '        <option value="">Select a community:</option>\n';
-        for(let i = 0; i < community.length; i++)
+        let formatType = parseInt(req.query.format);
+        switch(formatType)
         {
-            body += '<option id=' + community[i].community_id + ' name=' + community[i].title_id[0] + ' value=' + community[i].community_id + '>' + community[i].name + '</option>';
+            case 0:
+                let body = '<form action="">\n' +
+                    '    <select id="communities" onchange="getPosts(this.value)">' +
+                    '        <option value="">Select a community:</option>\n';
+                for(let i = 0; i < community.length; i++)
+                {
+                    body += '<option id=' + community[i].community_id + ' name=' + community[i].title_id[0] + ' value=' + community[i].community_id + '>' + community[i].name + '</option>';
+                }
+                body += '    </select> </form>';
+                body += '<button type="button" onClick="getPosts(-1)">Refresh Table</button>';
+                res.send('<!DOCTYPE html>'
+                    + '<html><head>' + '</head><body>' + body + '</body></html>');
+                break;
+            case 1:
+                let response = [];
+                for(let i = 0; i < community.length; i++)
+                {
+                    response.push(community[i]);
+                }
+                res.send(JSON.stringify(response));
+                break;
         }
-        body += '    </select> </form>';
-        body += '<button type="button" onClick="getPosts(-1)">Refresh Table</button>';
-        res.send('<!DOCTYPE html>'
-            + '<html><head>' + '</head><body>' + body + '</body></html>');
-
     });
 });
 router.get('/images', function (req, res) {
