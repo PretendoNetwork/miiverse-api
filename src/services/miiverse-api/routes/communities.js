@@ -5,6 +5,22 @@ const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/authentication');
 
 /* GET post titles. */
+router.get('/', function (req, res) {
+    database.connect().then(async e => {
+        const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+        let community = await database.getCommunityByTitleID(paramPack.title_id);
+        if (community != null) {
+            let response = await comPostGen.Communities(community);
+            res.contentType("application/xml");
+            res.send(response);
+        } else {
+            res.status(404);
+            res.send();
+        }
+
+    });
+});
+
 router.get('/0/posts', function (req, res) {
     database.connect().then(async e => {
         /*  Parse out parameters from URL and headers */

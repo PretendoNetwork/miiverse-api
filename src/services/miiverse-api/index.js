@@ -29,5 +29,6 @@ discovery.use('/v1/endpoint', routes.DISCOVERY);
 api.use('/v1/posts', routes.POST);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/people/', routes.PEOPLE);
+discovery.use('/p01/', routes.POLICY);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-//just testing pull requests
+
 const PostSchema = new Schema({
     title_id: String,
     screen_name: String,
@@ -19,12 +19,12 @@ const PostSchema = new Schema({
     },
     community_id: String,
     country_id: Number,
-    created_at: String,
+    created_at: Date,
     feeling_id: Number,
-    id: Number,
+    id: String,
     is_autopost: {
-      type: Number,
-      default: 0
+        type: Number,
+        default: 0
     },
     is_community_private_autopost: {
         type: Number,
@@ -55,11 +55,19 @@ const PostSchema = new Schema({
     pid: Number,
     platform_id: Number,
     region_id: Number,
-    parent_post: Number,
+    parent_post: String,
     reply_count: {
         type: Number,
         default: 0
     },
+    verified: {
+        type: Boolean,
+        default: false
+    },
+    parent: {
+        type: String,
+        default: null
+    }
 });
 
 

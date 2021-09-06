@@ -15,7 +15,8 @@ router.post('/', upload.none(), async function (req, res, next) {
     {
         let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-        if(pid == null)
+        console.log(pid);
+        if(pid === null)
         {
             throw new Error('The User token was not valid');
         }
@@ -23,7 +24,6 @@ router.post('/', upload.none(), async function (req, res, next) {
         {
             let usrObj;
             usrObj = await util.data.processUser(pid);
-            const creationDate = moment().format('YYYY-MM-DD HH:MM:SS');
             let appData = "";
             if (req.body.app_data) {
                 appData = req.body.app_data.replace(/\0/g, "").trim();
@@ -53,7 +53,7 @@ router.post('/', upload.none(), async function (req, res, next) {
                 topic_tag: req.body.topic_tag,
                 community_id: req.body.community_id,
                 country_id: paramPackData.country_id,
-                created_at: creationDate,
+                created_at: new Date(),
                 feeling_id: req.body.feeling_id,
                 id: snowflake.nextId(),
                 is_autopost: req.body.is_autopost,
@@ -61,10 +61,11 @@ router.post('/', upload.none(), async function (req, res, next) {
                 is_app_jumpable: req.body.is_app_jumpable,
                 language_id: req.body.language_id,
                 mii: usrObj.mii,
-                mii_face_url: "http://mii-images.account.pretendo.cc/",
+                mii_face_url: "https://mii-images.account.pretendo.cc/",
                 pid: pid,
                 platform_id: paramPackData.platform_id,
                 region_id: paramPackData.region_id,
+                parent: null,
             };
             const newPost = new POST(document);
             newPost.save();

@@ -1,7 +1,15 @@
 const { Schema, model } = require('mongoose');
 
 const  CommunitySchema = new Schema({
+    created_at: {
+      type: Date,
+        default: new Date(),
+    },
     empathy_count: {
+        type: Number,
+        default: 0
+    },
+    followers: {
         type: Number,
         default: 0
     },
@@ -33,6 +41,10 @@ const  CommunitySchema = new Schema({
     CTR_browser_header: String,
     WiiU_browser_header: String,
     description: String,
+    parent: {
+        type: Number,
+        default: null
+    }
 });
 
 CommunitySchema.methods.upEmpathy = async function() {
@@ -45,6 +57,20 @@ CommunitySchema.methods.upEmpathy = async function() {
 CommunitySchema.methods.downEmpathy = async function() {
     const empathy = this.get('empathy_count');
     this.set('empathy_count', empathy - 1);
+
+    await this.save();
+};
+
+CommunitySchema.methods.upFollower = async function() {
+    const followers = this.get('followers');
+    this.set('followers', followers + 1);
+
+    await this.save();
+};
+
+CommunitySchema.methods.downFollower = async function() {
+    const followers = this.get('followers');
+    this.set('followers', followers - 1);
 
     await this.save();
 };

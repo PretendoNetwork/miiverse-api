@@ -46,9 +46,9 @@ async function getTopicByCommunityID(communityID) {
     });
 }
 
-async function getCommunities(numberOfPosts) {
+async function getCommunities(numberOfCommunities) {
     verifyConnected();
-    return COMMUNITY.find({}).limit(numberOfPosts);
+    return COMMUNITY.find({}).limit(numberOfCommunities);
 }
 
 async function getCommunityByTitleID(title_id) {
@@ -79,6 +79,13 @@ async function getPostsByUserID(userID) {
     return POST.find({
         pid: userID
     });
+}
+
+async function getNumberPostsByUserID(userID) {
+    verifyConnected();
+    return POST.find({
+        pid: userID
+    }).countDocuments();
 }
 
 async function getHotPostsByCommunity(community, numberOfPosts) {
@@ -134,6 +141,7 @@ module.exports = {
     getHotPostsByCommunity,
     getPostsByCommunityKey,
     getPostsByUserID,
+    getNumberPostsByUserID,
     getPostByID,
     getUserByPID,
 };

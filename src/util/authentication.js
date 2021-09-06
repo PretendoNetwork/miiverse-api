@@ -14,14 +14,17 @@ let PNG = require('pngjs').PNG;
 let methods = {
     processUser: function(pid) {
         return new Promise(function(resolve, reject) {
+            console.log('running me');
             database.connect().then(async yeet => {
                 let userObject = await database.getUserByPID(pid);
+                console.log(userObject);
                 if(userObject != null)
                     resolve(userObject);
                 else
                 {
+                    console.log('else');
                     await request({
-                        url: "http://account.jemverse.xyz/v1/api/miis?pids=" + pid,
+                        url: "http://" + config.account_server + "/v1/api/miis?pids=" + pid,
                         headers: {
                             'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
                             'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a'
@@ -38,12 +41,17 @@ let methods = {
                                 official: false
                             };
                             const newUsrObj = new USER(newUsr);
+                            console.log(newUsrObj);
                             newUsrObj.save();
                             resolve(newUsr);
                         }
                         else
+                        {
+                            console.log('fail');
                             reject();
-                    })
+                        }
+
+                    });
 
                 }
 
@@ -67,8 +75,7 @@ let methods = {
         {
             let B64token = Buffer.from(token, 'base64');
             let decryptedToken = this.decryptToken(B64token);
-            let pid = decryptedToken.readUInt32LE(0x2);
-            return pid;
+            return decryptedToken.readUInt32LE(0x2);
         }
         catch(e)
         {

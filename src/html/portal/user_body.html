@@ -1,10 +1,7 @@
 <div id="body">
     <header id="header">
-
         <h1 id="page-title" class="">User Page</h1>
-
     </header>
-
     <div class="body-content user-page is-visitor">
         <a id="header-mymenu-button" href="https://portal-us.olv.nintendo.net/my_menu" data-pjax="#body">User Menu</a>
         <div class="user-info info-content">
@@ -88,22 +85,22 @@
         </div>
 
         <menu class="user-menu tab-header">
-            <li class="test-user-posts-count tab-button-profile"><a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/posts" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Posts</span><span class="number">0</span></a></li>
-            <li class="test-user-friends-count tab-button-activity"><a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/friends" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Friends</span><span class="number">0 / 100</span></a></li>
-            <li class="test-user-followings-count tab-button-activity"><a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/following" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Following</span><span class="number"><span class="js-following-count">0</span> / 1000</span></a></li>
-            <li class="test-user-followers-count tab-button-relationship"><a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/followers" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Followers</span><span class="number">0</span></a></li>
+            <li class="test-user-posts-count tab-button-profile"><a href="/users/OLV_USER_PID/posts" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Posts</span><span class="number">OLV_NUMBER_OF_POSTS</span></a></li>
+            <li class="test-user-friends-count tab-button-activity"><a href="/users/OLV_USER_PID/friends" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Friends</span><span class="number">0 / 100</span></a></li>
+            <li class="test-user-followings-count tab-button-activity"><a href="/users/OLV_USER_PID/following" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Following</span><span class="number"><span class="js-following-count">0</span> / 1000</span></a></li>
+            <li class="test-user-followers-count tab-button-relationship"><a href="/users/OLV_USER_PID/followers" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB"><span class="label">Followers</span><span class="number">0</span></a></li>
         </menu>
 
         <div class="tab-body">
             <div class="user-button-container with-album-button">
-                <a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/diary" data-pjax="#body" class="button scroll diary-button">View Play Journal</a>
-                <a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/album" data-pjax="#body" class="button scroll album-button">View Screenshot Album</a>
+                <a href="/users/OLV_USER_PID/diary" data-pjax="#body" class="button scroll diary-button">View Play Journal</a>
+                <a href="/users/OLV_USER_PID/album" data-pjax="#body" class="button scroll album-button">View Screenshot Album</a>
 
             </div>
 
             <div class="profile-content">
 
-                <p class="text">..like systemd.</p>
+                <p class="text">OLV_PROFILE_COMMENT</p>
 
                 <div class="user-data"><table>
                     <tbody><tr>
@@ -117,7 +114,7 @@
                     <tr class="game-skill">
                         <th><span>Game Experience</span></th>
                         <td>
-                            <span class="expert">Expert      </span></td>
+                            <span class="OLV_GAME_EXPERIENCE_TAG">OLV_GAME_EXPERIENCE_LABEL</span></td>
                     </tr>
                     <tr class="game">
                         <th><span>Systems Owned</span></th>
@@ -168,13 +165,13 @@
                 </ul>
             </div>
 
-            <div class="scroll test-diary-post-list" id="diary_post-post-list">
+            <!--<div class="scroll test-diary-post-list" id="diary_post-post-list">
                 <div class="headline"><h2>Recent Play Journal Entries</h2></div>
                 <div class="no-content">
                     <p>No Play Journal entries written yet.</p>
                 </div>
-                <a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/diary" data-pjax="#body" class="more-button scroll">View Play Journal</a>
-            </div>
+                <a href="/users/OLV_USER_PID/diary" data-pjax="#body" class="more-button scroll">View Play Journal</a>
+            </div>-->
 
             <div class="scroll test-artwork-post-list" id="artwork_post-post-list">
                 <div class="headline"><h2>Recent Drawings</h2></div>
@@ -183,19 +180,19 @@
                 </div>
             </div>
 
-            <div class="js-post-list post-list scroll test-topic-post-list" id="topic_post">
+            <!--<div class="js-post-list post-list scroll test-topic-post-list" id="topic_post">
                 <div class="headline"><h2>Open Discussion</h2></div>
                 <div class="no-content">
                     <p>No open discussions.</p>
                 </div>
-            </div>
+            </div>-->
 
             <div class="scroll album-content test-album-images-section">
                 <h2 class="headline">Recently Saved Screenshots</h2>
                 <div class="no-content">
                     <p>No screenshots saved yet.</p>
                 </div>
-                <a href="https://portal-us.olv.nintendo.net/users/EricDSucksG/album" data-pjax="#body" class="more-button scroll">View Screenshot Album</a>
+                <a href="/users/OLV_USER_PID/album" data-pjax="#body" class="more-button scroll">View Screenshot Album</a>
             </div>
 
         </div>

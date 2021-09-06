@@ -107,6 +107,48 @@ class CommunityPostGen {
         return xml.end({ pretty: true, allowEmpty: true });
     }
 
+    static async Communities(community) {
+        const xml = xmlbuilder.create("result")
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("request_name", "communities").up()
+            .e("communities")
+                .e("community")
+                    .e('olive_community_id', community.community_id).up()
+                    .e('community_id', community.community_id).up()
+                    .e("name", community.name).up()
+                    .e("description", community.description).up()
+                    .e("icon").up()
+                    .e("icon_3ds").up()
+                    .e("pid").up()
+                    .e("app_data").up()
+                    .e("is_user_community", 0).up()
+                .up()
+                .e("community")
+                    .e('olive_community_id', community.community_id + 100).up()
+                    .e('community_id', community.community_id + 100).up()
+                    .e("name", community.name + '- Nintendo Levels').up()
+                    .e("description", community.description).up()
+                    .e("icon").up()
+                    .e("icon_3ds").up()
+                    .e("pid").up()
+                    .e("app_data", 'TVZNSQI').up()
+                    .e("is_user_community", 0).up()
+                .up()
+                .e("community")
+                    .e('olive_community_id', community.community_id + 200).up()
+                    .e('community_id', community.community_id + 200).up()
+                    .e("name", community.name + '- User Levels').up()
+                    .e("description", community.description).up()
+                    .e("icon").up()
+                    .e("icon_3ds").up()
+                    .e("pid").up()
+                    .e("app_data", 'TVZNSQE').up()
+                    .e("is_user_community", 0).up()
+                .up()
+            .up();
+        return xml.end({ pretty: true, allowEmpty: true });
+    }
     /*  TODO Again, some constants */
     static async SinglePostResponse(post) {
         let xml = xmlbuilder.create("result")
