@@ -15,61 +15,63 @@ router.post('/', upload.none(), async function (req, res, next) {
     {
         let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
         let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-        console.log(pid);
         if(pid === null)
         {
             throw new Error('The User token was not valid');
         }
         else
         {
-            let usrObj;
-            usrObj = await util.data.processUser(pid);
-            let appData = "";
-            if (req.body.app_data) {
-                appData = req.body.app_data.replace(/\0/g, "").trim();
-            }
-            let painting = "";
-            if (req.body.painting) {
-                painting = req.body.painting.replace(/\0/g, "").trim();
-            }
-            let paintingURI = "";
-            if (req.body.painting) {
-                paintingURI = await util.data.processPainting(painting);
-            }
-            let screenshot = "";
-            if (req.body.screenshot) {
-                screenshot = req.body.screenshot.replace(/\0/g, "").trim();
-            }
-            const document = {
-                title_id: paramPackData.title_id,
-                screen_name: usrObj.user_id,
-                body: req.body.body,
-                app_data: appData,
-                painting: painting,
-                painting_uri: paintingURI,
-                screenshot: screenshot,
-                url: req.body.url,
-                search_key: req.body.search_key,
-                topic_tag: req.body.topic_tag,
-                community_id: req.body.community_id,
-                country_id: paramPackData.country_id,
-                created_at: new Date(),
-                feeling_id: req.body.feeling_id,
-                id: snowflake.nextId(),
-                is_autopost: req.body.is_autopost,
-                is_spoiler: req.body.is_spoiler,
-                is_app_jumpable: req.body.is_app_jumpable,
-                language_id: req.body.language_id,
-                mii: usrObj.mii,
-                mii_face_url: "https://mii-images.account.pretendo.cc/",
-                pid: pid,
-                platform_id: paramPackData.platform_id,
-                region_id: paramPackData.region_id,
-                parent: null,
-            };
-            const newPost = new POST(document);
-            newPost.save();
-            res.sendStatus(200);
+            database.connect().then(async fun => {
+                let user = await util.data.processUser(pid);
+                let community = await database.getCommunityByTitleID(paramPackData.title_id)
+                let appData = "";
+                if (req.body.app_data) {
+                    appData = req.body.app_data.replace(/\0/g, "").trim();
+                }
+                let painting = "";
+                if (req.body.painting) {
+                    painting = req.body.painting.replace(/\0/g, "").trim();
+                }
+                let paintingURI = "";
+                if (req.body.painting) {
+                    paintingURI = await util.data.processPainting(painting);
+                }
+                let screenshot = "";
+                if (req.body.screenshot) {
+                    screenshot = req.body.screenshot.replace(/\0/g, "").trim();
+                }
+                const document = {
+                    title_id: paramPackData.title_id,
+                    screen_name: user.user_id,
+                    body: req.body.body,
+                    app_data: appData,
+                    painting: painting,
+                    painting_uri: paintingURI,
+                    screenshot: screenshot,
+                    url: req.body.url,
+                    search_key: req.body.search_key,
+                    topic_tag: req.body.topic_tag,
+                    community_id: community.community_id,
+                    country_id: paramPackData.country_id,
+                    created_at: new Date(),
+                    feeling_id: req.body.feeling_id,
+                    id: snowflake.nextId(),
+                    is_autopost: req.body.is_autopost,
+                    is_spoiler: req.body.is_spoiler,
+                    is_app_jumpable: req.body.is_app_jumpable,
+                    language_id: req.body.language_id,
+                    mii: user.mii,
+                    mii_face_url: `https://mii-images.cdn.pretendo.cc/${user.pid}/normal_face.png`,
+                    pid: user.pid,
+                    verified: user.official,
+                    platform_id: paramPackData.platform_id,
+                    region_id: paramPackData.region_id,
+                    parent: null,
+                };
+                const newPost = new POST(document);
+                newPost.save();
+                res.sendStatus(200);
+            });
         }
     }
     catch (e)
@@ -91,15 +93,24 @@ router.post('/', upload.none(), async function (req, res, next) {
 
 });
 
-router.post('/*/empathies', upload.none(), function (req, res, next) {
-    let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let pid = req.originalUrl.replace('/v1/posts/', '').replace('/empathies','').trim();
+router.post('/:post_id/empathies', upload.none(), function (req, res, next) {
+    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     database.connect().then(async emp => {
-        const post = await database.getPostByID(pid);
-        await post.upEmpathy();
+        const post = await database.getPostByID(req.params.post_id);
+        if(pid === null) {
+            res.sendStatus(403);
+            return;
+        }
+        let user = await database.getUserByPID(pid);
+        if(user.likes.indexOf(post.id) === -1 && user.id !== post.pid)
+        {
+            post.upEmpathy();
+            user.addToLikes(post.id)
+            res.sendStatus(200);
+        }
+        else
+            res.sendStatus(403);
     });
-    res.status(200);
-    res.send();
 });
 
 module.exports = router;

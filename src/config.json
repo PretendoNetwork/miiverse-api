@@ -1,6 +1,6 @@
 {
     "http": {
-        "port": 80
+        "port": 8081
     },
     "account_server": "account.miiverse.cc:8080",
     "secret": "806590af0a2bf0cf9ce54b0b5c1493a1",
