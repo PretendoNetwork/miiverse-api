@@ -3,53 +3,19 @@ var router = express.Router();
 const database = require('../../../database');
 const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/authentication');
+const xmlbuilder = require("xmlbuilder");
+const moment = require("moment");
 
 /* GET post titles. */
 router.get('/', function (req, res) {
     database.connect().then(async e => {
         const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-        let community = await database.getCommunityByTitleID(paramPack.title_id);
-        if (community != null) {
-            let response = await comPostGen.Communities(community);
-            res.contentType("application/xml");
-            res.send(response);
-        } else {
-            res.status(404);
-            res.send();
-        }
-
-    });
-});
-
-router.get('/0/posts', function (req, res) {
-    database.connect().then(async e => {
-        /*  Parse out parameters from URL and headers */
-        const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-        //"[0:1]=1407375153523200"
-        let community = await database.getCommunityByTitleID(paramPack.title_id);
-        if(community != null)
-        {
-            let posts;
-            if(req.query.search_key)
-                posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
-            else
-                posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
-
-            /*  Build formatted response and send it off. */
-            let response;
-            if(req.query.with_mii === 1)
-                response = await comPostGen.PostsResponseWithMii(posts, community);
-            else
-                response = await comPostGen.PostsResponse(posts, community);
-            res.contentType("application/xml");
-            res.send(response);
-        }
-        else
-        {
-            res.status(404);
-            res.send();
-        }
-
+        let communities = await database.getCommunities(10);
+        if(communities === null)
+            return res.sendStatus(404);
+        let response = await comPostGen.topics(communities);
+        res.contentType("application/xml");
+        res.send(response);
     });
 });
 

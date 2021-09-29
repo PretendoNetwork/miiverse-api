@@ -4,4 +4,5 @@ module.exports = {
 	COMMUNITY: require('./communities'),
 	PEOPLE: require('./people'),
 	POLICY: require('./policyLists'),
+	TOPICS: require('./topics')
 };

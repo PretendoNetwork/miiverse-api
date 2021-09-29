@@ -8,7 +8,8 @@ const endpointSchema = new Schema({
         api_host: String,
         portal_host: String,
         n3ds_host: String
-    }
+    },
+    guest: Boolean,
 });
 
 endpointSchema.methods.updateHosts = async function({host, api_host, portal_host, n3ds_host}) {
@@ -18,6 +19,11 @@ endpointSchema.methods.updateHosts = async function({host, api_host, portal_host
     this.set('endpoint.n3ds_host', n3ds_host);
     await this.save();
 };
+
+endpointSchema.methods.updateGuest = async function(mode) {
+    this.set('guest', mode);
+    await this.save();
+}
 
 const ENDPOINT = model('ENDPOINT', endpointSchema);
 
