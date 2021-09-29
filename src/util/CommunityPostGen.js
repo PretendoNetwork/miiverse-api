@@ -191,7 +191,7 @@ class CommunityPostGen {
     }
 
     static async topics(communities) {
-        const expirationDate = moment().add(1, 'days');
+        const expirationDate = moment().add(2, 'days');
         let xml = xmlbuilder.create("result")
             .e("has_error", "0").up()
             .e("version", "1").up()
