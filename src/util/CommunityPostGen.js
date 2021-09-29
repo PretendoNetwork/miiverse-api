@@ -197,7 +197,7 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("request_name", "topics").up()
             .e("expire", expirationDate.format('YYYY-MM-DD HH:MM:SS')).up()
-            .e("topics").up();
+            .e("topics");
         for (const community of communities) {
             let posts = await database.getPostsByCommunity(community, 30);
             console.log(posts.length);
@@ -216,10 +216,13 @@ class CommunityPostGen {
                 .e('name', community.name).up()
                 .e("people");
             for (const post of posts) {
+                let newBody = '';
+                if(post.body)
+                    newBody = post.body.replace( /[\r\n]+/gm, '');
                 xml = xml.e("person")
                     .e("posts")
                     .e("post")
-                    .e("body", post.body).up()
+                    .e("body", newBody).up()
                     .e("community_id", community.community_id).up()
                     .e("country_id", post.country_id).up()
                     .e("created_at", moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
@@ -237,7 +240,7 @@ class CommunityPostGen {
                 if (post.painting) {
                     xml = xml.e("painting")
                         .e("format", "tga").up()
-                        .e("content", post.painting).up()
+                        .e("content", post.painting.replace( /[\r\n]+/gm, "" )).up()
                         .e("size", post.painting.length).up()
                         .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                         .up();
