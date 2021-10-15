@@ -200,7 +200,6 @@ class CommunityPostGen {
             .e("topics");
         for (const community of communities) {
             let posts = await database.getPostsByCommunity(community, 30);
-            console.log(posts.length);
             xml = xml.e('topic')
                 .e('empathy_count', community.empathy_count).up()
                 .e('has_shop_page', community.has_shop_page).up()
