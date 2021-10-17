@@ -10,19 +10,21 @@ const { USER } = require('../models/user');
 let TGA = require('tga');
 let pako = require('pako');
 let PNG = require('pngjs').PNG;
+const path = require('path')
+
 
 let methods = {
     processUser: function(pid) {
         return new Promise(function(resolve, reject) {
-            console.log('running me');
+            //console.log('running me');
             database.connect().then(async yeet => {
                 let userObject = await database.getUserByPID(pid);
-                console.log(userObject);
+                //console.log(userObject);
                 if(userObject != null)
                     resolve(userObject);
                 else
                 {
-                    console.log('else');
+                    //console.log('else');
                     await request({
                         url: "http://" + config.account_server + "/v1/api/miis?pids=" + pid,
                         headers: {
@@ -41,7 +43,7 @@ let methods = {
                                 official: false
                             };
                             const newUsrObj = new USER(newUsr);
-                            console.log(newUsrObj);
+                            //console.log(newUsrObj);
                             newUsrObj.save();
                             resolve(newUsr);
                         }
@@ -79,17 +81,16 @@ let methods = {
         }
         catch(e)
         {
-            console.error("The token was incorrect");
+            console.log(e)
             return null;
         }
 
     },
     decryptToken: function(token) {
-
         // Access and refresh tokens use a different format since they must be much smaller
         // Assume a small length means access or refresh token
         if (token.length <= 32) {
-            const cryptoPath = `${__dirname}/../certs/access`;
+            const cryptoPath = path.normalize(`${__dirname}/../certs/access`);
             const aesKey = Buffer.from(fs.readFileSync(`${cryptoPath}/aes.key`, { encoding: 'utf8' }), 'hex');
 
             const iv = Buffer.alloc(16);
@@ -101,11 +102,12 @@ let methods = {
 
             return decryptedBody;
         }
-        const cryptoPath = `${__dirname}/certs/access`;
+
+        const cryptoPath = path.normalize(`${__dirname}/../certs/access`);
 
         const cryptoOptions = {
             private_key: fs.readFileSync(`${cryptoPath}/private.pem`),
-            hmac_secret: config.account_server_secret
+            hmac_secret: config.secret
         };
 
         const privateKey = new NodeRSA(cryptoOptions.private_key, 'pkcs1-private-pem', {
@@ -138,7 +140,7 @@ let methods = {
         const hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
         const calculatedSignature = hmac.digest();
 
-        if (calculatedSignature !== signature) {
+        if (Buffer.compare(calculatedSignature, signature) !== 0) {
             console.log('Token signature did not match');
             return null;
         }

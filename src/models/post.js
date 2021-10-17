@@ -67,6 +67,10 @@ const PostSchema = new Schema({
     parent: {
         type: String,
         default: null
+    },
+    message_to_pid: {
+        type: String,
+        default: null
     }
 });
 
