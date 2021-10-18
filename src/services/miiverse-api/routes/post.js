@@ -26,11 +26,11 @@ router.post('/', upload.none(), async function (req, res, next) {
                 let community = await database.getCommunityByTitleID(paramPackData.title_id)
                 let appData = "";
                 if (req.body.app_data) {
-                    appData = req.body.app_data.replace(/\0/g, "").trim();
+                    appData = req.body.app_data.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
                 }
                 let painting = "";
                 if (req.body.painting) {
-                    painting = req.body.painting.replace(/\0/g, "").trim();
+                    painting = req.body.painting.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
                 }
                 let paintingURI = "";
                 if (req.body.painting) {

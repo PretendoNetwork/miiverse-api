@@ -17,23 +17,18 @@ class CommunityPostGen {
             xml = xml.e("post")
                 .e("app_data", posts[i].app_data).up()
                 .e("body", posts[i].body).up()
-                .e("community_id", community.community_id).up()
+                .e("community_id", community.id).up()
                 .e("country_id", "254").up()
-                .e("created_at", moment(posts[i].created_at).format('YYYY-MM-DD HH:MM:SS')).up()
-                .e("feeling_id", posts[i].feeling_id).up()
+                .e("created_at", moment(posts[i].created_at).format("YYYY-MM-DD hh:mm:ss")).up()
+                .e("feeling_id", "1").up()
                 .e("id", posts[i].id).up()
-                .e("is_autopost", posts[i].feeling_id).up()
+                .e("is_autopost", "0").up()
                 .e("is_community_private_autopost", "0").up()
-                .e("is_spoiler", posts[i].is_spoiler).up()
+                .e("is_spoiler", "0").up()
                 .e("is_app_jumpable", "0").up()
                 .e("empathy_count", posts[i].empathy_count).up()
-                .e("language_id", posts[i].language_id).up();
-                if(posts[i].mii) {
-                    xml = xml.e("mii", posts[i].mii).up()
-                             .e("mii_face_url", posts[i].mii_face_url).up()
-                }
-                xml = xml.e("number", "0").up();
-
+                .e("language_id", "1").up()
+                .e("number", "0").up();
             if (posts[i].painting) {
                 xml = xml.e("painting")
                     .e("format", "tga").up()
@@ -42,12 +37,12 @@ class CommunityPostGen {
                     .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                     .up();
             }
-            xml = xml.e("pid", i + 1).up()
+            xml = xml.e("pid", posts[i].pid).up()
                 .e("platform_id", "1").up()
                 .e("region_id", "4").up()
                 .e("reply_count", "0").up()
                 .e("screen_name", posts[i].screen_name).up()
-                .e("title_id", posts[i].title_id).up()
+                .e("title_id", community.title_ids[0]).up()
                 .up();
         }
 
