@@ -1,6 +1,30 @@
 const { Schema, model } = require('mongoose');
 
 const  CommunitySchema = new Schema({
+    platform_id: Number,
+    name: String,
+    description: String,
+    open: {
+        type: Boolean,
+        default: true
+    },
+    /**
+     * 0: Main Community
+     * 1: Sub-Community
+     * 2: Announcement Community
+     */
+    type: {
+      type: Number,
+      default: 0
+    },
+    parent: {
+        type: Number,
+        default: null
+    },
+    admins: {
+        type: [String],
+        default: undefined
+    },
     created_at: {
       type: Date,
         default: new Date(),
@@ -35,16 +59,10 @@ const  CommunitySchema = new Schema({
         type: Number,
         default: 0
     },
-    platform_id: Number,
-    name: String,
     browser_icon: String,
+    browser_thumbnail: String,
     CTR_browser_header: String,
-    WiiU_browser_header: String,
-    description: String,
-    parent: {
-        type: Number,
-        default: null
-    }
+    WiiU_browser_header: String
 });
 
 CommunitySchema.methods.upEmpathy = async function() {

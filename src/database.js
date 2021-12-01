@@ -1,19 +1,21 @@
 const mongoose = require('mongoose');
 const { mongoose: mongooseConfig } = require('./config.json');
-const { TOPIC } = require('./models/topic');
 const { ENDPOINT } = require('./models/endpoint');
 const { COMMUNITY } = require('./models/communities');
 const { POST } = require('./models/post');
 const { USER } = require('./models/user');
 const { CONVERSATION } = require('./models/conversation');
 const { uri, database, options } = mongooseConfig;
+const logger = require('./logger');
 
 let connection;
 
 async function connect() {
     await mongoose.connect(`${uri}/${database}`, options);
-
     connection = mongoose.connection;
+    connection.on('connected', function () {
+        logger.info(`MongoDB connected ${this.name}`);
+    });
     connection.on('error', console.error.bind(console, 'connection error:'));
     connection.on('close', () => {
         connection.removeAllListeners();
@@ -24,30 +26,6 @@ function verifyConnected() {
     if (!connection) {
         connect();
     }
-}
-
-async function getTopicByName(topicName) {
-    verifyConnected();
-
-    if (typeof topicName !== 'string') {
-        return null;
-    }
-
-    return TOPIC.findOne({
-        name: topicName
-    });
-}
-
-async function getTopicByCommunityID(communityID) {
-    verifyConnected();
-
-    if (typeof communityID !== 'string') {
-        return null;
-    }
-
-    return TOPIC.findOne({
-        community_id: communityID
-    });
 }
 
 async function getCommunities(numberOfCommunities) {
@@ -160,21 +138,21 @@ async function getNumberNewCommunityPostsByID(community, number) {
     }).sort({ created_at: -1}).limit(number);
 }
 
-async function getNumberPopularCommunityPostsByID(community, number) {
+async function getNumberPopularCommunityPostsByID(community, limit, offset) {
     verifyConnected();
     return POST.find({
         title_id: community.title_id,
         parent: null
-    }).sort({ empathy_count: -1}).limit(number);
+    }).sort({ empathy_count: -1}).skip(offset).limit(limit);
 }
 
-async function getNumberVerifiedCommunityPostsByID(community, number) {
+async function getNumberVerifiedCommunityPostsByID(community, limit, offset) {
     verifyConnected();
     return POST.find({
         title_id: community.title_id,
         verified: true,
         parent: null
-    }).sort({ created_at: -1}).limit(number);
+    }).sort({ created_at: -1}).skip(offset).limit(limit);
 }
 
 async function getPostsByCommunity(community, numberOfPosts) {
@@ -194,12 +172,12 @@ async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
     }).limit(numberOfPosts);
 }
 
-async function getNewPostsByCommunity(community, numberOfPosts) {
+async function getNewPostsByCommunity(community, limit, offset) {
     verifyConnected();
     return POST.find({
         community_id: community.community_id,
         parent: null
-    }).sort({ created_at: -1 }).limit(numberOfPosts);
+    }).sort({ created_at: -1 }).skip(offset).limit(limit);
 }
 
 async function getUserPostsAfterTimestamp(post, numberOfPosts) {
@@ -209,6 +187,14 @@ async function getUserPostsAfterTimestamp(post, numberOfPosts) {
         created_at: { $lt: post.created_at },
         parent: null
     }).limit(numberOfPosts);
+}
+
+async function getUserPostsOffset(pid, limit, offset) {
+    verifyConnected();
+    return POST.find({
+        pid: pid,
+        parent: null
+    }).sort({ created_at: -1}).skip(offset).limit(limit);
 }
 
 async function getCommunityPostsAfterTimestamp(post, numberOfPosts) {
@@ -272,7 +258,7 @@ async function getUserByUsername(user_id) {
     verifyConnected();
 
     return USER.findOne({
-        user_id: new RegExp(`^${user_id}$`, 'i')
+        pnid: new RegExp(`^${user_id}$`, 'i')
     });
 }
 
@@ -304,6 +290,17 @@ async function getNewsFeedAfterTimestamp(user, numberOfPosts, post) {
     }).limit(numberOfPosts).sort({ created_at: -1});
 }
 
+async function getNewsFeedOffset(user, limit, offset) {
+    verifyConnected();
+    return POST.find({
+        $or: [
+            {pid: user.followed_users},
+            {pid: user.pid}
+        ],
+        parent: null
+    }).skip(offset).limit(limit).sort({ created_at: -1});
+}
+
 async function getConversations(pid) {
     verifyConnected();
     return CONVERSATION.find({
@@ -313,11 +310,22 @@ async function getConversations(pid) {
 
 async function getConversation(pid, pid2) {
     verifyConnected();
-    return CONVERSATION.findOne({
-        pids: {
-            $all: [pid, pid2]
-        }
+    return CONVERSATION.find({
+        $and: [
+            {pids: pid},
+            {pids: pid2}
+        ],
     });
+}
+
+async function getLatestMessage(pid, pid2) {
+    verifyConnected();
+    return POST.findOne({
+        $or: [
+            {pid: pid, message_to_pid: pid2},
+            {pid: pid2, message_to_pid: pid}
+        ]
+    })
 }
 
 module.exports = {
@@ -347,14 +355,17 @@ module.exports = {
     getUserByPID,
     getUserByUsername,
     getUserPostsAfterTimestamp,
+    getUserPostsOffset,
     getCommunityPostsAfterTimestamp,
     getServerConfig,
     pushNewNotificationByPID,
     pushNewNotificationToAll,
     getNewsFeed,
     getNewsFeedAfterTimestamp,
+    getNewsFeedOffset,
     getFollowingUsers,
     getFollowedUsers,
     getConversations,
     getConversation,
+    getLatestMessage,
 };

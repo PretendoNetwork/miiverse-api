@@ -15,49 +15,42 @@ const path = require('path')
 
 let methods = {
     processUser: function(pid) {
-        return new Promise(function(resolve, reject) {
-            //console.log('running me');
-            database.connect().then(async yeet => {
-                let userObject = await database.getUserByPID(pid);
-                //console.log(userObject);
-                if(userObject != null)
-                    resolve(userObject);
-                else
-                {
-                    //console.log('else');
-                    await request({
-                        url: "http://" + config.account_server + "/v1/api/miis?pids=" + pid,
-                        headers: {
-                            'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
-                            'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a'
-                        }
-                    }, function (error, response, body) {
-                        if (!error && response.statusCode === 200) {
-                            let xml = xmlParser.toJson(body, {object: true});
-                            const newUsr = {
-                                pid: pid,
-                                created_at: moment().format('YYYY-MM-DD HH:mm:SS'),
-                                user_id: xml.miis.mii.user_id,
-                                account_status: 0,
-                                mii: xml.miis.mii.data,
-                                official: false
-                            };
-                            const newUsrObj = new USER(newUsr);
-                            //console.log(newUsrObj);
-                            newUsrObj.save();
-                            resolve(newUsr);
-                        }
-                        else
-                        {
-                            console.log('fail');
-                            reject();
-                        }
+        return new Promise(async function(resolve, reject) {
+            let userObject = await database.getUserByPID(pid);
+            if(userObject != null)
+                resolve(userObject);
+            else
+            {
+                await request({
+                    url: "http://" + config.account_server + "/v1/api/miis?pids=" + pid,
+                    headers: {
+                        'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
+                        'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a'
+                    }
+                }, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        let xml = xmlParser.toJson(body, {object: true});
+                        const newUsr = {
+                            pid: pid,
+                            created_at: moment().format('YYYY-MM-DD HH:mm:SS'),
+                            user_id: xml.miis.mii.user_id,
+                            account_status: 0,
+                            mii: xml.miis.mii.data,
+                            official: false
+                        };
+                        const newUsrObj = new USER(newUsr);
+                        newUsrObj.save();
+                        resolve(newUsr);
+                    }
+                    else
+                    {
+                        console.log('fail');
+                        reject();
+                    }
 
-                    });
+                });
 
-                }
-
-            });
+            }
         });
     },
     decodeParamPack: function (paramPack) {

@@ -30,6 +30,5 @@ api.use('/v1/friend_messages', routes.MESSAGE);
 api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/people/', routes.PEOPLE);
 api.use('/v1/topics/', routes.TOPICS);
-discovery.use('/p01/', routes.POLICY);
 
 module.exports = router;

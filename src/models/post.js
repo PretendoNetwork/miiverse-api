@@ -71,6 +71,10 @@ const PostSchema = new Schema({
     message_to_pid: {
         type: String,
         default: null
+    },
+    conversation_id: {
+        type: String,
+        default: null
     }
 });
 

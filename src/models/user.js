@@ -9,8 +9,9 @@ const notification = new Schema({
 
 const  UserSchema = new Schema({
     pid: Number,
-    created_at: String,
+    created_at: Date,
     user_id: String,
+    pnid: String,
     birthday: Date,
     country: String,
     pfp_uri: String,
@@ -70,19 +71,19 @@ const  UserSchema = new Schema({
         default: false
     },
     likes: {
-        type: [Number],
+        type: [String],
         default: [0]
     },
     followed_communities: {
-        type: [Number],
+        type: [String],
         default: [0]
     },
     followed_users: {
-        type: [Number],
+        type: [String],
         default: [0]
     },
     following_users: {
-        type: [Number],
+        type: [String],
         default: [0]
     },
     followers: {
@@ -250,8 +251,8 @@ UserSchema.methods.upFollower = async function() {
 
 UserSchema.methods.downFollower = async function() {
     const followers = this.get('followers');
-    this.set('followers', followers - 1);
-
+    if(followers > 0)
+        this.set('followers', followers - 1);
     await this.save();
 };
 
@@ -264,8 +265,8 @@ UserSchema.methods.upFollowing = async function() {
 
 UserSchema.methods.downFollowing = async function() {
     const following = this.get('following');
-    this.set('following', following - 1);
-
+    if(following > 0)
+        this.set('following', following - 1);
     await this.save();
 };
 
