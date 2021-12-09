@@ -23,6 +23,8 @@ router.post('/', upload.none(), async function (req, res, next) {
         {
             let user = await util.data.processUser(pid);
             let community = await database.getCommunityByTitleID(paramPackData.title_id)
+            if(community.community_id === 'announcements')
+                return res.sendStatus(403)
             let appData = "";
             if (req.body.app_data) {
                 appData = req.body.app_data.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
