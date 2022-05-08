@@ -2,3 +2,4 @@
 node_modules
 certs
 config.json
+src/logs
