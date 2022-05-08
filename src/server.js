@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const xmlparser = require('./middleware/xml-parser');
 const database = require('./database');
 const logger = require('./logger');
-const config = require('./config.json');
+const config = require('../config.json');
 
 const { http: { port } } = config;
 const app = express();

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { mongoose: mongooseConfig } = require('./config.json');
+const { mongoose: mongooseConfig } = require('../config.json');
 const { ENDPOINT } = require('./models/endpoint');
 const { COMMUNITY } = require('./models/communities');
 const { POST } = require('./models/post');
