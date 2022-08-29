@@ -1,198 +1,93 @@
 var express = require('express');
 var xml = require('object-to-xml');
 const database = require('../../../database');
-const util = require('../../../util/util');
 var router = express.Router();
 
 /* GET discovery server. */
 router.get('/', async function (req, res) {
-    const discovery = await database.getDiscoveryHosts();
-    try
-    {
-        let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-        let usrObj;
-        if(pid == null)
-        {
-            throw new Error('The User token was not valid');
-        }
-        else
-        {
-            usrObj = await util.data.processUser(pid);
-            if(!usrObj) {
-                res.set("Content-Type", "application/xml");
-                res.statusCode = 400;
-                response = {
-                    result: {
-                        has_error: 1,
-                        version: 1,
-                        code: 400,
-                        error_code: 2,
-                        message: "SETUP_NOT_COMPLETE"
-                    }
-                };
-                return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+    let user = await database.getPNID(req.pid);
+    console.log(user.mii)
+    if(!user) {
+        res.set("Content-Type", "application/xml");
+        res.statusCode = 400;
+        let response = {
+            result: {
+                has_error: 1,
+                version: 1,
+                code: 400,
+                error_code: 2,
+                message: "SETUP_NOT_COMPLETE"
             }
-            switch (usrObj.account_status) {
-                case 0:
-                    break;
-                case 1:
-                case 2:
-                case 3:
-                    res.set("Content-Type", "application/xml");
-                    res.statusCode = 400;
-                    response = {
-                        result: {
-                            has_error: 1,
-                            version: 1,
-                            code: 400,
-                            error_code: 7,
-                            message: "POSTING_FROM_NNID"
-                        }
-                    };
-                    res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
-            }
-        }
-
+        };
+        return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
     }
-    catch (e)
-    {
-        console.error(e);
-    }
-    switch(discovery.has_error)
-    {
+    let discovery = await database.getEndPoint(user.server_access_level);
+    if(!discovery)
+        discovery = await database.getEndPoint('prod');
+    let message = '', error = 0;
+    switch(discovery.status) {
         case 0 :
             res.set("Content-Type", "application/xml");
-            response = {
+            let response = {
                 result: {
                     has_error: 0,
-                    version: discovery.version,
+                    version: 0,
                     endpoint: {
-                        host: discovery.endpoint.host,
-                        api_host: discovery.endpoint.api_host,
-                        portal_host: discovery.endpoint.portal_host,
-                        n3ds_host: discovery.endpoint.n3ds_host
+                        host: discovery.host,
+                        api_host: discovery.api_host,
+                        portal_host: discovery.portal_host,
+                        n3ds_host: discovery.n3ds_host
                     }
                 }
             };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
-            break;
+            return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
         case 1 :
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 1,
-                    message: "SYSTEM_UPDATE_REQUIRED"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'SYSTEM_UPDATE_REQUIRED';
+            error = 1;
             break;
         case 2 :
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 2,
-                    message: "SETUP_NOT_COMPLETE"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'SETUP_NOT_COMPLETE';
+            error = 2;
             break;
         case 3 :
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 3,
-                    message: "SERVICE_MAINTENANCE"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'SERVICE_MAINTENANCE';
+            error = 3;
             break;
         case 4:
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 4,
-                    message: "SERVICE_CLOSED"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'SERVICE_CLOSED';
+            error = 4;
             break;
         case 5 :
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 5,
-                    message: "PARENTAL_CONTROLS_ENABLED"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'PARENTAL_CONTROLS_ENABLED';
+            error = 5;
             break;
         case 6 :
-            res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 6,
-                    message: "POSTING_LIMITED_PARENTAL_CONTROLS"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+            message = 'POSTING_LIMITED_PARENTAL_CONTROLS';
+            error = 6;
             break;
         case 7 :
+            message = 'NNID_BANNED';
+            error = 7;
             res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 7,
-                    message: "PNID_BANNED"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
             break;
         default :
+            message = 'SERVER_ERROR';
+            error = 15;
             res.set("Content-Type", "application/xml");
-            res.statusCode = 400;
-            response = {
-                result: {
-                    has_error: 1,
-                    version: 1,
-                    code: 400,
-                    error_code: 15,
-                    message: "SERVER_ERROR"
-                }
-            };
-            res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
             break;
     }
-});
-
-router.post('/posts', function (req, res) {
-    res.sendStatus(200);
+    res.set("Content-Type", "application/xml");
+    res.statusCode = 400;
+    let response = {
+        result: {
+            has_error: 1,
+            version: 1,
+            code: 400,
+            error_code: error,
+            message: message
+        }
+    };
+    res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
 });
 
 module.exports = router;

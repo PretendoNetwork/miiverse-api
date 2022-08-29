@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
 const { mongoose: mongooseConfig } = require('../config.json');
-const { ENDPOINT } = require('./models/endpoint');
 const { COMMUNITY } = require('./models/communities');
-const { POST } = require('./models/post');
-const { USER } = require('./models/user');
+const { CONTENT } = require('./models/content');
 const { CONVERSATION } = require('./models/conversation');
+const { ENDPOINT } = require('./models/endpoint');
+const { NOTIFICATIONS } = require('./models/notifications');
+const { PNID } = require('./models/pnid');
+const { POST } = require('./models/post');
+const { SETTINGS } = require('./models/settings');
+
 const { uri, database, options } = mongooseConfig;
 const logger = require('./logger');
+const accountDB = require('./accountdb');
 
 let connection;
 
@@ -31,19 +36,19 @@ function verifyConnected() {
 async function getCommunities(numberOfCommunities) {
     verifyConnected();
     if(numberOfCommunities === -1)
-        return COMMUNITY.find({ parent: null });
+        return COMMUNITY.find({ parent: null, type: 0 });
     else
-        return COMMUNITY.find({ parent: null }).limit(numberOfCommunities);
+        return COMMUNITY.find({ parent: null, type: 0 }).limit(numberOfCommunities);
 }
 
 async function getMostPopularCommunities(numberOfCommunities) {
     verifyConnected();
-    return COMMUNITY.find({ parent: null }).sort({followers: -1}).limit(numberOfCommunities);
+    return COMMUNITY.find({ parent: null, type: 0 }).sort({followers: -1}).limit(numberOfCommunities);
 }
 
 async function getNewCommunities(numberOfCommunities) {
     verifyConnected();
-    return COMMUNITY.find({ parent: null }).sort([['created_at', -1]]).limit(numberOfCommunities);
+    return COMMUNITY.find({ parent: null, type: 0 }).sort([['created_at', -1]]).limit(numberOfCommunities);
 }
 
 async function getSubCommunities(communityID) {
@@ -77,7 +82,6 @@ async function getTotalPostsByCommunity(community) {
 
 async function getPostByID(postID) {
     verifyConnected();
-
     return POST.findOne({
         id: postID
     });
@@ -98,11 +102,23 @@ async function getPostReplies(postID, number) {
     }).limit(number);
 }
 
+async function getDuplicatePosts(pid, post) {
+    verifyConnected();
+    return POST.findOne({
+        pid: pid,
+        body: post.body,
+        painting: post.painting,
+        screenshot: post.screenshot,
+        parent: null
+    });
+}
+
 async function getUserPostRepliesAfterTimestamp(post, numberOfPosts) {
     verifyConnected();
     return POST.find({
         parent: post.pid,
-        created_at: { $lt: post.created_at }
+        created_at: { $lt: post.created_at },
+        message_to_pid: null
     }).limit(numberOfPosts);
 }
 
@@ -110,7 +126,8 @@ async function getNumberUserPostsByID(userID, number) {
     verifyConnected();
     return POST.find({
         pid: userID,
-        parent: null
+        parent: null,
+        message_to_pid: null
     }).sort({ created_at: -1}).limit(number);
 }
 
@@ -118,7 +135,8 @@ async function getTotalPostsByUserID(userID) {
     verifyConnected();
     return POST.find({
         pid: userID,
-        parent: null
+        parent: null,
+        message_to_pid: null
     }).countDocuments();
 }
 
@@ -158,7 +176,7 @@ async function getNumberVerifiedCommunityPostsByID(community, limit, offset) {
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
-        title_id: community.title_id,
+        community_id: community.id,
         parent: null
     }).limit(numberOfPosts);
 }
@@ -170,6 +188,15 @@ async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
         search_key: search_key,
         parent: null
     }).limit(numberOfPosts);
+}
+
+async function getFriendMessages(pid, search_key, limit) {
+    verifyConnected();
+    return POST.find({
+        message_to_pid: pid,
+        search_key: search_key,
+        parent: null
+    }).limit(limit);
 }
 
 async function getNewPostsByCommunity(community, limit, offset) {
@@ -185,7 +212,8 @@ async function getUserPostsAfterTimestamp(post, numberOfPosts) {
     return POST.find({
         pid: post.pid,
         created_at: { $lt: post.created_at },
-        parent: null
+        parent: null,
+        message_to_pid: null,
     }).limit(numberOfPosts);
 }
 
@@ -193,8 +221,9 @@ async function getUserPostsOffset(pid, limit, offset) {
     verifyConnected();
     return POST.find({
         pid: pid,
-        parent: null
-    }).sort({ created_at: -1}).skip(offset).limit(limit);
+        parent: null,
+        message_to_pid: null
+    }).skip(offset).limit(limit).sort({ created_at: -1});
 }
 
 async function getCommunityPostsAfterTimestamp(post, numberOfPosts) {
@@ -206,115 +235,146 @@ async function getCommunityPostsAfterTimestamp(post, numberOfPosts) {
     }).limit(numberOfPosts);
 }
 
-async function pushNewNotificationByPID(PID, content, link) {
+async function getEndpoints() {
     verifyConnected();
-    return USER.update(
-        { pid: PID }, { $push: { notification_list: { content: content, link: link, read: false, created_at: Date() }}});
+    return ENDPOINT.find({});
 }
 
-async function pushNewNotificationToAll(content, link) {
-    verifyConnected();
-    return USER.updateMany(
-        {}, { $push: { notification_list: { content: content, link: link, read: false, created_at: Date() }}});
-}
-
-async function getDiscoveryHosts() {
+async function getEndPoint(accessLevel) {
     verifyConnected();
     return ENDPOINT.findOne({
-        version: 1
-    });
+        server_access_level: accessLevel
+    })
 }
 
-async function getUsers(numberOfUsers) {
+async function getUsersSettings(numberOfUsers) {
     verifyConnected();
     if(numberOfUsers === -1)
-        return USER.find({});
+        return SETTINGS.find({});
     else
-        return USER.find({}).limit(numberOfUsers);
+        return SETTINGS.find({}).limit(numberOfUsers);
 }
 
-async function getFollowingUsers(user) {
+async function getUsersContent(numberOfUsers) {
     verifyConnected();
-    return USER.find({
-        pid: user.following_users
+    if(numberOfUsers === -1)
+        return SETTINGS.find({});
+    else
+        return SETTINGS.find({}).limit(numberOfUsers);
+}
+
+async function getUserSettings(pid) {
+    verifyConnected();
+    return SETTINGS.findOne({pid: pid});
+}
+
+async function getUserContent(pid) {
+    verifyConnected();
+    return CONTENT.findOne({pid: pid});
+}
+
+async function getFollowingUsers(content) {
+    verifyConnected();
+    return SETTINGS.find({
+        pid: content.following_users
     });
 }
-async function getFollowedUsers(user) {
-    verifyConnected();
-    return USER.find({
-        pid: user.followed_users
-    });
-}
 
-async function getUserByPID(PID) {
+async function getFollowedUsers(content) {
     verifyConnected();
-
-    return USER.findOne({
-        pid: PID
+    return SETTINGS.find({
+        pid: content.followed_users
     });
 }
 
 async function getUserByUsername(user_id) {
     verifyConnected();
-
-    return USER.findOne({
-        pnid: new RegExp(`^${user_id}$`, 'i')
+    return PNID.findOne({
+        "username": new RegExp(`^${user_id}$`, 'i')
     });
 }
 
-async function getServerConfig() {
-    verifyConnected();
-    return ENDPOINT.findOne();
-}
-
-async function getNewsFeed(user, numberOfPosts) {
+async function getNewsFeed(content, numberOfPosts) {
     verifyConnected();
     return POST.find({
         $or: [
-            {pid: user.followed_users},
-            {pid: user.pid}
+            {pid: content.followed_users},
+            {pid: content.pid},
+            {community_id: content.followed_communities},
         ],
-        parent: null
+        parent: null,
+        message_to_pid: null
     }).limit(numberOfPosts).sort({ created_at: -1});
 }
 
-async function getNewsFeedAfterTimestamp(user, numberOfPosts, post) {
+async function getNewsFeedAfterTimestamp(content, numberOfPosts, post) {
     verifyConnected();
     return POST.find({
         $or: [
-            {pid: user.followed_users},
-            {pid: user.pid}
+            {pid: content.followed_users},
+            {pid: content.pid},
+            {community_id: content.followed_communities},
         ],
         created_at: { $lt: post.created_at },
-        parent: null
+        parent: null,
+        message_to_pid: null
     }).limit(numberOfPosts).sort({ created_at: -1});
 }
 
-async function getNewsFeedOffset(user, limit, offset) {
+async function getNewsFeedOffset(content, limit, offset) {
     verifyConnected();
     return POST.find({
         $or: [
-            {pid: user.followed_users},
-            {pid: user.pid}
+            {pid: content.followed_users},
+            {pid: content.pid},
+            {community_id: content.followed_communities},
         ],
-        parent: null
+        parent: null,
+        message_to_pid: null
     }).skip(offset).limit(limit).sort({ created_at: -1});
 }
 
 async function getConversations(pid) {
     verifyConnected();
     return CONVERSATION.find({
-        pids: pid
+        "users.pid": pid
+    }).sort({ last_updated: -1});
+}
+
+async function getUnreadConversationCount(pid) {
+    verifyConnected();
+    return CONVERSATION.find({
+        "users": { $elemMatch: {
+                'pid': pid,
+                'read': false
+            }}
+
+    }).countDocuments();
+}
+
+async function getConversationByID(community_id) {
+    verifyConnected();
+    return CONVERSATION.findOne({
+        type: 3,
+        id: community_id
     });
 }
 
-async function getConversation(pid, pid2) {
+async function getConversationMessages(community_id, limit, offset) {
     verifyConnected();
-    return CONVERSATION.find({
+    return POST.find({
+        community_id: community_id,
+        parent: null
+    }).sort({created_at: 1}).skip(offset).limit(limit);
+}
+
+async function getConversationByUsers(pids) {
+    verifyConnected();
+    return CONVERSATION.findOne({
         $and: [
-            {pids: pid},
-            {pids: pid2}
-        ],
+            {'users.pid': pids[0]},
+            {'users.pid': pids[1]}
+        ]
     });
 }
 
@@ -328,6 +388,50 @@ async function getLatestMessage(pid, pid2) {
     })
 }
 
+async function getPNIDS() {
+    accountDB.verifyConnected();
+    return PNID.find({});
+}
+
+async function getPNID(pid) {
+    accountDB.verifyConnected();
+    return PNID.findOne({
+        pid: pid
+    });
+}
+
+async function getNotifications(pid, limit, offset) {
+    verifyConnected();
+    return NOTIFICATIONS.find({
+        pid: pid,
+    }).sort({created_at: 1}).skip(offset).limit(limit);
+}
+
+async function getNotification(pid, type, reference_id) {
+    verifyConnected();
+    return NOTIFICATIONS.findOne({
+        pid: pid,
+        type: type,
+        reference_id: reference_id
+    })
+}
+
+async function getLastNotification(pid) {
+    verifyConnected();
+    return NOTIFICATIONS.findOne({
+        pid: pid
+    }).sort({created_at: -1}).limit(1);
+}
+
+async function getUnreadNotificationCount(pid) {
+    verifyConnected();
+    return NOTIFICATIONS.find({
+        pid: pid,
+        read: false
+    }).countDocuments();
+}
+
+
 module.exports = {
     connect,
     getCommunities,
@@ -337,7 +441,6 @@ module.exports = {
     getCommunityByTitleID,
     getCommunityByID,
     getTotalPostsByCommunity,
-    getDiscoveryHosts,
     getPostsByCommunity,
     getHotPostsByCommunity,
     getNumberNewCommunityPostsByID,
@@ -351,21 +454,33 @@ module.exports = {
     getNumberUserPostsByID,
     getTotalPostsByUserID,
     getPostByID,
-    getUsers,
-    getUserByPID,
+    getDuplicatePosts,
+    getEndpoints,
+    getEndPoint,
     getUserByUsername,
     getUserPostsAfterTimestamp,
     getUserPostsOffset,
     getCommunityPostsAfterTimestamp,
-    getServerConfig,
-    pushNewNotificationByPID,
-    pushNewNotificationToAll,
     getNewsFeed,
     getNewsFeedAfterTimestamp,
     getNewsFeedOffset,
     getFollowingUsers,
     getFollowedUsers,
     getConversations,
-    getConversation,
+    getConversationByID,
+    getConversationByUsers,
+    getConversationMessages,
+    getUnreadConversationCount,
     getLatestMessage,
+    getFriendMessages,
+    getPNID,
+    getPNIDS,
+    getUsersSettings,
+    getUsersContent,
+    getUserSettings,
+    getUserContent,
+    getNotifications,
+    getUnreadNotificationCount,
+    getNotification,
+    getLastNotification
 };

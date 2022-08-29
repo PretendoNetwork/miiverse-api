@@ -1,5 +1,18 @@
 const { Schema, model } = require('mongoose');
+const moment = require("moment");
 const snowflake = require('node-snowflake').Snowflake;
+
+const user = new Schema({
+    pid: String,
+    official: {
+        type: Boolean,
+        default: false
+    },
+    read: {
+        type: Boolean,
+        default: true
+    }
+});
 
 const  ConversationSchema = new Schema({
     id: {
@@ -10,7 +23,7 @@ const  ConversationSchema = new Schema({
         type: Date,
         default: new Date(),
     },
-    last_message_sent: {
+    last_updated: {
         type: Date,
         default: new Date(),
     },
@@ -18,41 +31,32 @@ const  ConversationSchema = new Schema({
         type: String,
         default: ""
     },
-    pid1: {
-        pid: String,
-        official: {
-            type: Boolean,
-            default: false
-        },
-        screen_name: String,
-        read: Boolean
-    },
-    pid2: {
-        pid: String,
-        official: {
-            type: Boolean,
-            default: false
-        },
-        screen_name: String,
-        read: Boolean
-    }
+    users: [user]
 });
 
 ConversationSchema.methods.newMessage = async function(message, fromPid) {
-    const pid1 = this.get('pid1');
-    const pid2 = this.get('pid2');
-    if(pid1.pid === fromPid) {
-        pid1.read = true
-        pid2.read = false
+    const users = this.get('users');
+    console.log(fromPid)
+    if(users[0].pid.toString() === fromPid.toString()) {;
+        users[1].read = false;
     }
     else {
-        pid1.read = false
-        pid2.read = true
+        users[0].read = false;
     }
-    this.set('pid1', pid1);
-    this.set('pid2', pid2);
-    this.set('last_message_sent', new Date());
+    this.set('users', users);
+    this.set('last_updated', moment(new Date()));
     this.set('message_preview', message);
+    await this.save();
+}
+
+ConversationSchema.methods.markAsRead = async function(pid) {
+    let users = this.get('users');
+    if(users[0].pid === pid.toString())
+        users[0].read = true;
+    else if(users[1].pid === pid.toString())
+        users[1].read = true;
+    this.set('users', users)
+    this.markModified('users');
     await this.save();
 }
 

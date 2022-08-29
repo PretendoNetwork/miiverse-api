@@ -5,6 +5,7 @@ const xmlparser = require('./middleware/xml-parser');
 const database = require('./database');
 const logger = require('./logger');
 const config = require('../config.json');
+const auth = require('./middleware/auth');
 
 const { http: { port } } = config;
 const app = express();
@@ -25,6 +26,7 @@ app.use(express.urlencoded({
     parameterLimit: 100000
 }));
 app.use(xmlparser);
+app.use(auth);
 
 // import the servers into one
 app.use(miiverse);

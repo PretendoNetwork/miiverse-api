@@ -194,14 +194,17 @@ class CommunityPostGen {
             .e("expire", expirationDate.format('YYYY-MM-DD HH:MM:SS')).up()
             .e("topics");
         for (const community of communities) {
-            let posts = await database.getPostsByCommunity(community, 30);
+            console.log(community.name)
+            let posts = await database.getNumberNewCommunityPostsByID(community, 30);
+            console.log(posts);
             xml = xml.e('topic')
                 .e('empathy_count', community.empathy_count).up()
                 .e('has_shop_page', community.has_shop_page).up()
                 .e('icon', community.icon).up()
                 .e('title_ids');
             community.title_ids.forEach(function (title_id) {
-                xml = xml.e('title_id', title_id).up()
+                if(title_id !== '')
+                    xml = xml.e('title_id', title_id).up();
             })
             xml = xml.up()
                 .e('title_id', community.title_ids[0]).up()
@@ -218,38 +221,38 @@ class CommunityPostGen {
                     .e("post")
                     .e("body", newBody).up()
                     .e("community_id", community.community_id).up()
-                    .e("country_id", post.country_id).up()
+                    .e("country_id", post.country_id || 0).up()
                     .e("created_at", moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
                     .e("feeling_id", post.feeling_id).up()
-                    .e("id", post.id).up()
+                    .e("id", '').up()
                     .e("is_autopost", post.is_autopost).up()
                     .e("is_community_private_autopost", post.is_community_private_autopost).up()
                     .e("is_spoiler", post.is_spoiler).up()
                     .e("is_app_jumpable", post.is_app_jumpable).up()
                     .e("empathy_count", post.empathy_count).up()
                     .e("language_id", post.language_id).up()
-                    .e("mii", post.mii).up()
-                    .e("mii_face_url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up();
+                    .e("mii", post.mii.toString().replace(/[\n\r]+/gm, '')).up()
+                    .e("mii_face_url", post.mii_face_url).up();
                 xml = xml.e("number", "0").up();
                 if (post.painting) {
                     xml = xml.e("painting")
                         .e("format", "tga").up()
                         .e("content", post.painting.replace( /[\r\n]+/gm, "" )).up()
                         .e("size", post.painting.length).up()
-                        .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
+                        .e("url", `https://cdn.pretendo.cc/paintings/${post.pid}/${post.id}.png`).up()
                         .up();
                 }
                 xml = xml.e("pid", post.pid).up()
                     .e("platform_id", post.platform_id).up()
                     .e("region_id", post.region_id).up()
                     .e("reply_count", post.reply_count).up()
-                    .e("screen_name", post.screen_name).up()
+                    .e("screen_name", 'placeholder').up()
                     .e("title_id", post.title_id).up()
                     .up().up().up();
             }
             xml = xml.up().up()
         }
-        return xml.end({ pretty: true, allowEmpty: true });
+        return xml.end({ pretty: false, allowEmpty: true });
     }
 }
 
