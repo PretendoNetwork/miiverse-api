@@ -68,14 +68,15 @@ router.post('/', upload.none(), async function (req, res, next) {
 
 router.get('/', async function(req, res, next) {
     let limit = parseInt(req.query.limit), type = req.query.type, search_key = req.query.search_key, by = req.query.by;
-    let posts = await database.getFriendMessages(req.pid, search_key, limit);
+    //let posts = await database.getFriendMessages(req.pid, search_key, limit);
+    //posts = posts.length === 0 ? " " : posts
 
     res.set("Content-Type", "application/xml");
     let response = {
         result: {
             has_error: 0,
             version: 1,
-            posts: posts.length === 0 ? " " : posts
+            posts: " "
         }
     };
     return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));

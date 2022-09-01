@@ -30,7 +30,7 @@
     "pngjs": "^5.0.0",
     "sanitize": "^2.1.0",
     "tga": "^1.0.3",
-    "xmlbuilder": "^13.0.2",
+    "xmlbuilder": "^15.1.1",
     "xmlbuilder2": "0.0.4"
   },
   "devDependencies": {
