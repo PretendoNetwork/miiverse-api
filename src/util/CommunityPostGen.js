@@ -186,7 +186,7 @@ class CommunityPostGen {
     }
 
     static async topics(communities) {
-        const expirationDate = moment().add(2, 'days');
+        const expirationDate = moment().add(1, 'days');
         let xml = xmlbuilder.create("result")
             .e("has_error", "0").up()
             .e("version", "1").up()
@@ -194,9 +194,7 @@ class CommunityPostGen {
             .e("expire", expirationDate.format('YYYY-MM-DD HH:MM:SS')).up()
             .e("topics");
         for (const community of communities) {
-            console.log(community.name)
             let posts = await database.getNumberNewCommunityPostsByID(community, 30);
-            console.log(posts);
             xml = xml.e('topic')
                 .e('empathy_count', community.empathy_count).up()
                 .e('has_shop_page', community.has_shop_page).up()

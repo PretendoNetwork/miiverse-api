@@ -6,7 +6,6 @@ var router = express.Router();
 /* GET discovery server. */
 router.get('/', async function (req, res) {
     let user = await database.getPNID(req.pid);
-    console.log(user.mii)
     if(!user) {
         res.set("Content-Type", "application/xml");
         res.statusCode = 400;

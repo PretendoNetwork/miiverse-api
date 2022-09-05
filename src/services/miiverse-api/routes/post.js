@@ -14,89 +14,81 @@ router.post('/', upload.none(), async function (req, res, next) {
     try
     {
         let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-        let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-        if(pid === null)
-        {
-            throw new Error('The User token was not valid');
+        let user = await database.getPNID(req.pid);
+        let community = await database.getCommunityByTitleID(paramPackData.title_id)
+        if(community.community_id === 'announcements')
+            return res.sendStatus(403)
+        let appData = "";
+        if (req.body.app_data) {
+            appData = req.body.app_data.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
         }
-        else
-        {
-            let user = await util.data.processUser(pid);
-            let community = await database.getCommunityByTitleID(paramPackData.title_id)
-            if(community.community_id === 'announcements')
-                return res.sendStatus(403)
-            let appData = "";
-            if (req.body.app_data) {
-                appData = req.body.app_data.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
-            }
-            let painting = "";
-            if (req.body.painting) {
-                painting = req.body.painting.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
-            }
-            let paintingURI = "";
-            if (req.body.painting) {
-                paintingURI = await util.data.processPainting(painting);
-            }
-            let screenshot = "";
-            if (req.body.screenshot) {
-                screenshot = req.body.screenshot.replace(/\0/g, "").trim();
-            }
-
-            let miiFace;
-            console.log(parseInt(req.body.feeling_id))
-            switch (parseInt(req.body.feeling_id)) {
-                case 1:
-                    miiFace = 'smile_open_mouth.png';
-                    break;
-                case 2:
-                    miiFace = 'wink_left.png';
-                    break;
-                case 3:
-                    miiFace = 'surprise_open_mouth.png';
-                    break;
-                case 4:
-                    miiFace = 'frustrated.png';
-                    break;
-                case 5:
-                    miiFace = 'sorrow.png';
-                    break;
-                default:
-                    miiFace = 'normal_face.png';
-                    break;
-            }
-
-            const document = {
-                title_id: paramPackData.title_id,
-                screen_name: user.user_id,
-                body: req.body.body,
-                app_data: appData,
-                painting: painting,
-                painting_uri: paintingURI,
-                screenshot: screenshot,
-                url: req.body.url,
-                search_key: req.body.search_key,
-                topic_tag: req.body.topic_tag,
-                community_id: community.community_id,
-                country_id: paramPackData.country_id,
-                created_at: new Date(),
-                feeling_id: req.body.feeling_id,
-                id: snowflake.nextId(),
-                is_autopost: req.body.is_autopost,
-                is_spoiler: req.body.is_spoiler,
-                is_app_jumpable: req.body.is_app_jumpable,
-                language_id: req.body.language_id,
-                mii: user.mii,
-                mii_face_url: `http://mii.olv.pretendo.cc/mii/${user.pid}/${miiFace}`,
-                pid: user.pid,
-                verified: user.official,
-                platform_id: paramPackData.platform_id,
-                region_id: paramPackData.region_id,
-                parent: null,
-            };
-            const newPost = new POST(document);
-            newPost.save();
-            res.sendStatus(200);
+        let painting = "";
+        if (req.body.painting) {
+            painting = req.body.painting.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
         }
+        let paintingURI = "";
+        if (req.body.painting) {
+            paintingURI = await util.data.processPainting(painting, true);
+        }
+        let screenshot = "";
+        if (req.body.screenshot) {
+            screenshot = req.body.screenshot.replace(/\0/g, "").trim();
+        }
+
+        let miiFace;
+        console.log(parseInt(req.body.feeling_id))
+        switch (parseInt(req.body.feeling_id)) {
+            case 1:
+                miiFace = 'smile_open_mouth.png';
+                break;
+            case 2:
+                miiFace = 'wink_left.png';
+                break;
+            case 3:
+                miiFace = 'surprise_open_mouth.png';
+                break;
+            case 4:
+                miiFace = 'frustrated.png';
+                break;
+            case 5:
+                miiFace = 'sorrow.png';
+                break;
+            default:
+                miiFace = 'normal_face.png';
+                break;
+        }
+
+        const document = {
+            title_id: paramPackData.title_id,
+            screen_name: user.mii.name,
+            body: req.body.body,
+            app_data: appData,
+            painting: painting,
+            painting_uri: paintingURI,
+            screenshot: screenshot,
+            url: req.body.url,
+            search_key: req.body.search_key,
+            topic_tag: req.body.topic_tag,
+            community_id: community.community_id,
+            country_id: paramPackData.country_id,
+            created_at: new Date(),
+            feeling_id: req.body.feeling_id,
+            id: snowflake.nextId(),
+            is_autopost: req.body.is_autopost,
+            is_spoiler: req.body.is_spoiler,
+            is_app_jumpable: req.body.is_app_jumpable,
+            language_id: req.body.language_id,
+            mii: user.mii.data,
+            mii_face_url: `http://mii.olv.pretendo.cc/mii/${req.pid}/${miiFace}`,
+            pid: req.pid,
+            verified: (user.access_level === 2 || user.access_level === 3),
+            platform_id: paramPackData.platform_id,
+            region_id: paramPackData.region_id,
+            parent: null,
+        };
+        const newPost = new POST(document);
+        newPost.save();
+        res.sendStatus(200);
     }
     catch (e)
     {
