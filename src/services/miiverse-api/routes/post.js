@@ -57,7 +57,6 @@ router.post('/', upload.none(), async function (req, res, next) {
                 miiFace = 'normal_face.png';
                 break;
         }
-
         const document = {
             title_id: paramPackData.title_id,
             screen_name: user.mii.name,

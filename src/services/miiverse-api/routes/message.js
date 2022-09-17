@@ -50,8 +50,10 @@ router.post('/', upload.none(), async function (req, res, next) {
         verified: (user.access_level === 2 || user.access_level === 3),
         parent: null,
         search_key: req.body.search_key,
+        topic_tag: req.body.topic_tag,
         community_id: conversation.id,
-        message_to_pid: req.body.message_to_pid
+        message_to_pid: req.body.message_to_pid,
+        title_id: req.paramPackData.title_id,
     };
     const newPost = new POST(document);
     newPost.save();
@@ -68,15 +70,48 @@ router.post('/', upload.none(), async function (req, res, next) {
 
 router.get('/', async function(req, res, next) {
     let limit = parseInt(req.query.limit), type = req.query.type, search_key = req.query.search_key, by = req.query.by;
-    //let posts = await database.getFriendMessages(req.pid, search_key, limit);
-    //posts = posts.length === 0 ? " " : posts
-
+    let posts = await database.getFriendMessages(req.pid, search_key, limit);
+    console.log(posts)
+    posts = posts.length === 0 ? " " : posts
+    let postBody = [];
+    for(let post of posts) {
+        console.log(post)
+        postBody.push({
+            post: {
+                body: post.body,
+                country_id: post.country_id || 0,
+                created_at: moment(post.created_at).format('YYYY-MM-DD HH:MM:SS'),
+                feeling_id: post.feeling_id || 0,
+                id: post.id,
+                is_autopost: post.is_autopost,
+                is_spoiler: post.is_spoiler,
+                is_app_jumpable: post.is_app_jumpable,
+                empathy_added: post.empathy_count,
+                language_id: post.language_id,
+                message_to_pid: post.message_to_pid,
+                mii: post.mii,
+                mii_face_url: post.mii_face_url,
+                number: post.number || 0,
+                pid: post.pid,
+                platform_id: post.platform_id || 0,
+                region_id: post.region_id || 0,
+                reply_count: post.reply_count,
+                screen_name: post.screen_name,
+                topic_tag: {
+                    name: post.topic_tag,
+                    title_id: 0
+                },
+                title_id: post.title_id
+            }
+        });
+    }
     res.set("Content-Type", "application/xml");
     let response = {
         result: {
             has_error: 0,
             version: 1,
-            posts: " "
+            request_name: 'friend_messages',
+            posts: postBody
         }
     };
     return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));

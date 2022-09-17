@@ -6,23 +6,13 @@ var router = express.Router();
 /* GET discovery server. */
 router.get('/', async function (req, res) {
     let user = await database.getPNID(req.pid);
-    if(!user) {
-        res.set("Content-Type", "application/xml");
-        res.statusCode = 400;
-        let response = {
-            result: {
-                has_error: 1,
-                version: 1,
-                code: 400,
-                error_code: 2,
-                message: "SETUP_NOT_COMPLETE"
-            }
-        };
-        return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
-    }
-    let discovery = await database.getEndPoint(user.server_access_level);
-    if(!discovery)
+
+    let discovery;
+    if(user)
+        discovery = await database.getEndPoint(user.server_access_level);
+    else
         discovery = await database.getEndPoint('prod');
+
     let message = '', error = 0;
     switch(discovery.status) {
         case 0 :

@@ -4,5 +4,6 @@ module.exports = {
 	MESSAGE: require('./message'),
 	COMMUNITY: require('./communities'),
 	PEOPLE: require('./people'),
-	TOPICS: require('./topics')
+	TOPICS: require('./topics'),
+	USERS: require('./users')
 };
