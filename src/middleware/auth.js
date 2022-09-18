@@ -3,7 +3,7 @@ const util = require('../util/util');
 const xml = require("object-to-xml");
 
 function auth(req, res, next) {
-    if(req.path.includes('/topics') || req.path.includes('/v1/endpoint'))
+    if(req.path.includes('/topics') || req.path.includes('/v1/endpoint') || req.path.includes('/v1/status'))
         return next();
     const token = req.headers["x-nintendo-servicetoken"] || req.headers['olive service token'];
     let paramPackData = req.headers["x-nintendo-parampack"];

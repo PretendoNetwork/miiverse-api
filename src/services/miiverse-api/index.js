@@ -31,5 +31,6 @@ api.use('/v1/communities/', routes.COMMUNITY);
 api.use('/v1/people/', routes.PEOPLE);
 api.use('/v1/topics/', routes.TOPICS);
 api.use('/v1/users/', routes.USERS);
+api.use('/v1/status/', routes.PING);
 
 module.exports = router;

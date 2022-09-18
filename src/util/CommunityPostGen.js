@@ -222,7 +222,7 @@ class CommunityPostGen {
                     .e("country_id", post.country_id || 0).up()
                     .e("created_at", moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
                     .e("feeling_id", post.feeling_id).up()
-                    .e("id", '').up()
+                    .e("id", post.id).up()
                     .e("is_autopost", post.is_autopost).up()
                     .e("is_community_private_autopost", post.is_community_private_autopost).up()
                     .e("is_spoiler", post.is_spoiler).up()
