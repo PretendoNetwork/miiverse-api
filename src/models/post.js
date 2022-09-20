@@ -63,7 +63,12 @@ const PostSchema = new Schema({
     message_to_pid: {
         type: String,
         default: null
-    }
+    },
+    removed: {
+        type: Boolean,
+        default: false
+    },
+    removed_reason: String
 });
 
 
@@ -92,6 +97,18 @@ PostSchema.methods.downReply = async function() {
     const replyCount = this.get('reply_count');
     this.set('reply_count', replyCount - 1);
 
+    await this.save();
+};
+
+PostSchema.methods.remove = async function(reason) {
+    this.set('remove', true);
+    this.set('removed_reason', reason)
+    await this.save();
+};
+
+PostSchema.methods.unRemove = async function(reason) {
+    this.set('remove', false);
+    this.set('removed_reason', reason)
     await this.save();
 };
 

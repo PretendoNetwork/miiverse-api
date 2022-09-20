@@ -41,8 +41,8 @@ class CommunityPostGen {
                 .e("platform_id", "1").up()
                 .e("region_id", "4").up()
                 .e("reply_count", "0").up()
-                .e("screen_name", posts[i].screen_name).up()
-                .e("title_id", community.title_ids[0]).up()
+                .e("screen_name", "Placeholder").up()
+                .e("title_id", community.title_id[0]).up()
                 .up();
         }
 
@@ -200,12 +200,12 @@ class CommunityPostGen {
                 .e('has_shop_page', community.has_shop_page).up()
                 .e('icon', community.icon).up()
                 .e('title_ids');
-            community.title_ids.forEach(function (title_id) {
+            community.title_id.forEach(function (title_id) {
                 if(title_id !== '')
                     xml = xml.e('title_id', title_id).up();
             })
             xml = xml.up()
-                .e('title_id', community.title_ids[0]).up()
+                .e('title_id', community.title_id[0]).up()
                 .e('community_id', community.community_id).up()
                 .e('is_recommended', community.is_recommended).up()
                 .e('name', community.name).up()

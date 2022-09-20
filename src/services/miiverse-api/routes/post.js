@@ -13,30 +13,25 @@ var upload = multer();
 router.post('/', upload.none(), async function (req, res, next) {
     try
     {
+        let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), parentPost = null, postID = snowflake.nextId();
         let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-        let user = await database.getPNID(req.pid);
         let community = await database.getCommunityByTitleID(paramPackData.title_id)
-        if(community.community_id === 'announcements')
-            return res.sendStatus(403)
-        let appData = "";
-        if (req.body.app_data) {
-            appData = req.body.app_data.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
-        }
-        let painting = "";
-        if (req.body.painting) {
-            painting = req.body.painting.replace(/\0/g, "").replace(/\r?\n|\r/g, "").trim();
-        }
-        let paintingURI = "";
-        if (req.body.painting) {
+        if(userSettings.account_status !== 0 || community.community_id === 'announcements')
+            throw new Error('User not allowed to post')
+        let appData = "", painting = "", paintingURI = "", screenshot = null;
+        if (req.body.app_data)
+            appData = req.body.app_data.replace(/\0/g, "").trim();
+        if (req.body.painting && req.body.painting !== 'eJztwTEBACAMA7DCNRlIQRbu4ZoEviTJTNvjZNUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL55fYLL3w==') {
+            painting = req.body.painting.replace(/\0/g, "").trim();
             paintingURI = await util.data.processPainting(painting, true);
+            await util.data.uploadCDNAsset('pn-cdn', `paintings/${req.pid}/${postID}.png`, paintingURI, 'public-read');
         }
-        let screenshot = "";
         if (req.body.screenshot) {
             screenshot = req.body.screenshot.replace(/\0/g, "").trim();
+            await util.data.uploadCDNAsset('pn-cdn', `screenshots/${req.pid}/${postID}.jpg`, Buffer.from(screenshot, 'base64'), 'public-read');
         }
 
         let miiFace;
-        console.log(parseInt(req.body.feeling_id))
         switch (parseInt(req.body.feeling_id)) {
             case 1:
                 miiFace = 'smile_open_mouth.png';
@@ -59,31 +54,27 @@ router.post('/', upload.none(), async function (req, res, next) {
         }
         const document = {
             title_id: paramPackData.title_id,
-            screen_name: user.mii.name,
+            community_id: community.community_id,
+            screen_name: userSettings.screen_name,
             body: req.body.body,
             app_data: appData,
             painting: painting,
-            painting_uri: paintingURI,
-            screenshot: screenshot,
-            url: req.body.url,
-            search_key: req.body.search_key,
-            topic_tag: req.body.topic_tag,
-            community_id: community.community_id,
+            screenshot: screenshot ? `/screenshots/${req.pid}/${postID}.jpg`: "",
             country_id: paramPackData.country_id,
             created_at: new Date(),
-            feeling_id: req.body.feeling_id,
-            id: snowflake.nextId(),
+            feeling_id: req.body.emotion,
+            id: postID,
             is_autopost: req.body.is_autopost,
-            is_spoiler: req.body.is_spoiler,
+            is_spoiler: (req.body.spoiler) ? 1 : 0,
             is_app_jumpable: req.body.is_app_jumpable,
             language_id: req.body.language_id,
-            mii: user.mii.data,
-            mii_face_url: `http://mii.olv.pretendo.cc/mii/${req.pid}/${miiFace}`,
+            mii: PNID.mii.data,
+            mii_face_url: `http://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
             pid: req.pid,
-            verified: (user.access_level === 2 || user.access_level === 3),
             platform_id: paramPackData.platform_id,
             region_id: paramPackData.region_id,
-            parent: null,
+            verified: (PNID.access_level === 2 || PNID.access_level === 3),
+            parent: null
         };
         const newPost = new POST(document);
         newPost.save();
