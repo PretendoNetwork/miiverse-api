@@ -52,11 +52,16 @@ router.post('/', upload.none(), async function (req, res, next) {
                 miiFace = 'normal_face.png';
                 break;
         }
+        let body = req.body.body;
+        if(body)
+            body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\[\]]/g, "");
+        if(body.length > 280)
+            body = body.substring(0,280);
         const document = {
             title_id: paramPackData.title_id,
             community_id: community.community_id,
             screen_name: userSettings.screen_name,
-            body: req.body.body,
+            body: body,
             app_data: appData,
             painting: painting,
             screenshot: screenshot ? `/screenshots/${req.pid}/${postID}.jpg`: "",
