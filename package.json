@@ -26,7 +26,7 @@
     "node-snowflake": "0.0.1",
     "pako": "^1.0.11",
     "pngjs": "^5.0.0",
-    "sanitize": "^2.1.0",
+    "sanitize": "^2.1.2",
     "tga": "^1.0.3",
     "xmlbuilder": "^13.0.2",
     "xmlbuilder2": "0.0.4"
