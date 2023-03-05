@@ -50,7 +50,7 @@ router.get('/0/posts', async function (req, res) {
             posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
         else
             posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
-
+        console.log(posts);
         /*  Build formatted response and send it off. */
         let response;
         if(req.query.with_mii === 1)

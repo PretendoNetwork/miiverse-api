@@ -55,7 +55,7 @@ router.post('/', upload.none(), async function (req, res, next) {
         let body = req.body.body;
         if(body)
             body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\[\]]/g, "");
-        if(body.length > 280)
+        if(body && body.length > 280)
             body = body.substring(0,280);
         const document = {
             title_id: paramPackData.title_id,
@@ -69,6 +69,7 @@ router.post('/', upload.none(), async function (req, res, next) {
             created_at: new Date(),
             feeling_id: req.body.emotion,
             id: postID,
+            search_key: req.body.search_key,
             is_autopost: req.body.is_autopost,
             is_spoiler: (req.body.spoiler) ? 1 : 0,
             is_app_jumpable: req.body.is_app_jumpable,

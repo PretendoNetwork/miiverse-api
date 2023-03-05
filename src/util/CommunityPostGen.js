@@ -10,14 +10,14 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("request_name", "posts").up()
             .e("topic")
-            .e("community_id", community.community_id).up()
+            .e("community_id", 0).up()
             .up()
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
             xml = xml.e("post")
                 .e("app_data", posts[i].app_data).up()
-                .e("body", posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "")).up()
-                .e("community_id", community.id).up()
+                .e("body", posts[i].body ? posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
+                .e("community_id", 0).up()
                 .e("country_id", "254").up()
                 .e("created_at", moment(posts[i].created_at).format("YYYY-MM-DD hh:mm:ss")).up()
                 .e("feeling_id", "1").up()
@@ -41,7 +41,7 @@ class CommunityPostGen {
                 .e("platform_id", "1").up()
                 .e("region_id", "4").up()
                 .e("reply_count", "0").up()
-                .e("screen_name", "Placeholder").up()
+                .e("screen_name", posts[i].screen_name.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "")).up()
                 .e("title_id", community.title_id[0]).up()
                 .up();
         }
@@ -61,7 +61,7 @@ class CommunityPostGen {
         for (let i = 0; i < posts.length; i++) {
             xml = xml.e("post")
                 .e("app_data", posts[i].app_data).up()
-                .e("body", posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "")).up()
+                .e("body", posts[i].body ? posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
                 .e("community_id", community.community_id).up()
                 .e("country_id", "254").up()
                 .e("created_at", moment(posts[i].created_at).format('YYYY-MM-DD HH:MM:SS')).up()
@@ -154,7 +154,7 @@ class CommunityPostGen {
         if (post.app_data) {
             xml = xml.e("app_data", post.app_data).up();
         }
-        xml = xml.e("body", post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "")).up()
+        xml = xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
             .e("community_id", post.community_id).up()
             .e("country_id", "254").up()
             .e("created_at", post.created_at).up()
@@ -211,13 +211,10 @@ class CommunityPostGen {
                 .e('name', community.name).up()
                 .e("people");
             for (const post of posts) {
-                let newBody = '';
-                if(post.body)
-                    newBody = post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "");
                 xml = xml.e("person")
                     .e("posts")
                     .e("post")
-                    .e("body", newBody).up()
+                    .e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
                     .e("community_id", community.community_id).up()
                     .e("country_id", post.country_id || 0).up()
                     .e("created_at", moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()

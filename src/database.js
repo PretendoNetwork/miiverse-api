@@ -187,7 +187,7 @@ async function getNumberVerifiedCommunityPostsByID(community, limit, offset) {
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
-        title_id: community.title_id,
+        community_id: community.community_id,
         parent: null,
         removed: false
     }).limit(numberOfPosts);
@@ -196,7 +196,7 @@ async function getPostsByCommunity(community, numberOfPosts) {
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
     verifyConnected();
     return POST.find({
-        title_id: community.title_id,
+        community_id: community.community_id,
         search_key: search_key,
         parent: null,
         removed: false
