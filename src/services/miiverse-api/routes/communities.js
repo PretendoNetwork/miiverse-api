@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const database = require('../../../database');
 const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/util');
@@ -8,14 +8,14 @@ const processHeaders = require('../../../util/util');
 router.get('/', async function (req, res) {
     const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community = await database.getCommunityByTitleID(paramPack.title_id);
-    if (community != null) {
-        let response = await comPostGen.Communities(community);
-        res.contentType("application/xml");
-        res.send(response);
-    } else {
-        res.status(404);
-        res.send();
-    }
+    if(!community) res.sendStatus(404);
+
+    let communities = await database.getSubCommunities(community.community_id);
+    if(!communities) res.sendStatus(404);
+    communities.unshift(community);
+    let response = await comPostGen.Communities(communities);
+    res.contentType("application/xml");
+    res.send(response);
 });
 
 router.get('/popular', async function (req, res) {
@@ -50,7 +50,6 @@ router.get('/0/posts', async function (req, res) {
             posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
         else
             posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
-        console.log(posts);
         /*  Build formatted response and send it off. */
         let response;
         if(req.query.with_mii === 1)

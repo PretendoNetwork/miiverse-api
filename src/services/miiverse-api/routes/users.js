@@ -1,16 +1,8 @@
-var express = require('express');
-var router = express.Router();
-const moment = require('moment');
-var xml = require('object-to-xml');
-const { POST } = require('../../../models/post');
-const { CONVERSATION } = require('../../../models/conversation');
-const util = require('../../../util/util');
-const database = require('../../../database');
-var multer  = require('multer');
-const snowflake = require('node-snowflake').Snowflake;
-var upload = multer();
+const express = require('express');
+const router = express.Router();
+const xml = require('object-to-xml');
 
-router.get('/:pid/notifications', async function(req, res, next) {
+router.get('/:pid/notifications', async function(req, res) {
     let type = req.query.type, title_id = req.query.title_id;
     console.log(type);
     console.log(title_id);

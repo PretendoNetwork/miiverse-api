@@ -143,6 +143,21 @@ class CommunityPostGen {
             .up();
         return xml.end({ pretty: true, allowEmpty: true });
     }
+
+    static async People(people) {
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("request_name", "user_infos").up()
+            .e("people");
+        for(let person of people) {
+            xml = xml.e("person")
+                .e('pid', person.pid).up()
+                .e('screen_name', person.screen_name).up()
+                .up()
+        }
+        return xml.up().end({ pretty: true, allowEmpty: true});
+    }
 }
 
 if (typeof module !== "undefined") {

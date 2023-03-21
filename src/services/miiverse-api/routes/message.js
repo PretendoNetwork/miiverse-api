@@ -1,16 +1,16 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const moment = require('moment');
-var xml = require('object-to-xml');
+const xml = require('object-to-xml');
 const { POST } = require('../../../models/post');
 const { CONVERSATION } = require('../../../models/conversation');
 const util = require('../../../util/util');
 const database = require('../../../database');
-var multer  = require('multer');
+const multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
-var upload = multer();
+const upload = multer();
 
-router.post('/', upload.none(), async function (req, res, next) {
+router.post('/', upload.none(), async function (req, res) {
     let user = await database.getPNID(req.pid);
     let user2 = await database.getPNID(req.body.message_to_pid);
     let conversation = await database.getConversationByUsers([user.pid, user2.pid]);
@@ -38,6 +38,27 @@ router.post('/', upload.none(), async function (req, res, next) {
     }
     if(!conversation)
         return res.sendStatus(404);
+    let miiFace;
+    switch (parseInt(req.body.feeling_id)) {
+        case 1:
+            miiFace = 'smile_open_mouth.png';
+            break;
+        case 2:
+            miiFace = 'wink_left.png';
+            break;
+        case 3:
+            miiFace = 'surprise_open_mouth.png';
+            break;
+        case 4:
+            miiFace = 'frustrated.png';
+            break;
+        case 5:
+            miiFace = 'sorrow.png';
+            break;
+        default:
+            miiFace = 'normal_face.png';
+            break;
+    }
     let document = {
         screen_name: user.mii.name,
         body: req.body.body,
@@ -45,7 +66,7 @@ router.post('/', upload.none(), async function (req, res, next) {
         created_at: new Date(),
         id: snowflake.nextId(),
         mii: user.mii.data,
-        mii_face_url: `https://mii.olv.pretendo.cc/${user.pid}/normal_face.png`,
+        mii_face_url: `http://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
         pid: user.pid,
         verified: (user.access_level === 2 || user.access_level === 3),
         parent: null,
@@ -68,10 +89,9 @@ router.post('/', upload.none(), async function (req, res, next) {
     await conversation.newMessage(postPreviewText, document.message_to_pid);
 });
 
-router.get('/', async function(req, res, next) {
-    let limit = parseInt(req.query.limit), type = req.query.type, search_key = req.query.search_key, by = req.query.by;
+router.get('/', async function(req, res) {
+    let limit = parseInt(req.query.limit), search_key = req.query.search_key;
     let posts = await database.getFriendMessages(req.pid, search_key, limit);
-    console.log(posts)
     posts = posts.length === 0 ? " " : posts
     let postBody = [];
     for(let post of posts) {
@@ -117,7 +137,7 @@ router.get('/', async function(req, res, next) {
     return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
 });
 
-router.post('/:post_id/empathies', upload.none(), async function (req, res, next) {
+router.post('/:post_id/empathies', upload.none(), async function (req, res) {
     let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     const post = await database.getPostByID(req.params.post_id);
     if(pid === null) {

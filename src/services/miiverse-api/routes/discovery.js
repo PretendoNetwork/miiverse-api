@@ -1,7 +1,7 @@
-var express = require('express');
-var xml = require('object-to-xml');
+const express = require('express');
+const xml = require('object-to-xml');
 const database = require('../../../database');
-var router = express.Router();
+const router = express.Router();
 
 /* GET discovery server. */
 router.get('/', async function (req, res) {

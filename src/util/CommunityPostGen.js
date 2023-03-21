@@ -5,7 +5,7 @@ const database = require('../database');
 class CommunityPostGen {
     /*  TODO lots of stubs and constants in here */
     static async PostsResponse(posts, community) {
-        let xml = xmlbuilder.create("result")
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("request_name", "posts").up()
@@ -50,7 +50,7 @@ class CommunityPostGen {
     }
 
     static async PostsResponseWithMii(posts, community) {
-        let xml = xmlbuilder.create("result")
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("request_name", "posts").up()
@@ -97,57 +97,36 @@ class CommunityPostGen {
     }
 
     static async EmptyResponse() {
-        const xml = xmlbuilder.create("result")
+        const xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up();
         return xml.end({ pretty: true, allowEmpty: true });
     }
 
-    static async Communities(community) {
-        const xml = xmlbuilder.create("result")
+    static async Communities(communities) {
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("request_name", "communities").up()
-            .e("communities")
-                .e("community")
-                    .e('olive_community_id', community.community_id).up()
-                    .e('community_id', community.community_id).up()
-                    .e("name", community.name).up()
-                    .e("description", community.description).up()
-                    .e("icon").up()
-                    .e("icon_3ds").up()
-                    .e("pid").up()
-                    .e("app_data").up()
-                    .e("is_user_community", 0).up()
+            .e("communities");
+        for(let community of communities) {
+        xml = xml.e("community")
+                .e('olive_community_id', community.community_id.padStart(20, '0')).up()
+                .e('community_id', community.app_id.padStart(6, '0')).up()
+                .e("name", community.name).up()
+                .e("description", community.description).up()
+                .e("icon").up()
+                .e("icon_3ds").up()
+                .e("pid").up()
+                .e("app_data", community.app_data).up()
+                .e("is_user_community", 0).up()
                 .up()
-                .e("community")
-                    .e('olive_community_id', community.community_id + 100).up()
-                    .e('community_id', community.community_id + 100).up()
-                    .e("name", community.name + '- Nintendo Levels').up()
-                    .e("description", community.description).up()
-                    .e("icon").up()
-                    .e("icon_3ds").up()
-                    .e("pid").up()
-                    .e("app_data", 'TVZNSQI').up()
-                    .e("is_user_community", 0).up()
-                .up()
-                .e("community")
-                    .e('olive_community_id', community.community_id + 200).up()
-                    .e('community_id', community.community_id + 200).up()
-                    .e("name", community.name + '- User Levels').up()
-                    .e("description", community.description).up()
-                    .e("icon").up()
-                    .e("icon_3ds").up()
-                    .e("pid").up()
-                    .e("app_data", 'TVZNSQE').up()
-                    .e("is_user_community", 0).up()
-                .up()
-            .up();
-        return xml.end({ pretty: true, allowEmpty: true });
+        }
+        return xml.up().end({ pretty: true, allowEmpty: true});
     }
     /*  TODO Again, some constants */
     static async SinglePostResponse(post) {
-        let xml = xmlbuilder.create("result")
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("post");
@@ -187,7 +166,7 @@ class CommunityPostGen {
 
     static async topics(communities) {
         const expirationDate = moment().add(1, 'days');
-        let xml = xmlbuilder.create("result")
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
             .e("request_name", "topics").up()

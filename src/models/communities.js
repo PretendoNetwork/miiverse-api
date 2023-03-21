@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose');
-const moment = require("moment");
 
 const  CommunitySchema = new Schema({
     platform_id: Number,
@@ -65,6 +64,8 @@ const  CommunitySchema = new Schema({
     browser_thumbnail: String,
     CTR_browser_header: String,
     WiiU_browser_header: String,
+    app_data: String,
+    app_id: String
 });
 
 CommunitySchema.methods.upEmpathy = async function() {

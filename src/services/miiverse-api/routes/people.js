@@ -1,8 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const database = require('../../../database');
 const pplPostGen = require('../../../util/peoplePostGen');
-const processHeaders = require('../../../util/util');
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -29,6 +28,14 @@ router.get('/', async function (req, res) {
         res.status(404);
         res.send();
     }
+});
+
+router.get('/:pid/following', async function (req, res) {
+    let user = await database.getUserContent(req.params.pid);
+    if(!user) res.sendStatus(404);
+    let people = await database.getFollowedUsers(user);
+    if(!people) res.sendStatus(404);
+    res.send(await pplPostGen.People(people));
 });
 
 module.exports = router;

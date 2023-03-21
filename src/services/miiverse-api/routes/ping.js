@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const database = require('../../../database');
 
-router.get('/', async function(req, res, next) {
+router.get('/', async function(req, res) {
     res.send('Pong!');
 });
 
-router.get('/database', async function(req, res, next) {
+router.get('/database', async function(req, res) {
     let document = await database.getEndpoints();
     if(document)
         res.send('DB Connection Working! :D');

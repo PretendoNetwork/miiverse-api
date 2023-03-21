@@ -1,10 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const database = require('../../../database');
 const comPostGen = require('../../../util/CommunityPostGen');
-const processHeaders = require('../../../util/util');
-const xmlbuilder = require("xmlbuilder");
-const moment = require("moment");
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
