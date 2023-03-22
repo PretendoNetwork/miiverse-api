@@ -190,7 +190,7 @@ async function getPostsByCommunity(community, numberOfPosts) {
         community_id: community.community_id,
         parent: null,
         removed: false
-    }).limit(numberOfPosts);
+    }).sort({ created_at: -1}).limit(numberOfPosts);
 }
 
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
@@ -200,7 +200,7 @@ async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
         search_key: search_key,
         parent: null,
         removed: false
-    }).limit(numberOfPosts);
+    }).sort({ created_at: -1}).limit(numberOfPosts);
 }
 
 async function getNewPostsByCommunity(community, limit, offset) {

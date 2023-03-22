@@ -15,7 +15,7 @@ class CommunityPostGen {
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
             xml = xml.e("post")
-                .e("app_data", posts[i].app_data).up()
+                .e("app_data", posts[i].app_data.replace(/[^A-Za-z0-9+/=\s\r?\n|\r]/g, "").replace(/[\n\r]+/gm, '').trim()).up()
                 .e("body", posts[i].body ? posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
                 .e("community_id", 0).up()
                 .e("country_id", "254").up()
@@ -60,7 +60,7 @@ class CommunityPostGen {
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
             xml = xml.e("post")
-                .e("app_data", posts[i].app_data).up()
+                .e("app_data", posts[i].app_data.replace(/[^A-Za-z0-9+/=\s\r?\n|\r]/g, "").replace(/[\n\r]+/gm, '').trim()).up()
                 .e("body", posts[i].body ? posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
                 .e("community_id", community.community_id).up()
                 .e("country_id", "254").up()
@@ -73,18 +73,18 @@ class CommunityPostGen {
                 .e("is_app_jumpable", "0").up()
                 .e("empathy_count", posts[i].empathy_count).up()
                 .e("language_id", "1").up()
-                .e("mii", posts[i].mii).up()
+                .e("mii", posts[i].mii.replace(/\r?\n|\r/g, "").trim()).up()
                 .e("mii_face_url", posts[i].mii_face_url).up()
                 .e("number", "0").up();
             if (posts[i].painting) {
                 xml = xml.e("painting")
                     .e("format", "tga").up()
-                    .e("content", posts[i].painting).up()
+                    .e("content", posts[i].painting.replace(/\r?\n|\r/g, "").trim()).up()
                     .e("size", posts[i].painting.length).up()
                     .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                     .up();
             }
-            xml = xml.e("pid", posts[i].id).up()
+            xml = xml.e("pid", posts[i].pid).up()
                 .e("platform_id", posts[i].platform_id).up()
                 .e("region_id", posts[i].region_id).up()
                 .e("reply_count", posts[i].reply_count).up()
@@ -112,7 +112,7 @@ class CommunityPostGen {
         for(let community of communities) {
         xml = xml.e("community")
                 .e('olive_community_id', community.community_id.padStart(20, '0')).up()
-                .e('community_id', community.app_id.padStart(6, '0')).up()
+                .e('community_id', community.app_id ? community.app_id.padStart(6, '0') : community.community_id).up()
                 .e("name", community.name).up()
                 .e("description", community.description).up()
                 .e("icon").up()
@@ -131,7 +131,7 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("post");
         if (post.app_data) {
-            xml = xml.e("app_data", post.app_data).up();
+            xml = xml.e("app_data", post.app_data.replace(/[^A-Za-z0-9+/=]/g, "").replace(/[\n\r]+/gm, '').trim()).up();
         }
         xml = xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
             .e("community_id", post.community_id).up()
@@ -144,12 +144,16 @@ class CommunityPostGen {
             .e("is_spoiler", "0").up()
             .e("is_app_jumpable", "0").up()
             .e("empathy_count", post.empathy_count).up()
-            .e("language_id", "1").up()
-            .e("number", "0").up();
+            .e("language_id", "1").up();
+            if(post.mii) {
+                xml = xml.e("mii", post.mii).up()
+                    .e("mii_face_url", post.mii_face_url).up()
+            }
+            xml = xml.e("number", "0").up();
         if (post.painting) {
             xml = xml.e("painting")
                 .e("format", "tga").up()
-                .e("content", post.painting).up()
+                .e("content", post.painting.replace(/\r?\n|\r/g, "").trim()).up()
                 .e("size", post.painting.length).up()
                 .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
                 .up();

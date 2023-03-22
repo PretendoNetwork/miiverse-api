@@ -18,8 +18,8 @@ router.post('/', upload.none(), async function (req, res) {
         return res.sendStatus(403);
     let appData = "", painting = "", paintingURI = "", screenshot = null;
     if (req.body.app_data)
-        appData = req.body.app_data.replace(/\0/g, "").trim();
-    if (req.body._post_type === 'painting' && req.body.painting) {
+        appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
+    if (req.body.painting) {
         painting = req.body.painting.replace(/\0/g, "").trim();
         paintingURI = await util.data.processPainting(painting, true);
         await util.data.uploadCDNAsset('pn-cdn', `paintings/${req.pid}/${postID}.png`, paintingURI, 'public-read');
@@ -52,8 +52,8 @@ router.post('/', upload.none(), async function (req, res) {
     }
     let body = req.body.body;
     if(body)
-        body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, "");
-    if(body.length > 280)
+        body = req.body.body.replace(/[^A-Za-z0-9+/=\r?\n|\s]/g, "");
+    if(body && body.length > 280)
         body = body.substring(0,280);
     const document = {
         title_id: paramPackData.title_id,
@@ -91,7 +91,7 @@ router.post('/', upload.none(), async function (req, res) {
                 version: 1,
                 code: 400,
                 error_code: 7,
-                message: "POSTING_FROM_NNID"
+                message: "DUPLICATE_POST"
             }
         };
         return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
@@ -108,7 +108,7 @@ router.post('/:post_id/empathies', upload.none(), async function (req, res) {
         res.sendStatus(403);
         return;
     }
-    let user = await database.getUserByPID(pid);
+    let user = await database.getUserContent(pid);
     if(user.likes.indexOf(post.id) === -1 && user.id !== post.pid)
     {
         post.upEmpathy();
@@ -116,7 +116,7 @@ router.post('/:post_id/empathies', upload.none(), async function (req, res) {
         res.sendStatus(200);
     }
     else
-        res.sendStatus(403);
+        res.sendStatus(200);
 });
 
 module.exports = router;

@@ -52,7 +52,7 @@ router.get('/0/posts', async function (req, res) {
             posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
         /*  Build formatted response and send it off. */
         let response;
-        if(req.query.with_mii === 1)
+        if(req.query.with_mii === '1')
             response = await comPostGen.PostsResponseWithMii(posts, community);
         else
             response = await comPostGen.PostsResponse(posts, community);
