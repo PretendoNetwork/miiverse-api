@@ -418,6 +418,16 @@ async function getLatestMessage(pid, pid2) {
     })
 }
 
+async function getFriendMessages(pid, search_key, limit) {
+    verifyConnected();
+    return POST.find({
+        message_to_pid: pid,
+        search_key: search_key,
+        parent: null,
+        removed: false
+    }).sort({created_at: 1}).limit(limit);
+}
+
 async function getPNIDS() {
     accountDB.verifyConnected();
     return PNID.find({});
@@ -513,5 +523,6 @@ module.exports = {
     getNotification,
     getLastNotification,
     getAllUserPosts,
-    getRemovedUserPosts
+    getRemovedUserPosts,
+    getFriendMessages
 };

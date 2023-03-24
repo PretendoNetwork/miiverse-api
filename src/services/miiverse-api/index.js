@@ -17,6 +17,8 @@ logger.info('[MIIVERSE] Creating \'discovery\' subdomain');
 router.use(subdomain('discovery.olv', discovery));
 logger.info('[MIIVERSE] Creating \'api\' subdomain');
 router.use(subdomain('api.olv', api));
+router.use(subdomain('api-test.olv', api));
+router.use(subdomain('api-dev.olv', api));
 
 
 logger.info('[MIIVERSE] Importing middleware');

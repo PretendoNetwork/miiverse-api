@@ -7,6 +7,13 @@ memoized = memoize(comPostGen.topics, { async: true, maxAge: 1000 * 60 * 60 });
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
+    let user = await database.getPNID(req.pid), discovery;
+    if(user)
+        discovery = await database.getEndPoint(user.server_access_level);
+    else
+        discovery = await database.getEndPoint('prod');
+    if(!discovery.topics)
+        return res.sendStatus(404);
     let communities = await database.getMostPopularCommunities(10);
     if(communities === null)
         return res.sendStatus(404);

@@ -3,6 +3,7 @@ const { Schema, model } = require('mongoose');
 const endpointSchema = new Schema({
     status: Number,
     server_access_level: String,
+    topics: Boolean,
     guest_access: Boolean,
     host: String,
     api_host: String,
