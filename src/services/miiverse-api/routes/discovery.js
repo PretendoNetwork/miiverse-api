@@ -20,7 +20,7 @@ router.get('/', async function (req, res) {
             let response = {
                 result: {
                     has_error: 0,
-                    version: 0,
+                    version: 1,
                     endpoint: {
                         host: discovery.host,
                         api_host: discovery.api_host,
