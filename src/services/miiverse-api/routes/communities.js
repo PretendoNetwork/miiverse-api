@@ -3,6 +3,7 @@ const router = express.Router();
 const database = require('../../../database');
 const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/util');
+const {COMMUNITY} = require("../../../models/communities");
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -64,6 +65,28 @@ router.get('/0/posts', async function (req, res) {
         res.status(404);
         res.send();
     }
+});
+
+router.get('/:appID/posts', async function (req, res) {
+    const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    let community = await COMMUNITY.findOne({ app_id: req.params.appID });
+    if(!community)
+        community = await database.getCommunityByTitleID(paramPack.title_id);
+    if(!community)
+        res.sendStatus(404);
+    let posts;
+    if(req.query.search_key)
+        posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
+    else
+        posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
+    /*  Build formatted response and send it off. */
+    let response;
+    if(req.query.with_mii === '1')
+        response = await comPostGen.PostsResponseWithMii(posts, community);
+    else
+        response = await comPostGen.PostsResponse(posts, community);
+    res.contentType("application/xml");
+    res.send(response);
 });
 
 module.exports = router;
