@@ -4,6 +4,7 @@ const database = require('../../../database');
 const comPostGen = require('../../../util/CommunityPostGen');
 const processHeaders = require('../../../util/util');
 const {COMMUNITY} = require("../../../models/communities");
+const {POST} = require("../../../models/post");
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -74,11 +75,18 @@ router.get('/:appID/posts', async function (req, res) {
         community = await database.getCommunityByTitleID(paramPack.title_id);
     if(!community)
         res.sendStatus(404);
-    let posts;
+    let query = {
+        community_id: community.app_id ? community.app_id : community.community_id,
+        removed: false,
+    }
+
     if(req.query.search_key)
-        posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
-    else
-        posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
+        query.search_key = search_key;
+    if(!req.query.allow_spoiler)
+        query.is_spoiler = 0;
+
+    let posts = await POST.find(query).sort({ created_at: -1}).limit(parseInt(req.query.limit));
+
     /*  Build formatted response and send it off. */
     let response;
     if(req.query.with_mii === '1')

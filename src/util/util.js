@@ -74,7 +74,6 @@ let methods = {
         }
         catch(e)
         {
-            console.log(e)
             return null;
         }
 
@@ -135,14 +134,14 @@ let methods = {
             const calculatedSignature = hmac.digest();
 
             if (Buffer.compare(calculatedSignature, signature) !== 0) {
-                console.log('Token signature did not match');
+                logger.error('Token signature did not match');
                 return null;
             }
 
             return decryptedBody;
         }
         catch (e) {
-            console.log('Failed to decrypt token. Probably a NNID from the topics request');
+            logger.error('Failed to decrypt token. Probably a NNID from the topics request');
             return null;
         }
     },

@@ -7,13 +7,21 @@ const database = require('../../../database');
 const multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
 const communityPostGen = require('../../../util/CommunityPostGen');
+const {COMMUNITY} = require("../../../models/communities");
 const upload = multer();
 
 /* GET post titles. */
 router.post('/', upload.none(), async function (req, res) {
     let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = snowflake.nextId();
     let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let community = await database.getCommunityByTitleID(paramPackData.title_id)
+    let community_id = req.body.community_id;
+
+    let community = await database.getCommunityByID(community_id)
+    if(!community)
+        await COMMUNITY.findOne({app_id: community_id});
+    if(!community)
+        community = await database.getCommunityByTitleID(paramPackData.title_id);
+
     if(!community || userSettings.account_status !== 0 || community.community_id === 'announcements')
         return res.sendStatus(403);
     let appData = "", painting = "", paintingURI = "", screenshot = null;
@@ -52,12 +60,12 @@ router.post('/', upload.none(), async function (req, res) {
     }
     let body = req.body.body;
     if(body)
-        body = req.body.body.replace(/[^A-Za-z0-9+/=\r?\n|\s]/g, "");
+        body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, "");
     if(body && body.length > 280)
         body = body.substring(0,280);
     const document = {
         title_id: paramPackData.title_id,
-        community_id: community.community_id,
+        community_id: community.app_id ? community.app_id : community.community_id,
         screen_name: userSettings.screen_name,
         body: body,
         app_data: appData,
@@ -99,6 +107,17 @@ router.post('/', upload.none(), async function (req, res) {
     const newPost = new POST(document);
     newPost.save();
     res.send(await communityPostGen.SinglePostResponse(newPost));
+});
+
+router.post('/:post_id.delete', async function (req, res) {
+    const post = await database.getPostByID(req.params.post_id);
+    let user = await database.getUserContent(req.pid);
+    if(post.pid === user.pid) {
+        await post.remove('User requested removal');
+        res.sendStatus(200);
+    }
+
+    else res.sendStatus(401)
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (req, res) {

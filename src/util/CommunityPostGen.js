@@ -10,7 +10,7 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("request_name", "posts").up()
             .e("topic")
-            .e("community_id", 0).up()
+            .e("community_id", community.app_id ? community.app_id : community.community_id).up()
             .up()
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
@@ -55,7 +55,7 @@ class CommunityPostGen {
             .e("version", "1").up()
             .e("request_name", "posts").up()
             .e("topic")
-            .e("community_id", community.community_id).up()
+            .e("community_id", community.app_id ? community.app_id : community.community_id).up()
             .up()
             .e("posts");
         for (let i = 0; i < posts.length; i++) {
