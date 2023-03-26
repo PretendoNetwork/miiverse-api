@@ -18,7 +18,7 @@ router.post('/', upload.none(), async function (req, res) {
 
     let community = await database.getCommunityByID(community_id)
     if(!community)
-        await COMMUNITY.findOne({app_id: community_id});
+        community = await COMMUNITY.findOne({app_id: community_id});
     if(!community)
         community = await database.getCommunityByTitleID(paramPackData.title_id);
 
