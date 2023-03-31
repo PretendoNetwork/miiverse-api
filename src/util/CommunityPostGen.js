@@ -49,6 +49,50 @@ class CommunityPostGen {
         return xml.end({ pretty: true, allowEmpty: true });
     }
 
+    static async RepliesResponse(posts) {
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("request_name", "replies").up()
+            .e("posts");
+        for (let i = 0; i < posts.length; i++) {
+            xml = xml.e("post")
+                .e("app_data", posts[i].app_data.replace(/[^A-Za-z0-9+/=\s\r?\n|\r]/g, "").replace(/[\n\r]+/gm, '').trim()).up()
+                .e("body", posts[i].body ? posts[i].body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
+                .e("community_id", 0).up()
+                .e("country_id", "254").up()
+                .e("created_at", moment(posts[i].created_at).format("YYYY-MM-DD hh:mm:ss")).up()
+                .e("feeling_id", "1").up()
+                .e("id", posts[i].id).up()
+                .e("is_autopost", posts[i].is_autopost).up()
+                .e("is_community_private_autopost", posts[i].is_community_private_autopost).up()
+                .e("is_spoiler", posts[i].is_spoiler).up()
+                .e("is_app_jumpable", "0").up()
+                .e("empathy_count", posts[i].empathy_count).up()
+                .e("language_id", posts[i].language_id).up()
+                .e("mii", posts[i].mii.replace(/\r?\n|\r/g, "").trim()).up()
+                .e("mii_face_url", posts[i].mii_face_url).up()
+                .e("number", "0").up();
+            if (posts[i].painting) {
+                xml = xml.e("painting")
+                    .e("format", "tga").up()
+                    .e("content", posts[i].painting).up()
+                    .e("size", posts[i].painting.length).up()
+                    .e("url", "https://s3.amazonaws.com/olv-public/pap/WVW69koebmETvBVqm1").up()
+                    .up();
+            }
+            xml = xml.e("pid", posts[i].pid).up()
+                .e("platform_id", "1").up()
+                .e("region_id", "4").up()
+                .e("reply_count", "0").up()
+                .e("screen_name", posts[i].screen_name.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "")).up()
+                .e("title_id", posts[i].title_id[0]).up()
+                .up();
+        }
+
+        return xml.end({ pretty: true, allowEmpty: true });
+    }
+
     static async PostsResponseWithMii(posts, community) {
         let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
@@ -104,6 +148,7 @@ class CommunityPostGen {
     }
 
     static async Communities(communities) {
+        let parent = communities[0].community_id;
         let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
@@ -111,7 +156,7 @@ class CommunityPostGen {
             .e("communities");
         for(let community of communities) {
         xml = xml.e("community")
-                .e('olive_community_id', community.community_id.padStart(20, '0')).up()
+                .e('olive_community_id', parent).up()
                 .e('community_id', community.app_id ? community.app_id.padStart(6, '0') : community.community_id).up()
                 .e("name", community.name).up()
                 .e("description", community.description).up()

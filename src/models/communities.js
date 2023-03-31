@@ -19,7 +19,7 @@ const  CommunitySchema = new Schema({
       default: 0
     },
     parent: {
-        type: Number,
+        type: String,
         default: null
     },
     admins: {

@@ -78,6 +78,7 @@ router.get('/:appID/posts', async function (req, res) {
     let query = {
         community_id: community.app_id ? community.app_id : community.community_id,
         removed: false,
+        app_data: { $ne: null }
     }
 
     if(req.query.search_key)

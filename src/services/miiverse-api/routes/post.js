@@ -8,11 +8,63 @@ const multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
 const communityPostGen = require('../../../util/CommunityPostGen');
 const {COMMUNITY} = require("../../../models/communities");
+const processHeaders = require("../../../util/util");
+const comPostGen = require("../../../util/CommunityPostGen");
 const upload = multer();
 
 /* GET post titles. */
-router.post('/', upload.none(), async function (req, res) {
-    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = snowflake.nextId();
+router.post('/', upload.none(), async function (req, res) { await newPost(req, res)});
+
+router.post('/:post_id/replies', upload.none(), async function (req, res) { await newPost(req, res)});
+
+router.post('/:post_id.delete', async function (req, res) {
+    const post = await database.getPostByID(req.params.post_id);
+    let user = await database.getUserContent(req.pid);
+    if(post.pid === user.pid) {
+        await post.remove('User requested removal');
+        res.sendStatus(200);
+    }
+
+    else res.sendStatus(401)
+});
+
+router.post('/:post_id/empathies', upload.none(), async function (req, res) {
+    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+    const post = await database.getPostByID(req.params.post_id);
+    if(pid === null) {
+        res.sendStatus(403);
+        return;
+    }
+    let user = await database.getUserContent(pid);
+    if(user.likes.indexOf(post.id) === -1 && user.id !== post.pid)
+    {
+        post.upEmpathy();
+        user.addToLikes(post.id)
+        res.sendStatus(200);
+    }
+    else
+        res.sendStatus(200);
+});
+
+router.get('/:post_id/replies', async function (req, res) {
+    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+    const post = await database.getPostByID(req.params.post_id);
+    if(!post)
+        return res.sendStatus(404);
+    const posts = await database.getPostReplies(post.id, req.query.limit)
+    if(!posts.length === 0)
+        return res.sendStatus(404);
+
+    /*  Build formatted response and send it off. */
+    let response = await communityPostGen.RepliesResponse(posts)
+    res.contentType("application/xml");
+    res.send(response);
+});
+
+module.exports = router;
+
+async function newPost(req, res) {
+    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = snowflake.nextId(), parentPost = null;
     let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community_id = req.body.community_id;
 
@@ -24,6 +76,13 @@ router.post('/', upload.none(), async function (req, res) {
 
     if(!community || userSettings.account_status !== 0 || community.community_id === 'announcements')
         return res.sendStatus(403);
+    if(req.params.post_id) {
+        parentPost = await database.getPostByID(req.params.post_id.toString());
+        if(!parentPost)
+            return res.sendStatus(403);
+        parentPost.reply_count = parentPost.reply_count + 1;
+        parentPost.save();
+    }
     let appData = "", painting = "", paintingURI = "", screenshot = null;
     if (req.body.app_data)
         appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
@@ -86,7 +145,7 @@ router.post('/', upload.none(), async function (req, res) {
         platform_id: paramPackData.platform_id,
         region_id: paramPackData.region_id,
         verified: (PNID.access_level === 2 || PNID.access_level === 3),
-        parent: null,
+        parent: parentPost ? parentPost.id : null,
         removed: false
     };
     let duplicatePost = await database.getDuplicatePosts(req.pid, document);
@@ -107,35 +166,4 @@ router.post('/', upload.none(), async function (req, res) {
     const newPost = new POST(document);
     newPost.save();
     res.send(await communityPostGen.SinglePostResponse(newPost));
-});
-
-router.post('/:post_id.delete', async function (req, res) {
-    const post = await database.getPostByID(req.params.post_id);
-    let user = await database.getUserContent(req.pid);
-    if(post.pid === user.pid) {
-        await post.remove('User requested removal');
-        res.sendStatus(200);
-    }
-
-    else res.sendStatus(401)
-});
-
-router.post('/:post_id/empathies', upload.none(), async function (req, res) {
-    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
-    const post = await database.getPostByID(req.params.post_id);
-    if(pid === null) {
-        res.sendStatus(403);
-        return;
-    }
-    let user = await database.getUserContent(pid);
-    if(user.likes.indexOf(post.id) === -1 && user.id !== post.pid)
-    {
-        post.upEmpathy();
-        user.addToLikes(post.id)
-        res.sendStatus(200);
-    }
-    else
-        res.sendStatus(200);
-});
-
-module.exports = router;
+}
