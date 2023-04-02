@@ -93,7 +93,8 @@ async function getPostsByUserID(userID) {
     return POST.find({
         pid: userID,
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     });
 }
 
@@ -101,7 +102,8 @@ async function getPostReplies(postID, number) {
     verifyConnected();
     return POST.find({
         parent: postID,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).limit(number);
 }
 
@@ -123,7 +125,8 @@ async function getUserPostRepliesAfterTimestamp(post, numberOfPosts) {
         parent: post.pid,
         created_at: { $lt: post.created_at },
         message_to_pid: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).limit(numberOfPosts);
 }
 
@@ -152,7 +155,8 @@ async function getHotPostsByCommunity(community, numberOfPosts) {
     return POST.find({
         title_id: community.title_id,
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).sort({empathy_count: -1}).limit(numberOfPosts);
 }
 
@@ -189,7 +193,8 @@ async function getPostsByCommunity(community, numberOfPosts) {
     return POST.find({
         community_id: community.community_id,
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).sort({ created_at: -1}).limit(numberOfPosts);
 }
 
@@ -199,7 +204,8 @@ async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
         community_id: community.community_id,
         search_key: search_key,
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).sort({ created_at: -1}).limit(numberOfPosts);
 }
 
@@ -208,7 +214,8 @@ async function getNewPostsByCommunity(community, limit, offset) {
     return POST.find({
         community_id: community.community_id,
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).sort({ created_at: -1 }).skip(offset).limit(limit);
 }
 
@@ -216,7 +223,8 @@ async function getAllUserPosts(pid) {
     verifyConnected();
     return POST.find({
         pid: pid,
-        message_to_pid: null
+        message_to_pid: null,
+        app_data: { $ne: null }
     });
 }
 
@@ -236,7 +244,8 @@ async function getUserPostsAfterTimestamp(post, numberOfPosts) {
         created_at: { $lt: post.created_at },
         parent: null,
         message_to_pid: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).limit(numberOfPosts);
 }
 
@@ -246,7 +255,8 @@ async function getUserPostsOffset(pid, limit, offset) {
         pid: pid,
         parent: null,
         message_to_pid: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).skip(offset).limit(limit).sort({ created_at: -1});
 }
 
@@ -256,7 +266,8 @@ async function getCommunityPostsAfterTimestamp(post, numberOfPosts) {
         title_id: post.title_id,
         created_at: { $lt: post.created_at },
         parent: null,
-        removed: false
+        removed: false,
+        app_data: { $ne: null }
     }).limit(numberOfPosts);
 }
 
