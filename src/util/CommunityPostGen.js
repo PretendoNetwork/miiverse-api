@@ -213,6 +213,51 @@ class CommunityPostGen {
         return xml.end({ pretty: true, allowEmpty: true });
     }
 
+    static async queryResponse(post) {
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("request_name", "posts.search").up()
+            .e("posts")
+            .e("post");
+        if (post.app_data) {
+            xml = xml.e("app_data", post.app_data.replace(/[^A-Za-z0-9+/=]/g, "").replace(/[\n\r]+/gm, '').trim()).up();
+        }
+        xml = xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
+            .e("community_id", post.community_id).up()
+            .e("country_id", post.country_id).up()
+            .e("created_at", post.created_at).up()
+            .e("feeling_id", post.feeling_id).up()
+            .e("id", post.id).up()
+            .e("is_autopost", post.is_autopost).up()
+            .e("is_community_private_autopost", post.is_community_private_autopost).up()
+            .e("is_spoiler", post.is_spoiler).up()
+            .e("is_app_jumpable", post.is_app_jumpable).up()
+            .e("empathy_count", post.empathy_count).up()
+            .e("language_id", post.language_id).up();
+        if(post.mii) {
+            xml = xml.e("mii", post.mii).up()
+                .e("mii_face_url", post.mii_face_url).up()
+        }
+        xml = xml.e("number", "0").up();
+        if (post.painting) {
+            xml = xml.e("painting")
+                .e("format", "tga").up()
+                .e("content", post.painting.replace(/\r?\n|\r/g, "").trim()).up()
+                .e("size", post.painting.length).up()
+                .e("url", `https://pretendo-cdn.b-cdn.net/paintings/${post.pid}/{${post.id}.png`).up()
+                .up();
+        }
+        xml = xml.e("pid", post.pid).up()
+            .e("platform_id", post.platform_id).up()
+            .e("region_id", post.region_id).up()
+            .e("reply_count", post.reply_count).up()
+            .e("screen_name", post.screen_name).up()
+            .e("title_id", post.title_id).up()
+            .up().up();
+        return xml.end({ pretty: true, allowEmpty: true });
+    }
+
     static async topics(communities) {
         const expirationDate = moment().add(1, 'days');
         let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })

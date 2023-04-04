@@ -61,6 +61,24 @@ router.get('/:post_id/replies', async function (req, res) {
     res.send(response);
 });
 
+router.get('', async function (req, res) {
+    const post = await database.getPostByID(req.query.post_id);
+    if(!post) {
+        res.set("Content-Type", "application/xml");
+        res.statusCode = 404;
+        let response = {
+            result: {
+                has_error: 1,
+                version: 1,
+                code: 404,
+                message: "Not Found"
+            }
+        };
+        return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+    }
+    else res.send(await communityPostGen.queryResponse(post));
+});
+
 module.exports = router;
 
 async function newPost(req, res) {

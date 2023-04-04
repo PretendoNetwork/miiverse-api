@@ -11,6 +11,7 @@ const { http: { port } } = config;
 const app = express();
 
 const miiverse = require('./services/miiverse-api');
+const xml = require("object-to-xml");
 
 app.set('etag', false);
 app.disable('x-powered-by');
@@ -33,24 +34,36 @@ app.use(miiverse);
 
 // 404 handler
 logger.info('Creating 404 status handler');
-app.use((request, response) => {
+app.use((req, res) => {
     //logger.warn(request.protocol + '://' + request.get('host') + request.originalUrl);
-    response.status(404);
-    response.send();
+    res.set("Content-Type", "application/xml");
+    res.statusCode = 404;
+    let response = {
+        result: {
+            has_error: 1,
+            version: 1,
+            code: 404,
+            message: "Not Found"
+        }
+    };
+    return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
 });
 
 // non-404 error handler
 logger.info('Creating non-404 status handler');
-app.use((error, request, response) => {
+app.use((error, req, res) => {
     const status = error.status || 500;
-
-    response.status(status);
-
-    response.json({
-        app: 'api',
-        status,
-        error: error.message
-    });
+    res.set("Content-Type", "application/xml");
+    res.statusCode = 404;
+    let response = {
+        result: {
+            has_error: 1,
+            version: 1,
+            code: status,
+            message: "Not Found"
+        }
+    };
+    return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
 });
 
 // Starts the server
