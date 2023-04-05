@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../../../database');
-const comPostGen = require('../../../util/CommunityPostGen');
+const comPostGen = require('../../../util/xmlResponseGenerator');
 const processHeaders = require('../../../util/util');
 const {COMMUNITY} = require("../../../models/communities");
 const {POST} = require("../../../models/post");
@@ -25,10 +25,7 @@ router.get('/popular', async function (req, res) {
     if (community != null) {
         res.contentType("application/json");
         res.send(community);
-    } else {
-        res.status(404);
-        res.send();
-    }
+    } else res.sendStatus(404);
 });
 
 router.get('/new', async function (req, res) {
@@ -36,10 +33,7 @@ router.get('/new', async function (req, res) {
     if (community != null) {
         res.contentType("application/json");
         res.send(community);
-    } else {
-        res.status(404);
-        res.send();
-    }
+    } else res.sendStatus(404);
 });
 
 router.get('/0/posts', async function (req, res) {
@@ -53,19 +47,14 @@ router.get('/0/posts', async function (req, res) {
         else
             posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
         /*  Build formatted response and send it off. */
-        let response;
-        if(req.query.with_mii === '1')
-            response = await comPostGen.PostsResponseWithMii(posts, community);
-        else
-            response = await comPostGen.PostsResponse(posts, community);
+        let options = {
+            name: 'posts',
+            with_mii: req.query.with_mii === 1
+        }
         res.contentType("application/xml");
-        res.send(response);
+        res.send(await comPostGen.PostsResponse(posts, community, options));
     }
-    else
-    {
-        res.status(404);
-        res.send();
-    }
+    else res.sendStatus(404);
 });
 
 router.get('/:appID/posts', async function (req, res) {
@@ -89,13 +78,12 @@ router.get('/:appID/posts', async function (req, res) {
     let posts = await POST.find(query).sort({ created_at: -1}).limit(parseInt(req.query.limit));
 
     /*  Build formatted response and send it off. */
-    let response;
-    if(req.query.with_mii === '1')
-        response = await comPostGen.PostsResponseWithMii(posts, community);
-    else
-        response = await comPostGen.PostsResponse(posts, community);
+    let options = {
+        name: 'posts',
+        with_mii: req.query.with_mii === 1
+    }
     res.contentType("application/xml");
-    res.send(response);
+    res.send(await comPostGen.PostsResponse(posts, community, options));
 });
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../../../database');
-const comPostGen = require('../../../util/CommunityPostGen');
+const comPostGen = require('../../../util/xmlResponseGenerator');
 let memoize = require("memoizee");
 memoized = memoize(comPostGen.topics, { async: true, maxAge: 1000 * 60 * 60 });
 

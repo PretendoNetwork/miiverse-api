@@ -8,6 +8,7 @@ const PostSchema = new Schema({
     app_data: String,
     painting: String,
     screenshot: String,
+    screenshot_length: Number,
     search_key: {
         type: [String],
         default: undefined

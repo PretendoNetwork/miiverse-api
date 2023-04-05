@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../../../database');
-const pplPostGen = require('../../../util/peoplePostGen');
+const xmlGenerator = require('../../../util/xmlResponseGenerator');
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -15,13 +15,12 @@ router.get('/', async function (req, res) {
             posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
 
         /*  Build formatted response and send it off. */
-        let response;
-        if(req.query.with_mii === 1)
-            response = await pplPostGen.PostsResponseWithMii(posts, community);
-        else
-            response = await pplPostGen.PostsResponse(posts, community);
+        let options = {
+            name: 'people',
+            with_mii: req.query.with_mii === 1
+        }
         res.contentType("application/xml");
-        res.send(response);
+        res.send(await xmlGenerator.PostsResponse(posts, community, options));
     }
     else
     {
@@ -35,7 +34,7 @@ router.get('/:pid/following', async function (req, res) {
     if(!user) res.sendStatus(404);
     let people = await database.getFollowedUsers(user);
     if(!people) res.sendStatus(404);
-    res.send(await pplPostGen.People(people));
+    res.send(await xmlGenerator.People(people));
 });
 
 module.exports = router;

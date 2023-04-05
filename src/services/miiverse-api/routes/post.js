@@ -6,10 +6,10 @@ const util = require('../../../util/util');
 const database = require('../../../database');
 const multer  = require('multer');
 const snowflake = require('node-snowflake').Snowflake;
-const communityPostGen = require('../../../util/CommunityPostGen');
+const communityPostGen = require('../../../util/xmlResponseGenerator');
 const {COMMUNITY} = require("../../../models/communities");
 const processHeaders = require("../../../util/util");
-const comPostGen = require("../../../util/CommunityPostGen");
+const comPostGen = require("../../../util/xmlResponseGenerator");
 const upload = multer();
 
 /* GET post titles. */
@@ -54,9 +54,12 @@ router.get('/:post_id/replies', async function (req, res) {
     const posts = await database.getPostReplies(post.id, req.query.limit)
     if(!posts.length === 0)
         return res.sendStatus(404);
-
+    let options = {
+        name: 'replies',
+        with_mii: req.query.with_mii === 1
+    }
     /*  Build formatted response and send it off. */
-    let response = await communityPostGen.RepliesResponse(posts)
+    let response = await communityPostGen.RepliesResponse(posts, options)
     res.contentType("application/xml");
     res.send(response);
 });
@@ -76,7 +79,7 @@ router.get('', async function (req, res) {
         };
         return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
     }
-    else res.send(await communityPostGen.queryResponse(post));
+    else res.send(await communityPostGen.QueryResponse(post));
 });
 
 module.exports = router;
@@ -148,6 +151,7 @@ async function newPost(req, res) {
         app_data: appData,
         painting: painting,
         screenshot: screenshot ? `/screenshots/${req.pid}/${postID}.jpg`: "",
+        screenshot_length: screenshot ? screenshot.length : null,
         country_id: paramPackData.country_id,
         created_at: new Date(),
         feeling_id: req.body.feeling_id,
@@ -158,7 +162,7 @@ async function newPost(req, res) {
         is_app_jumpable: req.body.is_app_jumpable,
         language_id: req.body.language_id,
         mii: PNID.mii.data,
-        mii_face_url: `http://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
+        mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
         pid: req.pid,
         platform_id: paramPackData.platform_id,
         region_id: paramPackData.region_id,
