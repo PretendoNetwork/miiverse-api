@@ -36,27 +36,6 @@ router.get('/new', async function (req, res) {
     } else res.sendStatus(404);
 });
 
-router.get('/0/posts', async function (req, res) {
-    const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let community = await database.getCommunityByTitleID(paramPack.title_id);
-    if(community != null)
-    {
-        let posts;
-        if(req.query.search_key)
-            posts = await database.getPostsByCommunityKey(community, parseInt(req.query.limit), req.query.search_key);
-        else
-            posts = await database.getPostsByCommunity(community, parseInt(req.query.limit));
-        /*  Build formatted response and send it off. */
-        let options = {
-            name: 'posts',
-            with_mii: req.query.with_mii === 1
-        }
-        res.contentType("application/xml");
-        res.send(await comPostGen.PostsResponse(posts, community, options));
-    }
-    else res.sendStatus(404);
-});
-
 router.get('/:appID/posts', async function (req, res) {
     const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community = await COMMUNITY.findOne({ app_id: req.params.appID });
@@ -67,20 +46,35 @@ router.get('/:appID/posts', async function (req, res) {
     let query = {
         community_id: community.app_id ? community.app_id : community.community_id,
         removed: false,
-        app_data: { $ne: null }
+        app_data: { $ne: null },
+        message_to_pid: { $eq: null }
     }
 
     if(req.query.search_key)
-        query.search_key = search_key;
+        query.search_key = req.query.search_key;
     if(!req.query.allow_spoiler)
         query.is_spoiler = 0;
+    if(req.query.by === 'followings') {
+        let userContent = await database.getUserContent(req.pid);
+        query.pid = userContent.following_users;
+    }
 
-    let posts = await POST.find(query).sort({ created_at: -1}).limit(parseInt(req.query.limit));
+    let posts;
+    if(req.query.distinct_pid === '1')
+        posts = await POST.aggregate([
+            { $match: query }, // filter based on input query
+            { $sort: { created_at: -1 } }, // sort by 'created_at' in descending order
+            { $group: { _id: '$pid', doc: { $first: '$$ROOT' } } }, // remove any duplicate 'pid' elements
+            { $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
+            { $limit: (req.query.limit ? Number(req.query.limit) : 10) } // only return the top 8 results
+        ]);
+    else
+        posts = await POST.find(query).sort({ created_at: -1}).limit(parseInt(req.query.limit));
 
     /*  Build formatted response and send it off. */
     let options = {
         name: 'posts',
-        with_mii: req.query.with_mii === 1
+        with_mii: req.query.with_mii === '1'
     }
     res.contentType("application/xml");
     res.send(await comPostGen.PostsResponse(posts, community, options));

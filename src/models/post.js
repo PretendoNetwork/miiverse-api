@@ -43,6 +43,10 @@ const PostSchema = new Schema({
         type: Number,
         default: 0
     },
+    country_id: {
+        type: Number,
+        default: 49
+    },
     language_id: {
         type: Number,
         default: 1

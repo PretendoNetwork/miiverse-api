@@ -35,15 +35,38 @@ router.post('/:post_id/empathies', upload.none(), async function (req, res) {
         res.sendStatus(403);
         return;
     }
-    let user = await database.getUserContent(pid);
-    if(user.likes.indexOf(post.id) === -1 && user.id !== post.pid)
+    let userContent = await database.getUserContent(req.pid);
+    if(userContent.likes.indexOf(post.id) === -1 && userContent.pid !== post.pid)
     {
-        post.upEmpathy();
-        user.addToLikes(post.id)
-        res.sendStatus(200);
+        if(post.empathy_count < 0) {
+            await POST.updateOne(
+                { id: post.id },
+                { $set: { empathy_count: 1 } }
+            );
+        }
+        else {
+            await POST.updateOne(
+                { id: post.id },
+                { $inc: { empathy_count: 1 } }
+            );
+        }
+        userContent.addToLikes(post.id);
+    } else if(userContent.likes.indexOf(post.id) !== -1 && userContent.pid !== post.pid) {
+        if(post.empathy_count < 0) {
+            await POST.updateOne(
+                { id: post.id },
+                { $set: { empathy_count: 0 } }
+            );
+        }
+        else {
+            await POST.updateOne(
+                { id: post.id },
+                { $inc: { empathy_count: -1 } }
+            );
+        }
+        userContent.removeFromLike(post.id);
     }
-    else
-        res.sendStatus(200);
+    res.sendStatus(200);
 });
 
 router.get('/:post_id/replies', async function (req, res) {

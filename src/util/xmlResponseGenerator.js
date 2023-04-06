@@ -163,12 +163,12 @@ class XmlResponseGenerator {
     }
 
     /**
-     * Generate response to /v1/people
+     * Generate response to /v1/users/:pid/following
      * @param people
      * @returns xml
      * @constructor
      */
-    static async People(people) {
+    static async Following(people) {
         let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
@@ -181,6 +181,31 @@ class XmlResponseGenerator {
                 .up()
         }
         return xml.up().end({ pretty: true, allowEmpty: true});
+    }
+
+    /**
+     * Generate response to /v1/people
+     * @param posts
+     * @param options
+     * @returns xml
+     * @constructor
+     */
+    static async People(posts, options) {
+        const expirationDate = moment().add(1, 'days');
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("expire", expirationDate.format('YYYY-MM-DD HH:MM:SS')).up()
+            .e("request_name", options.name).up()
+            .e("people");
+        for (const post of posts) {
+            xml = xml.e("person")
+                .e("posts")
+            postObj(xml, post, options);
+            xml = xml.up().up();
+        }
+        xml = xml.up();
+        return xml.end({ pretty: true, allowEmpty: true });
     }
 }
 
@@ -197,8 +222,8 @@ function postObj(xml, post, options) {
     }
     xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
         .e("community_id", post.community_id).up()
-        .e("country_id", post.country_id).up()
-        .e("created_at", post.created_at).up()
+        .e("country_id", post.country_id ? post.country_id : 254).up()
+        .e("created_at", new moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
         .e("feeling_id", post.feeling_id).up()
         .e("id", post.id).up()
         .e("is_autopost", post.is_autopost).up()
@@ -207,7 +232,7 @@ function postObj(xml, post, options) {
         .e("is_app_jumpable", post.is_app_jumpable).up()
         .e("empathy_count", post.empathy_count).up()
         .e("language_id", post.language_id).up();
-    if(post.mii && options.with_mii) {
+    if(options.with_mii) {
         xml.e("mii", post.mii.replace(/[^A-Za-z0-9+/=]/g, "").replace(/[\n\r]+/gm, '').trim()).up()
             .e("mii_face_url", post.mii_face_url).up()
     }
@@ -215,7 +240,7 @@ function postObj(xml, post, options) {
     if (post.painting) {
         xml.e("painting")
             .e("format", "tga").up()
-            .e("content", post.painting.replace(/\r?\n|\r/g, "").trim()).up()
+            .e("content", post.painting.replace(/[\n\r]+/gm, '').trim()).up()
             .e("size", post.painting.length).up()
             .e("url", `https://pretendo-cdn.b-cdn.net/paintings/${post.pid}/${post.id}.png`).up()
             .up();
