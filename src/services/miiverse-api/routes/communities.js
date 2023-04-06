@@ -74,7 +74,8 @@ router.get('/:appID/posts', async function (req, res) {
     /*  Build formatted response and send it off. */
     let options = {
         name: 'posts',
-        with_mii: req.query.with_mii === '1'
+        with_mii: req.query.with_mii === '1',
+        app_data: true
     }
     res.contentType("application/xml");
     res.send(await comPostGen.PostsResponse(posts, community, options));
