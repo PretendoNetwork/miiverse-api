@@ -163,9 +163,11 @@ async function newPost(req, res) {
     }
     let body = req.body.body;
     if(body)
-        body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, "");
+        body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, "").trim();
     if(body && body.length > 280)
         body = body.substring(0,280);
+    if(!body && !painting && !screenshot)
+        return res.sendStatus(400);
     const document = {
         title_id: paramPackData.title_id,
         community_id: community.app_id ? community.app_id : community.community_id,

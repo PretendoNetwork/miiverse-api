@@ -13,7 +13,9 @@ router.get('/', async function (req, res) {
 
     let query = {
         removed: false,
+        is_spoiler: 0,
         app_data: { $eq: null },
+        parent: { $eq: null },
         message_to_pid: { $eq: null }
     }
 

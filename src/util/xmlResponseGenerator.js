@@ -154,7 +154,7 @@ class XmlResponseGenerator {
             for (const post of posts) {
                 xml = xml.e("person")
                     .e("posts")
-                    postObj(xml, post, { with_mii: true });
+                    postObj(xml, post, { with_mii: true, app_data: false });
                     xml = xml.up().up();
             }
             xml = xml.up().up()
@@ -217,10 +217,10 @@ class XmlResponseGenerator {
  */
 function postObj(xml, post, options) {
     xml = xml.e("post");
-    if (post.app_data) {
+    if (post.app_data && options.app_data) {
         xml.e("app_data", post.app_data.replace(/[^A-Za-z0-9+/=]/g, "").replace(/[\n\r]+/gm, '').trim()).up();
     }
-    xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "") : "").up()
+    xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "").replace(/[\n\r]+/gm, '') : "").up()
         .e("community_id", post.community_id).up()
         .e("country_id", post.country_id ? post.country_id : 254).up()
         .e("created_at", new moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
