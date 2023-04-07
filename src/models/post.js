@@ -14,7 +14,7 @@ const PostSchema = new Schema({
         default: undefined
     },
     topic_tag: {
-        type: [String],
+        type: String,
         default: undefined
     },
     community_id: {

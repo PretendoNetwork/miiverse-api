@@ -256,6 +256,12 @@ function postObj(xml, post, options) {
             .e("url", `https://pretendo-cdn.b-cdn.net/screenshots/${post.pid}/${post.id}.jpg`).up()
             .up();
     }
+    if (post.topic_tag) {
+        xml.e("topic_tag")
+            .e("name", post.topic_tag).up()
+            .e("title_id", post.title_id).up()
+            .up();
+    }
     xml.e("title_id", post.title_id).up().up()
 }
 

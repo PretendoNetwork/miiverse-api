@@ -58,6 +58,8 @@ router.get('/:appID/posts', async function (req, res) {
         let userContent = await database.getUserContent(req.pid);
         query.pid = userContent.following_users;
     }
+    else if(req.query.by === 'self')
+        query.pid = req.pid;
 
     let posts;
     if(req.query.distinct_pid === '1')

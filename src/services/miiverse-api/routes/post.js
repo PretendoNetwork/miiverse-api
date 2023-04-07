@@ -182,6 +182,7 @@ async function newPost(req, res) {
         feeling_id: req.body.feeling_id,
         id: postID,
         search_key: req.body.search_key,
+        topic_tag: req.body.topic_tag,
         is_autopost: req.body.is_autopost,
         is_spoiler: (req.body.spoiler) ? 1 : 0,
         is_app_jumpable: req.body.is_app_jumpable,
