@@ -3,7 +3,7 @@ const router = express.Router();
 const database = require('../../../database');
 const xmlGenerator = require('../../../util/xmlResponseGenerator');
 const {POST} = require("../../../models/post");
-const comPostGen = require("../../../util/xmlResponseGenerator");
+const util = require('../../../util/util')
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -18,7 +18,9 @@ router.get('/', async function (req, res) {
     }
 
     if(req.query.relation === 'friend') {
-        query.pid = { $in: userContent.following_users.map(i=>Number(i)) };
+        let friends = await util.getFriends(req.pid);
+        if(!friends) return res.sendStatus(204);
+        query.pid = { $in: friends.pids };
     }
     else if(req.query.relation === 'following') {
         query.pid = { $in: userContent.followed_users.map(i=>Number(i)) };
@@ -33,7 +35,7 @@ router.get('/', async function (req, res) {
             { $sort: { created_at: -1 } }, // sort by 'created_at' in descending order
             { $group: { _id: '$pid', doc: { $first: '$$ROOT' } } }, // remove any duplicate 'pid' elements
             { $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
-            { $limit: (req.query.limit ? Number(req.query.limit) : 10) } // only return the top 8 results
+            { $limit: (req.query.limit ? Number(req.query.limit) : 10) } // only return the top 10 results
         ]);
     else if(req.query.is_hot === '1')
         posts = await POST.find(query).sort({ empathy_count: -1}).limit(parseInt(req.query.limit));
@@ -46,7 +48,7 @@ router.get('/', async function (req, res) {
         with_mii: req.query.with_mii === '1'
     }
     res.contentType("application/xml");
-    res.send(await comPostGen.People(posts, options));
+    res.send(await xmlGenerator.People(posts, options));
 });
 
 router.get('/:pid/following', async function (req, res) {
