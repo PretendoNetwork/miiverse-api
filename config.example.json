@@ -1,22 +1,22 @@
 {
     "http": {
-        "port": 8081
+        "port": 8080
     },
-    "account_server": "",
-    "secret": "",
+    "account_server": "localhost",
+    "account_server_secret": "",
     "X-Nintendo-Client-ID": "",
     "X-Nintendo-Client-Secret": "",
     "mongoose": {
-        "uri": "",
-        "database": "",
+        "uri": "mongodb://localhost:27017",
+        "database": "Juxt",
         "options": {
             "useNewUrlParser": true,
             "useUnifiedTopology": true
         }
     },
     "account_db": {
-        "uri": "",
-        "database": "",
+        "uri": "mongodb://localhost:27017",
+        "database": "pretendo",
         "options": {
             "useNewUrlParser": true,
             "useUnifiedTopology": true
@@ -26,6 +26,13 @@
         "spaces": {
             "key": "",
             "secret": ""
+        }
+    },
+    "grpc": {
+        "friends": {
+            "ip": "localhost",
+            "port": 50051,
+            "api_key": ""
         }
     }
 }
