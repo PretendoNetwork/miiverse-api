@@ -3,15 +3,22 @@ const NodeRSA = require('node-rsa');
 const fs = require('fs-extra');
 const database = require('../database');
 const logger = require('../logger');
+const grpc = require('nice-grpc');
+const grpcServices = require('grpc');
 const config = require('../../config.json');
 const { SETTINGS } = require('../models/settings');
 const { CONTENT } = require('../models/content');
 const { NOTIFICATIONS } = require('../models/notifications');
-let TGA = require('tga');
-let pako = require('pako');
-let PNG = require('pngjs').PNG;
-let bmp = require("bmp-js");
+const { FriendsDefinition } = grpcServices.friends.service;
+const TGA = require('tga');
+const pako = require('pako');
+const PNG = require('pngjs').PNG;
+const bmp = require("bmp-js");
 const aws = require('aws-sdk');
+const { ip, port, api_key } = config.grpc.friends;
+
+const channel = grpc.createChannel(`${ip}:${port}`);
+const client = grpc.createClient(FriendsDefinition, channel);
 
 const spacesEndpoint = new aws.Endpoint('nyc3.digitaloceanspaces.com');
 const s3 = new aws.S3({
@@ -299,6 +306,15 @@ let methods = {
         else
             return await saveNotification(pid, type, title, content, reference_id, '');
 
+    },
+    getFriends: async function(pid) {
+        return await client.getUserFriendPIDs({
+            pid: pid
+        }, {
+            metadata: grpc.Metadata({
+                'X-API-Key': api_key
+            })
+        });
     }
 };
-exports.data = methods;
+module.exports = methods;

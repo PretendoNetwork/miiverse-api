@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const database = require('../../../database');
 const comPostGen = require('../../../util/xmlResponseGenerator');
-const processHeaders = require('../../../util/util');
+const util = require('../../../util/util');
 const {COMMUNITY} = require("../../../models/communities");
 const {POST} = require("../../../models/post");
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
-    const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community = await database.getCommunityByTitleID(paramPack.title_id);
     if(!community) res.sendStatus(404);
 
@@ -37,7 +37,7 @@ router.get('/new', async function (req, res) {
 });
 
 router.get('/:appID/posts', async function (req, res) {
-    const paramPack = processHeaders.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community = await COMMUNITY.findOne({ app_id: req.params.appID });
     if(!community)
         community = await database.getCommunityByTitleID(paramPack.title_id);

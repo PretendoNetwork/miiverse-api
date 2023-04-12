@@ -9,7 +9,7 @@ function auth(req, res, next) {
     let paramPackData = req.headers["x-nintendo-parampack"];
 
     if(paramPackData)
-        paramPackData = paramPackData = util.data.decodeParamPack(paramPackData);
+        paramPackData = paramPackData = util.decodeParamPack(paramPackData);
     else if(req.path.includes('/users/'))
         return next();
 
@@ -19,7 +19,7 @@ function auth(req, res, next) {
     if(!token || !paramPackData)
         badAuth(res);
     else {
-        const pid = util.data.processServiceToken(token);
+        const pid = util.processServiceToken(token);
 
         if(pid === null)
             badAuth(res);

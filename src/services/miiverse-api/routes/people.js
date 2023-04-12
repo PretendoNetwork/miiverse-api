@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const database = require('../../../database');
 const xmlGenerator = require('../../../util/xmlResponseGenerator');
-const processHeaders = require("../../../util/util");
-const {COMMUNITY} = require("../../../models/communities");
 const {POST} = require("../../../models/post");
 const comPostGen = require("../../../util/xmlResponseGenerator");
 

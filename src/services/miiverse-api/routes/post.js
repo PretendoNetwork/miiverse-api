@@ -29,7 +29,7 @@ router.post('/:post_id.delete', async function (req, res) {
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (req, res) {
-    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+    let pid = util.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     const post = await database.getPostByID(req.params.post_id);
     if(pid === null) {
         res.sendStatus(403);
@@ -70,7 +70,7 @@ router.post('/:post_id/empathies', upload.none(), async function (req, res) {
 });
 
 router.get('/:post_id/replies', async function (req, res) {
-    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+    let pid = util.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     const post = await database.getPostByID(req.params.post_id);
     if(!post)
         return res.sendStatus(404);
@@ -109,7 +109,7 @@ module.exports = router;
 
 async function newPost(req, res) {
     let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = snowflake.nextId(), parentPost = null;
-    let paramPackData = util.data.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    let paramPackData = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community_id = req.body.community_id;
 
     let community = await database.getCommunityByID(community_id)
@@ -132,12 +132,12 @@ async function newPost(req, res) {
         appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
     if (req.body.painting) {
         painting = req.body.painting.replace(/\0/g, "").trim();
-        paintingURI = await util.data.processPainting(painting, true);
-        await util.data.uploadCDNAsset('pn-cdn', `paintings/${req.pid}/${postID}.png`, paintingURI, 'public-read');
+        paintingURI = await util.processPainting(painting, true);
+        await util.uploadCDNAsset('pn-cdn', `paintings/${req.pid}/${postID}.png`, paintingURI, 'public-read');
     }
     if (req.body.screenshot) {
         screenshot = req.body.screenshot.replace(/\0/g, "").trim();
-        await util.data.uploadCDNAsset('pn-cdn', `screenshots/${req.pid}/${postID}.jpg`, Buffer.from(screenshot, 'base64'), 'public-read');
+        await util.uploadCDNAsset('pn-cdn', `screenshots/${req.pid}/${postID}.jpg`, Buffer.from(screenshot, 'base64'), 'public-read');
     }
 
     let miiFace;

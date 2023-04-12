@@ -138,7 +138,7 @@ router.get('/', async function(req, res) {
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (req, res) {
-    let pid = util.data.processServiceToken(req.headers["x-nintendo-servicetoken"]);
+    let pid = util.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     const post = await database.getPostByID(req.params.post_id);
     if(pid === null) {
         res.sendStatus(403);
