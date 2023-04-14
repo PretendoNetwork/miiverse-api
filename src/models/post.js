@@ -76,27 +76,6 @@ const PostSchema = new Schema({
     removed_reason: String
 });
 
-
-PostSchema.methods.upEmpathy = async function() {
-    const empathy = this.get('empathy_count');
-    if(empathy + 1 < 0)
-        this.set('empathy_count', 0);
-    else
-        this.set('empathy_count', empathy + 1);
-
-    await this.save();
-};
-
-PostSchema.methods.downEmpathy = async function() {
-    const empathy = this.get('empathy_count');
-    if(empathy - 1 < 0)
-        this.set('empathy_count', 0);
-    else
-        this.set('empathy_count', empathy - 1);
-
-    await this.save();
-};
-
 PostSchema.methods.upReply = async function() {
     const replyCount = this.get('reply_count');
     if(replyCount + 1 < 0)

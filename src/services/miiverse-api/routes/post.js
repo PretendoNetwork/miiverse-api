@@ -10,6 +10,7 @@ const communityPostGen = require('../../../util/xmlResponseGenerator');
 const {COMMUNITY} = require("../../../models/communities");
 const processHeaders = require("../../../util/util");
 const comPostGen = require("../../../util/xmlResponseGenerator");
+const crypto = require("crypto");
 const upload = multer();
 
 /* GET post titles. */
@@ -108,7 +109,7 @@ router.get('', async function (req, res) {
 module.exports = router;
 
 async function newPost(req, res) {
-    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = snowflake.nextId(), parentPost = null;
+    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = await generatePostUID(22), parentPost = null;
     let paramPackData = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community_id = req.body.community_id;
 
@@ -214,4 +215,11 @@ async function newPost(req, res) {
     const newPost = new POST(document);
     newPost.save();
     res.send(await communityPostGen.SinglePostResponse(newPost));
+}
+
+async function generatePostUID(length) {
+    let id = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, "").substring(0, length);
+    const inuse = await POST.findOne({ id });
+    id = (inuse ? await generatePostUID() : id);
+    return id;
 }
