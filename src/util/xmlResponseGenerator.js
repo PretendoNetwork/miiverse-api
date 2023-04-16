@@ -37,7 +37,7 @@ class XmlResponseGenerator {
             .e("version", "1").up()
             .e("request_name", options.name).up()
             .e("topic")
-            .e("community_id", community.app_id ? community.app_id : community.community_id).up()
+            .e("community_id", community.community_id).up()
             .up()
             .e("posts");
         for (const post of posts) {
@@ -66,7 +66,6 @@ class XmlResponseGenerator {
      * @constructor
      */
     static async Communities(communities) {
-        let parent = communities[0].community_id;
         let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
             .e("has_error", "0").up()
             .e("version", "1").up()
@@ -74,8 +73,8 @@ class XmlResponseGenerator {
             .e("communities");
         for(let community of communities) {
         xml = xml.e("community")
-                .e('olive_community_id', parent).up()
-                .e('community_id', community.app_id ? community.app_id.padStart(6, '0') : community.community_id).up()
+                .e('olive_community_id', community.olive_community_id).up()
+                .e('community_id', community.community_id).up()
                 .e("name", community.name).up()
                 .e("description", community.description).up()
                 .e("icon").up()

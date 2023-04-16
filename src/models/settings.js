@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const SettingsSchema = new Schema({
-    pid: String,
+    pid: Number,
     screen_name: String,
     account_status: {
         type: Number,

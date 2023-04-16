@@ -41,7 +41,8 @@ const PostSchema = new Schema({
     },
     empathy_count: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     },
     country_id: {
         type: Number,
@@ -73,7 +74,8 @@ const PostSchema = new Schema({
         type: Boolean,
         default: false
     },
-    removed_reason: String
+    removed_reason: String,
+    yeahs: [Number]
 });
 
 PostSchema.methods.upReply = async function() {

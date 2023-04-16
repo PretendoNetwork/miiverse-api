@@ -29,9 +29,9 @@ NotificationsSchema.methods.markRead = async function() {
     await this.save();
 };
 
-const NOTIFICATIONS = model('NOTIFICATIONS', NotificationsSchema);
+const NOTIFICATION = model('NOTIFICATION', NotificationsSchema);
 
 module.exports = {
     NotificationsSchema,
-    NOTIFICATIONS
+    NOTIFICATION
 };

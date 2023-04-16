@@ -68,7 +68,7 @@ async function getCommunityByTitleID(title_id) {
 async function getCommunityByID(community_id) {
     verifyConnected();
     return COMMUNITY.findOne({
-        community_id: community_id
+        olive_community_id: community_id
     });
 }
 
@@ -191,7 +191,7 @@ async function getNumberVerifiedCommunityPostsByID(community, limit, offset) {
 async function getPostsByCommunity(community, numberOfPosts) {
     verifyConnected();
     return POST.find({
-        community_id: community.community_id,
+        community_id: community.olive_community_id,
         parent: null,
         removed: false,
         app_data: { $ne: null }
@@ -201,7 +201,7 @@ async function getPostsByCommunity(community, numberOfPosts) {
 async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
     verifyConnected();
     return POST.find({
-        community_id: community.community_id,
+        community_id: community.olive_community_id,
         search_key: search_key,
         parent: null,
         removed: false,
@@ -212,7 +212,7 @@ async function getPostsByCommunityKey(community, numberOfPosts, search_key) {
 async function getNewPostsByCommunity(community, limit, offset) {
     verifyConnected();
     return POST.find({
-        community_id: community.community_id,
+        community_id: community.olive_community_id,
         parent: null,
         removed: false,
         app_data: { $ne: null }

@@ -66,7 +66,7 @@ router.post('/', upload.none(), async function (req, res) {
         created_at: new Date(),
         id: snowflake.nextId(),
         mii: user.mii.data,
-        mii_face_url: `http://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
+        mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
         pid: user.pid,
         verified: (user.access_level === 2 || user.access_level === 3),
         parent: null,

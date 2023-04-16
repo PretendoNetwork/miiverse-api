@@ -16,7 +16,6 @@ const PNG = require('pngjs').PNG;
 const bmp = require("bmp-js");
 const aws = require('aws-sdk');
 const { ip, port, api_key } = config.grpc.friends;
-
 const channel = grpc.createChannel(`${ip}:${port}`);
 const client = grpc.createClient(FriendsDefinition, channel);
 
@@ -314,7 +313,7 @@ let methods = {
             metadata: grpc.Metadata({
                 'X-API-Key': api_key
             })
-        });
+        })
     }
 };
 module.exports = methods;

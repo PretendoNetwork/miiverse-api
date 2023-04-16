@@ -21,6 +21,17 @@ const PNIDSchema = new mongoose.Schema({
 		name: String,
 		data: String,
 	},
+	connections: {
+		stripe: {
+			customer_id: String,
+			subscription_id: String,
+			price_id: String,
+			tier_level: Number,
+			tier_name: String,
+			latest_webhook_timestamp: Number
+		}
+	}
+
 });
 
 const PNID = pnidConnection.model('PNID', PNIDSchema);
@@ -28,3 +39,4 @@ const PNID = pnidConnection.model('PNID', PNIDSchema);
 module.exports = {
 	PNID,
 };
+

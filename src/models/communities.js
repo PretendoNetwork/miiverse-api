@@ -8,6 +8,10 @@ const  CommunitySchema = new Schema({
         type: Boolean,
         default: true
     },
+    allows_comments: {
+        type: Boolean,
+        default: true
+    },
     /**
      * 0: Main Community
      * 1: Sub-Community
@@ -23,7 +27,7 @@ const  CommunitySchema = new Schema({
         default: null
     },
     admins: {
-        type: [String],
+        type: [Number],
         default: undefined
     },
     created_at: {
@@ -35,10 +39,6 @@ const  CommunitySchema = new Schema({
         default: 0
     },
     followers: {
-        type: Number,
-        default: 0
-    },
-    id: {
         type: Number,
         default: 0
     },
@@ -56,16 +56,12 @@ const  CommunitySchema = new Schema({
         default: undefined
     },
     community_id: String,
+    olive_community_id: String,
     is_recommended: {
         type: Number,
         default: 0
     },
-    browser_icon: String,
-    browser_thumbnail: String,
-    CTR_browser_header: String,
-    WiiU_browser_header: String,
     app_data: String,
-    app_id: String
 });
 
 CommunitySchema.methods.upEmpathy = async function() {

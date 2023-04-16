@@ -12,7 +12,7 @@ router.get('/', async function (req, res) {
     let community = await database.getCommunityByTitleID(paramPack.title_id);
     if(!community) res.sendStatus(404);
 
-    let communities = await database.getSubCommunities(community.community_id);
+    let communities = await database.getSubCommunities(community.olive_community_id);
     if(!communities) res.sendStatus(404);
     communities.unshift(community);
     let response = await comPostGen.Communities(communities);
@@ -38,13 +38,13 @@ router.get('/new', async function (req, res) {
 
 router.get('/:appID/posts', async function (req, res) {
     const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let community = await COMMUNITY.findOne({ app_id: req.params.appID });
+    let community = await COMMUNITY.findOne({ community_id: req.params.appID });
     if(!community)
         community = await database.getCommunityByTitleID(paramPack.title_id);
     if(!community)
         res.sendStatus(404);
     let query = {
-        community_id: community.app_id ? community.app_id : community.community_id,
+        community_id: community.olive_community_id,
         removed: false,
         app_data: { $ne: null },
         message_to_pid: { $eq: null }

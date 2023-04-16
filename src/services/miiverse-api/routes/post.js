@@ -30,42 +30,39 @@ router.post('/:post_id.delete', async function (req, res) {
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (req, res) {
-    let pid = util.processServiceToken(req.headers["x-nintendo-servicetoken"]);
     const post = await database.getPostByID(req.params.post_id);
-    if(pid === null) {
-        res.sendStatus(403);
-        return;
+    if(!post) res.sendStatus(404);
+    if(post.yeahs.indexOf(req.pid) === -1) {
+        await POST.updateOne({
+                id: post.id,
+                yeahs: {
+                    $ne: req.pid
+                }
+            },
+            {
+                $inc: {
+                    empathy_count: 1
+                },
+                $push: {
+                    yeahs: req.pid
+                }
+            });
     }
-    let userContent = await database.getUserContent(req.pid);
-    if(userContent.likes.indexOf(post.id) === -1 && userContent.pid !== post.pid)
-    {
-        if(post.empathy_count < 0) {
-            await POST.updateOne(
-                { id: post.id },
-                { $set: { empathy_count: 1 } }
-            );
-        }
-        else {
-            await POST.updateOne(
-                { id: post.id },
-                { $inc: { empathy_count: 1 } }
-            );
-        }
-        userContent.addToLikes(post.id);
-    } else if(userContent.likes.indexOf(post.id) !== -1 && userContent.pid !== post.pid) {
-        if(post.empathy_count < 0) {
-            await POST.updateOne(
-                { id: post.id },
-                { $set: { empathy_count: 0 } }
-            );
-        }
-        else {
-            await POST.updateOne(
-                { id: post.id },
-                { $inc: { empathy_count: -1 } }
-            );
-        }
-        userContent.removeFromLike(post.id);
+    else if(post.yeahs.indexOf(req.pid) !== -1) {
+        await POST.updateOne({
+                id: post.id,
+                yeahs: {
+                    $eq: req.pid
+                }
+            },
+            {
+                $inc: {
+                    empathy_count: -1
+                },
+                $pull: {
+                    yeahs: req.pid
+                }
+            });
     }
     res.sendStatus(200);
 });
@@ -115,7 +112,7 @@ async function newPost(req, res) {
 
     let community = await database.getCommunityByID(community_id)
     if(!community)
-        community = await COMMUNITY.findOne({app_id: community_id});
+        community = await COMMUNITY.findOne({olive_community_id: community_id});
     if(!community)
         community = await database.getCommunityByTitleID(paramPackData.title_id);
 
@@ -125,9 +122,13 @@ async function newPost(req, res) {
         parentPost = await database.getPostByID(req.params.post_id.toString());
         if(!parentPost)
             return res.sendStatus(403);
-        parentPost.reply_count = parentPost.reply_count + 1;
-        parentPost.save();
     }
+
+    if(!(community.admins && community.admins.indexOf(req.pid) !== -1 && userSettings.account_status === 0)
+        && (community.type >= 2) && !(parentPost && community.allows_comments && community.open)) {
+        return res.sendStatus(403);
+    }
+
     let appData = "", painting = "", paintingURI = "", screenshot = null;
     if (req.body.app_data)
         appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
@@ -171,7 +172,7 @@ async function newPost(req, res) {
         return res.sendStatus(400);
     const document = {
         title_id: paramPackData.title_id,
-        community_id: community.app_id ? community.app_id : community.community_id,
+        community_id: community.olive_community_id,
         screen_name: userSettings.screen_name,
         body: body,
         app_data: appData,
@@ -214,6 +215,10 @@ async function newPost(req, res) {
     }
     const newPost = new POST(document);
     newPost.save();
+    if(parentPost) {
+        parentPost.reply_count = parentPost.reply_count + 1;
+        parentPost.save();
+    }
     res.send(await communityPostGen.SinglePostResponse(newPost));
 }
 

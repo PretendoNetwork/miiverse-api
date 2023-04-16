@@ -1,36 +1,20 @@
 const { Schema, model } = require('mongoose');
 
 const  ContentSchema = new Schema({
-    pid: String,
-    likes: {
-        type: [String],
-        default: [0]
-    },
+    pid: Number,
     followed_communities: {
         type: [String],
         default: [0]
     },
     followed_users: {
-        type: [String],
+        type: [Number],
         default: [0]
     },
     following_users: {
-        type: [String],
+        type: [Number],
         default: [0]
     },
 });
-
-ContentSchema.methods.addToLikes = async function(postID) {
-    const likes = this.get('likes');
-    likes.addToSet(postID);
-    await this.save();
-}
-
-ContentSchema.methods.removeFromLike = async function(postID) {
-    const likes = this.get('likes');
-    likes.pull(postID);
-    await this.save();
-}
 
 ContentSchema.methods.addToCommunities = async function(postID) {
     const communities = this.get('followed_communities');
