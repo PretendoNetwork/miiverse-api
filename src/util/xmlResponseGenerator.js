@@ -73,7 +73,6 @@ class XmlResponseGenerator {
             .e("communities");
         for(let community of communities) {
         xml = xml.e("community")
-                .e('olive_community_id', community.olive_community_id).up()
                 .e('community_id', community.community_id).up()
                 .e("name", community.name).up()
                 .e("description", community.description).up()

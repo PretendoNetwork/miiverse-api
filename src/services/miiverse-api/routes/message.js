@@ -7,6 +7,7 @@ const { CONVERSATION } = require('../../../models/conversation');
 const util = require('../../../util/util');
 const database = require('../../../database');
 const multer  = require('multer');
+const crypto = require("crypto");
 const snowflake = require('node-snowflake').Snowflake;
 const upload = multer();
 
@@ -64,7 +65,7 @@ router.post('/', upload.none(), async function (req, res) {
         body: req.body.body,
         painting: req.body.raw,
         created_at: new Date(),
-        id: snowflake.nextId(),
+        id: generatePostUID(21),
         mii: user.mii.data,
         mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
         pid: user.pid,
@@ -154,5 +155,12 @@ router.post('/:post_id/empathies', upload.none(), async function (req, res) {
     else
         res.sendStatus(403);
 });
+
+async function generatePostUID(length) {
+    let id = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, "").substring(0, length);
+    const inuse = await POST.findOne({ id });
+    id = (inuse ? await generatePostUID(length) : id);
+    return id;
+}
 
 module.exports = router;

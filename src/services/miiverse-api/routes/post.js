@@ -106,7 +106,7 @@ router.get('', async function (req, res) {
 module.exports = router;
 
 async function newPost(req, res) {
-    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = await generatePostUID(22), parentPost = null;
+    let PNID = await database.getPNID(req.pid), userSettings = await database.getUserSettings(req.pid), postID = await generatePostUID(21), parentPost = null;
     let paramPackData = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let community_id = req.body.community_id;
 
@@ -225,6 +225,6 @@ async function newPost(req, res) {
 async function generatePostUID(length) {
     let id = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, "").substring(0, length);
     const inuse = await POST.findOne({ id });
-    id = (inuse ? await generatePostUID() : id);
+    id = (inuse ? await generatePostUID(length) : id);
     return id;
 }

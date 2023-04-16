@@ -42,9 +42,9 @@ async function calculateMostPopularCommunities(hours, limit) {
         return calculateMostPopularCommunities(hours + hours, limit);
 
     let response = await COMMUNITY.aggregate([
-        { $match: { community_id: { $in: communities }, parent: null } },
+        { $match: { olive_community_id: { $in: communities }, parent: null } },
         {$addFields: {
-                index: { $indexOfArray: [ communities, "$community_id" ] }
+                index: { $indexOfArray: [ communities, "$olive_community_id" ] }
             }},
         { $sort: { index: 1 } },
         { $limit : limit },
