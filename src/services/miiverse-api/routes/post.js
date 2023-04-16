@@ -21,6 +21,8 @@ router.post('/:post_id/replies', upload.none(), async function (req, res) { awai
 router.post('/:post_id.delete', async function (req, res) {
     const post = await database.getPostByID(req.params.post_id);
     let user = await database.getUserContent(req.pid);
+    if(!post || !user)
+        return res.sendStatus(504);
     if(post.pid === user.pid) {
         await post.remove('User requested removal');
         res.sendStatus(200);
@@ -77,7 +79,8 @@ router.get('/:post_id/replies', async function (req, res) {
         return res.sendStatus(404);
     let options = {
         name: 'replies',
-        with_mii: req.query.with_mii === 1
+        with_mii: req.query.with_mii === 1,
+        topic_tag: true
     }
     /*  Build formatted response and send it off. */
     let response = await communityPostGen.RepliesResponse(posts, options)

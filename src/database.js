@@ -68,7 +68,7 @@ async function getCommunityByTitleID(title_id) {
 async function getCommunityByID(community_id) {
     verifyConnected();
     return COMMUNITY.findOne({
-        olive_community_id: community_id
+        community_id: community_id
     });
 }
 

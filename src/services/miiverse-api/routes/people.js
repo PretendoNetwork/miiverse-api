@@ -8,7 +8,7 @@ const util = require('../../../util/util')
 /* GET post titles. */
 router.get('/', async function (req, res) {
     let userContent = await database.getUserContent(req.pid);
-
+    if(!userContent) return res.sendStatus(404);
     let query = {
         removed: false,
         is_spoiler: 0,
@@ -45,7 +45,8 @@ router.get('/', async function (req, res) {
     /*  Build formatted response and send it off. */
     let options = {
         name: 'posts',
-        with_mii: req.query.with_mii === '1'
+        with_mii: req.query.with_mii === '1',
+        topic_tag: true
     }
     res.contentType("application/xml");
     res.send(await xmlGenerator.People(posts, options));

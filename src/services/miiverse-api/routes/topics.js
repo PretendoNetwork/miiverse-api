@@ -17,7 +17,7 @@ router.get('/', async function (req, res) {
     if(!discovery.topics) return res.sendStatus(404);
 
     let communities = await calculateMostPopularCommunities(24, 10);
-    if(communities === null) return res.sendStatus(404);
+    if(communities === null || communities.length < 10) return res.sendStatus(404);
 
     let response = await memoized(communities);
     res.contentType("application/xml");
@@ -27,9 +27,8 @@ router.get('/', async function (req, res) {
 async function calculateMostPopularCommunities(hours, limit) {
     const now = new Date();
     const last24Hours = new Date(now.getTime() - hours * 60 * 60 * 1000);
-
-    const posts = await POST.find({ created_at: { $gte: last24Hours },  message_to_pid: null }).lean();
-
+    const posts = await POST.find({ created_at: { $gte: last24Hours },  message_to_pid: null });
+    if(!posts) return;
     const communityIds = {};
     for (const post of posts) {
         const communityId = post.community_id;
@@ -39,7 +38,7 @@ async function calculateMostPopularCommunities(hours, limit) {
         .sort((a, b) => b[1] - a[1])
         .map((entry) => entry[0]);
     if(communities.size < limit)
-        return calculateMostPopularCommunities(hours + hours, limit);
+        return COMMUNITY.find().limit(limit).sort({followers: -1});
 
     let response = await COMMUNITY.aggregate([
         { $match: { olive_community_id: { $in: communities }, parent: null } },

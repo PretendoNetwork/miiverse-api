@@ -152,7 +152,7 @@ class XmlResponseGenerator {
             for (const post of posts) {
                 xml = xml.e("person")
                     .e("posts")
-                    postObj(xml, post, { with_mii: true, app_data: false });
+                    postObj(xml, post, { with_mii: true, app_data: false, topic_tag: false, topics: true }, community);
                     xml = xml.up().up();
             }
             xml = xml.up().up()
@@ -212,14 +212,15 @@ class XmlResponseGenerator {
  * @param xml
  * @param post
  * @param options
+ * @param community
  */
-function postObj(xml, post, options) {
+function postObj(xml, post, options, community) {
     xml = xml.e("post");
     if (post.app_data && options.app_data) {
         xml.e("app_data", post.app_data.replace(/[^A-Za-z0-9+/=]/g, "").replace(/[\n\r]+/gm, '').trim()).up();
     }
     xml.e("body", post.body ? post.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"\[\]]/g, "").replace(/[\n\r]+/gm, '') : "").up()
-        .e("community_id", post.community_id).up()
+        .e("community_id", options.topics ? community.community_id : post.community_id).up()
         .e("country_id", post.country_id ? post.country_id : 254).up()
         .e("created_at", new moment(post.created_at).format('YYYY-MM-DD HH:MM:SS')).up()
         .e("feeling_id", post.feeling_id).up()
@@ -254,7 +255,7 @@ function postObj(xml, post, options) {
             .e("url", `https://pretendo-cdn.b-cdn.net/screenshots/${post.pid}/${post.id}.jpg`).up()
             .up();
     }
-    if (post.topic_tag) {
+    if (post.topic_tag && options.topic_tag) {
         xml.e("topic_tag")
             .e("name", post.topic_tag).up()
             .e("title_id", post.title_id).up()
