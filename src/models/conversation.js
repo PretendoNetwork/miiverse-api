@@ -3,7 +3,7 @@ const moment = require("moment");
 const snowflake = require('node-snowflake').Snowflake;
 
 const user = new Schema({
-    pid: String,
+    pid: Number,
     official: {
         type: Boolean,
         default: false
@@ -35,15 +35,14 @@ const  ConversationSchema = new Schema({
 });
 
 ConversationSchema.methods.newMessage = async function(message, fromPid) {
-    const users = this.get('users');
-    console.log(fromPid)
-    if(users[0].pid.toString() === fromPid.toString()) {;
-        users[1].read = false;
+    if(this.users[0].pid === fromPid) {
+        this.users[1].read = false;
+        this.markModified('users[1].read');
     }
     else {
-        users[0].read = false;
+        this.users[0].read = false;
+        this.markModified('users[0].read');
     }
-    this.set('users', users);
     this.set('last_updated', moment(new Date()));
     this.set('message_preview', message);
     await this.save();
@@ -51,9 +50,9 @@ ConversationSchema.methods.newMessage = async function(message, fromPid) {
 
 ConversationSchema.methods.markAsRead = async function(pid) {
     let users = this.get('users');
-    if(users[0].pid === pid.toString())
+    if(users[0].pid === pid)
         users[0].read = true;
-    else if(users[1].pid === pid.toString())
+    else if(users[1].pid === pid)
         users[1].read = true;
     this.set('users', users)
     this.markModified('users');

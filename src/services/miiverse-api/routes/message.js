@@ -15,8 +15,10 @@ router.post('/', upload.none(), async function (req, res) {
     let user = await database.getPNID(req.pid);
     let user2 = await database.getPNID(req.body.message_to_pid);
     let conversation = await database.getConversationByUsers([user.pid, user2.pid]);
+    let userSettings = await database.getUserSettings(req.pid), user2Settings = await database.getUserSettings(user2.pid), postID = await generatePostUID(21);
+    let friends = await util.data.getFriends(user2.pid);
     if(!conversation) {
-        if(!user || !user2)
+        if(!user || !user2 || userSettings || userSettings)
             return res.sendStatus(422)
         let document = {
             id: snowflake.nextId(),
@@ -39,6 +41,27 @@ router.post('/', upload.none(), async function (req, res) {
     }
     if(!conversation)
         return res.sendStatus(404);
+    if(!friends || friends.indexOf(req.pid) === -1)
+        return res.sendStatus(422);
+
+    if(req.body.body === '' && req.body.painting === ''  && req.body.screenshot === '') {
+        res.status(422);
+        return res.redirect(`/friend_messages/${conversation.id}`);
+    }
+    let paramPackData = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    let appData = "", painting = "", paintingURI = "", screenshot = null;
+    if (req.body.app_data)
+        appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
+    if (req.body.painting) {
+        painting = req.body.painting.replace(/\0/g, "").trim();
+        paintingURI = await util.processPainting(painting, true);
+        await util.uploadCDNAsset('pn-cdn', `paintings/${req.pid}/${postID}.png`, paintingURI, 'public-read');
+    }
+    if (req.body.screenshot) {
+        screenshot = req.body.screenshot.replace(/\0/g, "").trim();
+        await util.uploadCDNAsset('pn-cdn', `screenshots/${req.pid}/${postID}.jpg`, Buffer.from(screenshot, 'base64'), 'public-read');
+    }
+
     let miiFace;
     switch (parseInt(req.body.feeling_id)) {
         case 1:
@@ -60,22 +83,39 @@ router.post('/', upload.none(), async function (req, res) {
             miiFace = 'normal_face.png';
             break;
     }
-    let document = {
+    let body = req.body.body;
+    if(body)
+        body = req.body.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, "");
+    if(body.length > 280)
+        body = body.substring(0,280);
+    const document = {
+        title_id: paramPackData.title_id,
+        community_id: community.olive_community_id,
         screen_name: user.mii.name,
-        body: req.body.body,
-        painting: req.body.raw,
+        body: body,
+        app_data: appData,
+        painting: painting,
+        screenshot: screenshot ? `/screenshots/${req.pid}/${postID}.jpg`: "",
+        screenshot_length: screenshot ? screenshot.length : null,
+        country_id: paramPackData.country_id,
         created_at: new Date(),
-        id: generatePostUID(21),
-        mii: user.mii.data,
-        mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
-        pid: user.pid,
-        verified: (user.access_level === 2 || user.access_level === 3),
-        parent: null,
+        feeling_id: req.body.feeling_id,
+        id: postID,
         search_key: req.body.search_key,
         topic_tag: req.body.topic_tag,
-        community_id: conversation.id,
+        is_autopost: req.body.is_autopost,
+        is_spoiler: (req.body.spoiler) ? 1 : 0,
+        is_app_jumpable: req.body.is_app_jumpable,
+        language_id: req.body.language_id,
+        mii: PNID.mii.data,
+        mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
+        pid: req.pid,
+        platform_id: paramPackData.platform_id,
+        region_id: paramPackData.region_id,
+        verified: (PNID.access_level === 2 || PNID.access_level === 3),
         message_to_pid: req.body.message_to_pid,
-        title_id: req.paramPackData.title_id,
+        parent:  null,
+        removed: false
     };
     const newPost = new POST(document);
     newPost.save();

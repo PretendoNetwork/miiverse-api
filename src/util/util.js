@@ -314,6 +314,16 @@ let methods = {
                 'X-API-Key': api_key
             })
         })
+    },
+    getFriendRequests: async function(pid) {
+        const requests = await client.getUserFriendRequestsIncoming({
+            pid: pid
+        }, {
+            metadata: grpc.Metadata({
+                'X-API-Key': api_key
+            })
+        });
+        return requests.friendRequests;
     }
 };
 module.exports = methods;
