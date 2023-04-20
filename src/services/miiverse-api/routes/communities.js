@@ -110,7 +110,8 @@ router.post('/', multer().none(), async function (req, res) {
         olive_community_id: (parseInt(parent_community.community_id) + (5000 * num_communities)).toString(),
         app_data: req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ""),
     });
-    new_community.save();
+
+    await new_community.save();
 
     let response = await comPostGen.Community(new_community);
     res.contentType("application/xml");
