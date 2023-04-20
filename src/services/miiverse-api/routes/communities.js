@@ -93,8 +93,6 @@ router.post('/', multer().none(), async function (req, res) {
     const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
     let parent_community = await database.getCommunityByTitleIDs(paramPack.title_id);
     if(!parent_community) res.sendStatus(404);
-    
-    console.log(req.body);
 
     let num_communities = await COMMUNITY.count();
     let new_community = new COMMUNITY({
