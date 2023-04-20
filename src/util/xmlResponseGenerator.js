@@ -87,6 +87,31 @@ class XmlResponseGenerator {
     }
 
     /**
+     * Generates response to a acommunity request
+     * @param communities
+     * @returns xml
+     * @constructor
+     */
+    static async Community(community) {
+        let xml = xmlbuilder.create("result", { encoding: 'UTF-8' })
+            .e("has_error", "0").up()
+            .e("version", "1").up()
+            .e("request_name", "community").up()
+            .e("community")
+                .e('community_id', community.community_id).up()
+                .e("name", community.name).up()
+                .e("description", community.description).up()
+                .e("icon").up()
+                .e("icon_3ds").up()
+                .e("pid").up()
+                .e("app_data", community.app_data).up()
+                .e("is_user_community", 0)
+            .up()
+        
+        return xml.up().end({ pretty: true, allowEmpty: true});
+    }
+
+    /**
      * Generate response to request for single post
      * @param post
      * @returns xml

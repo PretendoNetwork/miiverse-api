@@ -65,6 +65,13 @@ async function getCommunityByTitleID(title_id) {
     });
 }
 
+async function getCommunityByTitleIDs(title_ids) {
+    verifyConnected();
+    return COMMUNITY.findOne({
+        title_ids: {$in: title_ids}
+    });
+}
+
 async function getCommunityByID(community_id) {
     verifyConnected();
     return COMMUNITY.findOne({
@@ -490,6 +497,7 @@ module.exports = {
     getNewCommunities,
     getSubCommunities,
     getCommunityByTitleID,
+    getCommunityByTitleIDs,
     getCommunityByID,
     getTotalPostsByCommunity,
     getPostsByCommunity,

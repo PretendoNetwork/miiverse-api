@@ -87,4 +87,17 @@ router.get('/:appID/posts', async function (req, res) {
     res.send(await comPostGen.PostsResponse(posts, community, options));
 });
 
+// Handler for POST on '/v1/communities'
+router.post('/', async function (req, res) {
+    console.error("AM I HERE ?.?.????");
+    console.log(req.body);
+    const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    console.log(paramPack);
+    let community = await database.getCommunityByTitleIDs(paramPack.title_id);
+    if(!community) res.sendStatus(404);
+    let response = await comPostGen.Community(community);
+    res.contentType("application/xml");
+    res.send(response);
+});
+
 module.exports = router;
