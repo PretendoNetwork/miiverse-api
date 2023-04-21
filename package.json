@@ -1,11 +1,13 @@
 {
-  "name": "pretendoverse",
-  "version": "1.0.0",
+  "name": "miiverse-api",
+  "version": "2.0.0",
   "description": "Miiverse API Server",
-  "main": "./src/server.js",
+  "main": "./dist/server.js",
   "scripts": {
-    "start": "node ./src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run clean && npx tsc && npx tsc-alias",
+    "clean": "rm -rf ./dist",
+    "start": "node .",
+    "start:dev": "NODE_ENV=development node ."
   },
   "keywords": [],
   "author": "Jemma",
@@ -41,6 +43,8 @@
     "object-to-xml": "^2.0.0",
     "request": "^2.88.2",
     "string-sanitizer": "^1.1.1",
+    "tsc-alias": "^1.8.5",
+    "typescript": "^5.0.4",
     "xml2json": "^0.12.0"
   }
 }
