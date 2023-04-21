@@ -5,6 +5,7 @@ const comPostGen = require('../../../util/xmlResponseGenerator');
 const util = require('../../../util/util');
 const {COMMUNITY} = require("../../../models/communities");
 const {POST} = require("../../../models/post");
+const multer  = require('multer')
 
 /* GET post titles. */
 router.get('/', async function (req, res) {
@@ -85,6 +86,36 @@ router.get('/:appID/posts', async function (req, res) {
     }
     res.contentType("application/xml");
     res.send(await comPostGen.PostsResponse(posts, community, options));
+});
+
+// Handler for POST on '/v1/communities'
+router.post('/', multer().none(), async function (req, res) {
+    const paramPack = util.decodeParamPack(req.headers["x-nintendo-parampack"]);
+    let parent_community = await database.getCommunityByTitleIDs(paramPack.title_id);
+    if(!parent_community) res.sendStatus(404);
+
+    let num_communities = await COMMUNITY.count();
+    let new_community = new COMMUNITY({
+        platform_id: 0, // WiiU
+        name: req.body.name,
+        description: req.body.description,
+        open: true,
+        allows_comments: true,
+        type: 1,
+        parent: parent_community.community_id,
+        admins: parent_community.admins,
+        icon: req.body.icon,
+        title_id: paramPack.title_id,
+        community_id: (parseInt(parent_community.community_id) + (5000 * num_communities)).toString(),
+        olive_community_id: (parseInt(parent_community.community_id) + (5000 * num_communities)).toString(),
+        app_data: req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ""),
+    });
+
+    await new_community.save();
+
+    let response = await comPostGen.Community(new_community);
+    res.contentType("application/xml");
+    res.send(response);
 });
 
 module.exports = router;
