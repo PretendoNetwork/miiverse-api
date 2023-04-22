@@ -131,6 +131,5 @@ dist
 
 # custom
 certs
-config.json
 src/logs
 dist

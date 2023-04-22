@@ -50,7 +50,7 @@ router.post('/', upload.none(), async function (req, res) {
         return res.redirect(`/friend_messages/${conversation.id}`);
     }
     let paramPackData = decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let appData = "", painting = "", paintingURI = "", screenshot = null;
+    let appData = "", painting = "", paintingURI, screenshot = null;
     if (req.body.app_data)
         appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
     if (req.body.painting) {

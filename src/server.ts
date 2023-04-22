@@ -5,11 +5,12 @@ import morgan from 'morgan';
 import xml from 'object-to-xml';
 import { connect as connectDatabase } from '@/database';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
-import config from '../config.json';
 import xmlparser from '@/middleware/xml-parser';
 import auth from '@/middleware/auth';
 
 import miiverse from '@/services/miiverse-api';
+
+import { config } from '@/config-manager';
 
 const { http: { port } } = config;
 const app = express();

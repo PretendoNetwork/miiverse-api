@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 import { LOG_INFO, LOG_ERROR } from '@/logger';
-import { account_db as mongooseConfig } from '../config.json';
+import { config } from '@/config-manager';
 
-const { uri, database, options } = mongooseConfig;
+const { account_db: mongooseConfig } = config;
 
 export let pnidConnection: mongoose.Connection;
 
 export function connect() {
     if(!pnidConnection)
-        pnidConnection = makeNewConnection(`${uri}/${database}`);
+        pnidConnection = makeNewConnection(mongooseConfig.connection_string);
 }
 
 export function verifyConnected() {
@@ -18,7 +18,7 @@ export function verifyConnected() {
 }
 
 export function makeNewConnection(uri) {
-    pnidConnection = mongoose.createConnection(uri, options as mongoose.ConnectOptions);
+    pnidConnection = mongoose.createConnection(uri, mongooseConfig.options);
 
     pnidConnection.on('error', function (error) {
         LOG_ERROR(`MongoDB connection ${this.name} ${JSON.stringify(error)}`);
@@ -36,4 +36,4 @@ export function makeNewConnection(uri) {
     return pnidConnection;
 }
 
-pnidConnection = makeNewConnection(`${uri}/${database}`);
+pnidConnection = makeNewConnection(mongooseConfig.connection_string);

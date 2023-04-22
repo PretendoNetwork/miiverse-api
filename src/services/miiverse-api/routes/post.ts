@@ -139,7 +139,7 @@ async function newPost(req, res) {
         return res.sendStatus(403);
     }
 
-    let appData = "", painting = "", paintingURI = "", screenshot = null;
+    let appData = "", painting = "", paintingURI, screenshot = null;
     if (req.body.app_data)
         appData = req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, "");
     if (req.body.painting) {

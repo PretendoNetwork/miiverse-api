@@ -18,6 +18,7 @@
 		"bmp-js": "^0.1.0",
 		"body-parser": "^1.20.2",
 		"colors": "^1.4.0",
+		"dotenv": "^16.0.3",
 		"express": "^4.17.1",
 		"express-session": "^1.17.0",
 		"express-subdomain": "^1.0.5",
@@ -41,8 +42,13 @@
 		"xmlbuilder2": "0.0.4"
 	},
 	"devDependencies": {
+		"@types/bmp-js": "^0.1.0",
 		"@types/express": "^4.17.17",
+		"@types/fs-extra": "^11.0.1",
 		"@types/morgan": "^1.9.4",
+		"@types/node-rsa": "^1.1.1",
+		"@types/pako": "^2.0.0",
+		"@types/pngjs": "^6.0.1",
 		"@typescript-eslint/eslint-plugin": "^5.59.0",
 		"@typescript-eslint/parser": "^5.59.0",
 		"eslint": "^8.38.0",

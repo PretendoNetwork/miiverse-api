@@ -9,15 +9,14 @@ import { Notification } from '@/models/notification';
 import { PNID } from '@/models/pnid';
 import { Post } from '@/models/post';
 import { Settings } from '@/models/settings';
+import { config } from '@/config-manager';
 
-import { mongoose as mongooseConfig } from '../config.json';
-
-const { uri, database, options } = mongooseConfig;
+const { mongoose: mongooseConfig } = config;
 
 let connection;
 
 export async function connect() {
-    await mongoose.connect(`${uri}/${database}`, options as mongoose.ConnectOptions || {});
+    await mongoose.connect(mongooseConfig.connection_string, mongooseConfig.options);
     connection = mongoose.connection;
     connection.on('connected', function () {
         LOG_INFO(`MongoDB connected ${this.name}`);
