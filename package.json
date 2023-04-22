@@ -5,7 +5,7 @@
 	"main": "./dist/server.js",
 	"scripts": {
 		"lint": "npx eslint .",
-		"build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
+		"build": "npm run clean && npx tsc && npx tsc-alias",
 		"clean": "rm -rf ./dist",
 		"start": "node .",
 		"start:dev": "NODE_ENV=development node ."
@@ -22,7 +22,6 @@
 		"express-session": "^1.17.0",
 		"express-subdomain": "^1.0.5",
 		"fs-extra": "^9.0.0",
-		"grpc": "github:pretendonetwork/grpc-js",
 		"memoizee": "^0.4.15",
 		"moment": "^2.24.0",
 		"moment-timezone": "^0.5.27",
@@ -35,12 +34,15 @@
 		"node-snowflake": "0.0.1",
 		"pako": "^1.0.11",
 		"pngjs": "^5.0.0",
+		"pretendo-grpc-ts": "github:PretendoNetwork/grpc-ts",
 		"sanitize": "^2.1.0",
 		"tga": "^1.0.3",
 		"xmlbuilder": "^15.1.1",
 		"xmlbuilder2": "0.0.4"
 	},
 	"devDependencies": {
+		"@types/express": "^4.17.17",
+		"@types/morgan": "^1.9.4",
 		"@typescript-eslint/eslint-plugin": "^5.59.0",
 		"@typescript-eslint/parser": "^5.59.0",
 		"eslint": "^8.38.0",
