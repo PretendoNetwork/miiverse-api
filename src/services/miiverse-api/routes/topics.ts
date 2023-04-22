@@ -1,5 +1,5 @@
 import express from 'express';
-import memoize from 'memoize';
+import memoize from 'memoizee';
 import { getPNID, getEndPoint } from '@/database';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';

@@ -24,7 +24,6 @@ if (process.env.PN_MIIVERSE_API_CONFIG_MONGOOSE_ACCOUNT_SERVER_CONNECT_OPTIONS_P
 	LOG_WARN('No Mongoose connection options found for main connection. To add connection options, set PN_MIIVERSE_API_CONFIG_MONGOOSE_ACCOUNT_SERVER_CONNECT_OPTIONS_PATH to the path of your options JSON file');
 }
 
-
 export const config: Config = {
 	http: {
 		port: Number(process.env.PN_MIIVERSE_API_CONFIG_HTTP_PORT || '')

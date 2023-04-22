@@ -8,7 +8,7 @@ import { PNG } from 'pngjs';
 import bmp from 'bmp-js';
 import aws from 'aws-sdk';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
-import { FriendsDefinition } from 'pretendo-grpc-ts/src/friends/friends_service';
+import { friends } from 'pretendo-grpc-ts';
 import { ParsedQs } from 'qs';
 import { getPNID } from '@/database';
 import { LOG_ERROR } from '@/logger';
@@ -16,12 +16,13 @@ import { Settings } from '@/models/settings';
 import { Content } from '@/models/content';
 import { SafeQs } from '@/types/common/safe-qs';
 import { ParamPack } from '@/types/common/param-pack';
-
 import { config } from '@/config-manager';
 
+const { FriendsService } = friends;
 const { ip, port, api_key } = config.grpc.friends;
+
 const channel = createChannel(`${ip}:${port}`);
-const client = createClient(FriendsDefinition, channel);
+const client = createClient(FriendsService.FriendsDefinition, channel);
 
 const s3 = new aws.S3({
 	endpoint: new aws.Endpoint(config.s3.endpoint),
