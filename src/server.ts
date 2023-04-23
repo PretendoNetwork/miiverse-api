@@ -8,7 +8,8 @@ import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import xmlparser from '@/middleware/xml-parser';
 import auth from '@/middleware/auth';
 
-import miiverse from '@/services/miiverse-api';
+import discovery from '@/services/discovery';
+import api from '@/services/api';
 
 import { config } from '@/config-manager';
 
@@ -32,7 +33,8 @@ app.use(xmlparser);
 app.use(auth);
 
 // import the servers into one
-app.use(miiverse);
+app.use(discovery);
+app.use(api);
 
 // 404 handler
 LOG_INFO('Creating 404 status handler');
