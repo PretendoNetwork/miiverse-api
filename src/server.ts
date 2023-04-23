@@ -69,10 +69,16 @@ app.use((error: any, _request: express.Request, response: express.Response, _nex
 	}));
 });
 
-// Starts the server
-LOG_INFO('Starting server');
-connectDatabase().then(() => {
+async function main(): Promise<void> {
+	// Starts the server
+	LOG_INFO('Starting server');
+
+	await connectDatabase();
+	// TODO - Connect to account DB here too?
+
 	app.listen(port, () => {
 		LOG_SUCCESS(`Server started on port ${port}`);
 	});
-});
+}
+
+main().catch(console.error);
