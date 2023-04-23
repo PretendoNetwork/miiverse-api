@@ -1,10 +1,10 @@
-// to make the file a module and avoid the TypeScript error
-export {};
+import { ParamPack } from '@/types/common/param-pack';
 
 declare global {
 	namespace Express {
 		interface Request {
 			pid: number;
+			paramPack: ParamPack
 		}
 	}
 }

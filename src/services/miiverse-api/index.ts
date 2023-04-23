@@ -1,6 +1,5 @@
 import express from 'express';
 import subdomain from 'express-subdomain';
-import sessionMiddleware from '@/middleware/session';
 import { LOG_INFO } from '@/logger';
 
 import DISCOVERY from '@/services/miiverse-api/routes/discovery';
@@ -26,9 +25,6 @@ LOG_INFO('[MIIVERSE] Creating \'api\' subdomain');
 router.use(subdomain('api.olv', api));
 router.use(subdomain('api-test.olv', api));
 router.use(subdomain('api-dev.olv', api));
-
-LOG_INFO('[MIIVERSE] Importing middleware');
-discovery.use(sessionMiddleware);
 
 // Setup routes
 discovery.use('/v1/endpoint', DISCOVERY);

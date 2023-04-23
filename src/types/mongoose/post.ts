@@ -9,16 +9,16 @@ export interface IPost {
     painting: string;
     screenshot: string;
     screenshot_length: number;
-    search_key: Types.Array<string>;
+    search_key: string[];
     topic_tag: string;
     community_id: string;
-    created_at: number;
+    created_at: Date;
     feeling_id: number;
     is_autopost: number;
-    is_community_private_autopost: number;
+    is_community_private_autopost?: number;
     is_spoiler: number;
     is_app_jumpable: number;
-    empathy_count: number;
+    empathy_count?: number;
     country_id: number;
     language_id: number;
     mii: string;
@@ -27,13 +27,13 @@ export interface IPost {
     platform_id: number;
     region_id: number;
     parent: string;
-    reply_count: number;
+    reply_count?: number;
     verified: boolean;
-    message_to_pid: string;
+    message_to_pid?: string;
     removed: boolean;
-    removed_reason: string;
-    yeahs: Types.Array<number>;
-    number: number;
+    removed_reason?: string;
+    yeahs?: Types.Array<number>;
+    number?: number;
 }
 
 export interface IPostMethods {

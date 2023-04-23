@@ -1,23 +1,26 @@
 import express from 'express';
 import xml from 'object-to-xml';
+import { getValueFromQueryString } from '@/util';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
-router.get('/:pid/notifications', async function(req, res) {
-    let type = req.query.type, title_id = req.query.title_id;
-    console.log(type);
-    console.log(title_id);
-    console.log(req.params.pid);
+router.get('/:pid/notifications', function(request: express.Request, response: express.Response): void {
+	const type: string | undefined = getValueFromQueryString(request.query, 'type');
+	const titleID: string | undefined = getValueFromQueryString(request.query, 'title_id');
+	const pid: string | undefined = getValueFromQueryString(request.query, 'pid');
 
-    res.set("Content-Type", "application/xml");
-    let response = {
-        result: {
-            has_error: 0,
-            version: 1,
-            posts: " "
-        }
-    };
-    return res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xml(response));
+	console.log(type);
+	console.log(titleID);
+	console.log(pid);
+
+	response.set('Content-Type', 'application/xml');
+	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+		result: {
+			has_error: 0,
+			version: 1,
+			posts: ' '
+		}
+	}));
 });
 
 export default router;

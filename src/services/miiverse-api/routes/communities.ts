@@ -1,133 +1,193 @@
 import express from 'express';
 import multer from 'multer';
+import { z } from 'zod';
 import {
-    getSubCommunities,
-    getMostPopularCommunities,
-    getNewCommunities,
-    getCommunityByTitleID,
-    getUserContent,
-    getCommunityByTitleIDs
+	getSubCommunities,
+	getMostPopularCommunities,
+	getNewCommunities,
+	getCommunityByTitleID,
+	getUserContent,
+	getCommunityByTitleIDs
 } from '@/database';
 import comPostGen from '@/util/xmlResponseGenerator';
-import { decodeParamPack } from '@/util';
-import { Community } from "@/models/community";
-import { Post } from "@/models/post";
+import { getValueFromQueryString } from '@/util';
+import { LOG_WARN } from '@/logger';
+import { Community } from '@/models/community';
+import { Post } from '@/models/post';
+import { XMLResponseGeneratorOptions } from '@/types/common/xml-response-generator-options';
+import { CreateNewCommunityBody } from '@/types/common/create-new-community-body';
+import { HydratedCommunityDocument } from '@/types/mongoose/community';
+import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
+import { HydratedContentDocument } from '@/types/mongoose/content';
+import { HydratedPostDocument } from '@/types/mongoose/post';
 
-const router = express.Router();
+
+const createNewCommunitySchema = z.object({
+	name: z.string(),
+	description: z.string(),
+	icon: z.string(),
+	app_data: z.string()
+});
+
+const router: express.Router = express.Router();
 
 /* GET post titles. */
-router.get('/', async function (req, res) {
-    const paramPack = decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let community = await getCommunityByTitleID(paramPack.title_id);
-    if(!community) res.sendStatus(404);
+router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	const community: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
+	if (!community) {
+		response.sendStatus(404);
+		return;
+	}
 
-    let communities = await getSubCommunities(community.olive_community_id);
-    if(!communities) res.sendStatus(404);
-    communities.unshift(community);
-    let response = await comPostGen.Communities(communities);
-    res.contentType("application/xml");
-    res.send(response);
+	const subCommunities: HydratedCommunityDocument[] = await getSubCommunities(community.olive_community_id);
+	subCommunities.unshift(community);
+
+	const communities: string = await comPostGen.Communities(subCommunities);
+
+	response.contentType('application/xml');
+	response.send(communities);
 });
 
-router.get('/popular', async function (req, res) {
-    let community = await getMostPopularCommunities(100);
-    if (community != null) {
-        res.contentType("application/json");
-        res.send(community);
-    } else res.sendStatus(404);
+router.get('/popular', async function (_request: express.Request, response: express.Response): Promise<void> {
+	const popularCommunities: HydratedCommunityDocument[] = await getMostPopularCommunities(100);
+
+	response.contentType('application/json');
+	response.send(popularCommunities);
 });
 
-router.get('/new', async function (req, res) {
-    let community = await getNewCommunities(100);
-    if (community != null) {
-        res.contentType("application/json");
-        res.send(community);
-    } else res.sendStatus(404);
+router.get('/new', async function (_request: express.Request, response: express.Response): Promise<void> {
+	const newCommunities: HydratedCommunityDocument[] = await getNewCommunities(100);
+
+	response.contentType('application/json');
+	response.send(newCommunities);
 });
 
-router.get('/:appID/posts', async function (req, res) {
-    const paramPack = decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let community = await Community.findOne({ community_id: req.params.appID });
-    if(!community)
-        community = await getCommunityByTitleID(paramPack.title_id);
-    if(!community)
-        res.sendStatus(404);
-    let query = {
-        community_id: community.olive_community_id,
-        removed: false,
-        app_data: { $ne: null },
-        message_to_pid: { $eq: null },
-        search_key: null,
-        is_spoiler: null,
-        painting: null,
-        pid: null
-    }
+router.get('/:appID/posts', async function (request: express.Request, response: express.Response): Promise<void> {
+	let community: HydratedCommunityDocument | null = await Community.findOne({
+		community_id: request.params.appID
+	});
 
-    if(req.query.search_key)
-        query.search_key = req.query.search_key;
-    if(!req.query.allow_spoiler)
-        query.is_spoiler = 0;
-    //TODO: There probably is a type for text and screenshots too, will have to investigate
-    if(req.query.type === 'memo')
-        query.painting = { $ne: null };
-    if(req.query.by === 'followings') {
-        let userContent = await getUserContent(req.pid);
-        query.pid = userContent.following_users;
-    }
-    else if(req.query.by === 'self')
-        query.pid = req.pid;
+	if (!community) {
+		community = await getCommunityByTitleID(request.paramPack.title_id);
+	}
 
-    let posts;
-    if(req.query.distinct_pid === '1')
-        posts = await Post.aggregate([
-            { $match: query }, // filter based on input query
-            { $sort: { created_at: -1 } }, // sort by 'created_at' in descending order
-            { $group: { _id: '$pid', doc: { $first: '$$ROOT' } } }, // remove any duplicate 'pid' elements
-            { $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
-            { $limit: (req.query.limit ? Number(req.query.limit) : 10) } // only return the top 10 results
-        ]);
-    else
-        posts = await Post.find(query).sort({ created_at: -1}).limit(parseInt(req.query.limit as string));
+	if (!community) {
+		response.sendStatus(404);
+		return;
+	}
 
-    /*  Build formatted response and send it off. */
-    let options = {
-        name: 'posts',
-        with_mii: req.query.with_mii === '1',
-        app_data: true,
-        topic_tag: true
-    }
-    res.contentType("application/xml");
-    res.send(await comPostGen.PostsResponse(posts, community, options));
+	const query: CommunityPostsQuery = {
+		community_id: community.olive_community_id,
+		removed: false,
+		app_data: { $ne: null },
+		message_to_pid: { $eq: null }
+	};
+
+	const searchKey: string | undefined = getValueFromQueryString(request.query, 'search_key');
+	const allowSpoiler: string | undefined = getValueFromQueryString(request.query, 'allow_spoiler');
+	const postType: string | undefined = getValueFromQueryString(request.query, 'type');
+	const queryBy: string | undefined = getValueFromQueryString(request.query, 'by');
+	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid');
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
+	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii');
+
+	let limit: number = 10;
+
+	if (limitString) {
+		limit = parseInt(limitString);
+	}
+
+	if (isNaN(limit)) {
+		limit = 10;
+	}
+
+	if (searchKey) {
+		query.search_key = searchKey;
+	}
+
+	if (!allowSpoiler) {
+		query.is_spoiler = 0;
+	}
+
+	//TODO: There probably is a type for text and screenshots too, will have to investigate
+	if (postType === 'memo') {
+		query.painting = { $ne: null };
+	}
+
+	if (queryBy === 'followings') {
+		const userContent: HydratedContentDocument | null = await getUserContent(request.pid);
+
+		if (!userContent) {
+			LOG_WARN(`USER PID ${request.pid} HAS NO USER CONTENT`);
+			query.pid = [];
+		} else {
+			query.pid = userContent.following_users;
+		}
+	} else if (queryBy === 'self') {
+		query.pid = request.pid;
+	}
+
+	let posts: HydratedPostDocument[];
+	if (distinctPID && distinctPID === '1') {
+		posts = await Post.aggregate([
+			{ $match: query }, // filter based on input query
+			{ $sort: { created_at: -1 } }, // sort by 'created_at' in descending order
+			{ $group: { _id: '$pid', doc: { $first: '$$ROOT' } } }, // remove any duplicate 'pid' elements
+			{ $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
+			{ $limit: limit } // only return the top 10 results
+		]);
+	} else {
+		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
+	}
+
+	/*  Build formatted response and send it off. */
+	const options: XMLResponseGeneratorOptions = {
+		name: 'posts',
+		with_mii: withMii === '1',
+		app_data: true,
+		topic_tag: true
+	};
+	response.contentType('application/xml');
+	response.send(await comPostGen.PostsResponse(posts, community, options));
 });
 
 // Handler for POST on '/v1/communities'
-router.post('/', multer().none(), async function (req, res) {
-    const paramPack = decodeParamPack(req.headers["x-nintendo-parampack"]);
-    let parent_community = await getCommunityByTitleIDs(paramPack.title_id);
-    if(!parent_community) res.sendStatus(404);
+router.post('/', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleIDs([request.paramPack.title_id]);
 
-    let num_communities = await Community.count();
-    let new_community = new Community({
-        platform_id: 0, // WiiU
-        name: req.body.name,
-        description: req.body.description,
-        open: true,
-        allows_comments: true,
-        type: 1,
-        parent: parent_community.community_id,
-        admins: parent_community.admins,
-        icon: req.body.icon,
-        title_id: paramPack.title_id,
-        community_id: (parseInt(parent_community.community_id) + (5000 * num_communities)).toString(),
-        olive_community_id: (parseInt(parent_community.community_id) + (5000 * num_communities)).toString(),
-        app_data: req.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ""),
-    });
+	if (!parentCommunity) {
+		response.sendStatus(404);
+		return;
+	}
 
-    await new_community.save();
+	// TODO - Better error codes, maybe do defaults?
+	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
+	if (!bodyCheck.success) {
+		response.sendStatus(404);
+		return;
+	}
 
-    let response = await comPostGen.Community(new_community);
-    res.contentType("application/xml");
-    res.send(response);
+	const communitiesCount: number = await Community.count();
+	const community: HydratedCommunityDocument = new Community({
+		platform_id: 0, // WiiU
+		name: request.body.name,
+		description: request.body.description,
+		open: true,
+		allows_comments: true,
+		type: 1,
+		parent: parentCommunity.community_id,
+		admins: parentCommunity.admins,
+		icon: request.body.icon,
+		title_id: request.paramPack.title_id,
+		community_id: (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)).toString(),
+		olive_community_id: (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)).toString(),
+		app_data: request.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
+	});
+
+	await community.save();
+
+	response.contentType('application/xml');
+	response.send(await comPostGen.Community(community));
 });
 
 export default router;

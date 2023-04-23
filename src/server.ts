@@ -36,36 +36,35 @@ app.use(miiverse);
 
 // 404 handler
 LOG_INFO('Creating 404 status handler');
-app.use((req, res) => {
-	//logger.warn(request.protocol + '://' + request.get('host') + request.originalUrl);
-	res.set('Content-Type', 'application/xml');
-	res.statusCode = 404;
-	const response = {
+app.use((_request: express.Request, response: express.Response) => {
+	response.set('Content-Type', 'application/xml');
+	response.statusCode = 404;
+
+	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
 			has_error: 1,
 			version: 1,
 			code: 404,
 			message: 'Not Found'
 		}
-	};
-	return res.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml(response));
+	}));
 });
 
 // non-404 error handler
 LOG_INFO('Creating non-404 status handler');
-app.use((error, req, res, _next) => {
-	const status = error.status || 500;
-	res.set('Content-Type', 'application/xml');
-	res.statusCode = 404;
-	const response = {
+app.use((error: any, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
+	const status: number = error.status || 500;
+	response.set('Content-Type', 'application/xml');
+	response.statusCode = 404;
+
+	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
 			has_error: 1,
 			version: 1,
 			code: status,
 			message: 'Not Found'
 		}
-	};
-	return res.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml(response));
+	}));
 });
 
 // Starts the server
