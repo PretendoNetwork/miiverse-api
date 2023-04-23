@@ -6,7 +6,7 @@ enum ACCESS_LEVEL {
 	Tester = 1,
 	Mod = 2,
 	Developer = 3
-};
+}
 
 type SERVER_ACCESS_LEVEL = 'prod' | 'test' | 'dev';
 
