@@ -16,6 +16,8 @@ const memoized = memoize(comPostGen.topics, { async: true, maxAge: 1000 * 60 * 6
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const user: HydratedPNIDDocument | null = await getPNID(request.pid);
 	let discovery: HydratedEndpointDocument | null;
 
@@ -37,7 +39,6 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	response.contentType('application/xml');
 	response.send(await memoized(communities));
 });
 

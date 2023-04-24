@@ -30,6 +30,8 @@ const router: express.Router = express.Router();
 const upload: multer.Multer = multer();
 
 router.post('/', upload.none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	// TODO - Better error codes, maybe do defaults?
 	const bodyCheck: z.SafeParseReturnType<SendMessageBody, SendMessageBody> = sendMessageSchema.safeParse(request.body);
 
@@ -199,6 +201,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 });
 
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
 
 	// TODO - Is this the limit?
@@ -255,7 +259,6 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.set('Content-Type', 'application/xml');
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
 			has_error: 0,
@@ -266,7 +269,8 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	}));
 });
 
-router.post('/:post_id/empathies', upload.none(), async function (_request: express.Request, _response: express.Response): Promise<void> {
+router.post('/:post_id/empathies', upload.none(), async function (_request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
 	// TODO - FOR JEMMA! FIX THIS! MISSING MONGOOSE SCHEMA METHODS
 	// * Remove the underscores from request and response to make them seen by eslint again
 	/*

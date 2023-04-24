@@ -21,7 +21,6 @@ import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedContentDocument } from '@/types/mongoose/content';
 import { HydratedPostDocument } from '@/types/mongoose/post';
 
-
 const createNewCommunitySchema = z.object({
 	name: z.string(),
 	description: z.string(),
@@ -33,6 +32,8 @@ const router: express.Router = express.Router();
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const community: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!community) {
 		response.sendStatus(404);
@@ -44,25 +45,26 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	const communities: string = await comPostGen.Communities(subCommunities);
 
-	response.contentType('application/xml');
 	response.send(communities);
 });
 
 router.get('/popular', async function (_request: express.Request, response: express.Response): Promise<void> {
 	const popularCommunities: HydratedCommunityDocument[] = await getMostPopularCommunities(100);
 
-	response.contentType('application/json');
+	response.type('application/json');
 	response.send(popularCommunities);
 });
 
 router.get('/new', async function (_request: express.Request, response: express.Response): Promise<void> {
 	const newCommunities: HydratedCommunityDocument[] = await getNewCommunities(100);
 
-	response.contentType('application/json');
+	response.type('application/json');
 	response.send(newCommunities);
 });
 
 router.get('/:appID/posts', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	let community: HydratedCommunityDocument | null = await Community.findOne({
 		community_id: request.params.appID
 	});
@@ -147,12 +149,14 @@ router.get('/:appID/posts', async function (request: express.Request, response: 
 		app_data: true,
 		topic_tag: true
 	};
-	response.contentType('application/xml');
+
 	response.send(await comPostGen.PostsResponse(posts, community, options));
 });
 
 // Handler for POST on '/v1/communities'
 router.post('/', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleIDs([request.paramPack.title_id]);
 
 	if (!parentCommunity) {
@@ -186,7 +190,6 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 
 	await community.save();
 
-	response.contentType('application/xml');
 	response.send(await comPostGen.Community(community));
 });
 

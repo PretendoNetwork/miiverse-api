@@ -13,7 +13,7 @@ router.get('/:pid/notifications', function(request: express.Request, response: e
 	console.log(titleID);
 	console.log(pid);
 
-	response.set('Content-Type', 'application/xml');
+	response.type('application/xml');
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
 			has_error: 0,

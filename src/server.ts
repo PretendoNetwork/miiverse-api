@@ -39,7 +39,7 @@ app.use(api);
 // 404 handler
 LOG_INFO('Creating 404 status handler');
 app.use((_request: express.Request, response: express.Response) => {
-	response.set('Content-Type', 'application/xml');
+	response.type('application/xml');
 	response.statusCode = 404;
 
 	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
@@ -56,7 +56,7 @@ app.use((_request: express.Request, response: express.Response) => {
 LOG_INFO('Creating non-404 status handler');
 app.use((error: any, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
 	const status: number = error.status || 500;
-	response.set('Content-Type', 'application/xml');
+	response.type('application/xml');
 	response.statusCode = 404;
 
 	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({

@@ -48,6 +48,8 @@ router.post('/', upload.none(), newPost);
 router.post('/:post_id/replies', upload.none(), newPost);
 
 router.post('/:post_id.delete', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const post: HydratedPostDocument | null = await getPostByID(request.params.post_id);
 	const userContent: HydratedContentDocument | null = await getUserContent(request.pid);
 
@@ -65,6 +67,8 @@ router.post('/:post_id.delete', async function (request: express.Request, respon
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const post: HydratedPostDocument | null = await getPostByID(request.params.post_id);
 
 	if (!post) {
@@ -108,6 +112,8 @@ router.post('/:post_id/empathies', upload.none(), async function (request: expre
 });
 
 router.get('/:post_id/replies', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
 
 	let limit: number = 10; // TODO - Is there a real limit?
@@ -139,15 +145,16 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		topic_tag: true
 	};
 
-	response.contentType('application/xml');
 	response.send(await communityPostGen.RepliesResponse(posts, options));
 });
 
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const postID: string | undefined = getValueFromQueryString(request.query, 'post_id');
 
 	if (!postID) {
-		response.set('Content-Type', 'application/xml');
+		response.type('application/xml');
 		response.statusCode = 404;
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {
@@ -163,7 +170,6 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	const post: HydratedPostDocument | null = await getPostByID(postID);
 
 	if (!post) {
-		response.set('Content-Type', 'application/xml');
 		response.statusCode = 404;
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {
@@ -179,6 +185,8 @@ router.get('/', async function (request: express.Request, response: express.Resp
 });
 
 async function newPost(request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const PNID: HydratedPNIDDocument | null = await getPNID(request.pid);
 	const userSettings: HydratedSettingsDocument | null = await getUserSettings(request.pid);
 	const bodyCheck = newPostSchema.safeParse(request.body);
@@ -340,7 +348,6 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	const duplicatePost = await getDuplicatePosts(request.pid, document);
 
 	if (duplicatePost) {
-		response.set('Content-Type', 'application/xml');
 		response.statusCode = 400;
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {

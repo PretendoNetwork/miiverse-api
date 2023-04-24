@@ -78,7 +78,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 }
 
 function badAuth(response: express.Response): void {
-	response.set('Content-Type', 'application/xml');
+	response.type('application/xml');
 	response.statusCode = 400;
 
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
@@ -124,16 +124,14 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 		case 7 :
 			message = 'NNID_BANNED';
 			error = 7;
-			response.set('Content-Type', 'application/xml');
 			break;
 		default :
 			message = 'SERVER_ERROR';
 			error = 15;
-			response.set('Content-Type', 'application/xml');
 			break;
 	}
 
-	response.set('Content-Type', 'application/xml');
+	response.type('application/xml');
 	response.statusCode = 400;
 
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({

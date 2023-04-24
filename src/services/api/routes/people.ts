@@ -13,6 +13,8 @@ const router: express.Router = express.Router();
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const userContent: HydratedContentDocument | null = await getUserContent(request.pid);
 
 	if (!userContent) {
@@ -74,11 +76,12 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		topic_tag: true
 	};
 
-	response.contentType('application/xml');
 	response.send(await xmlGenerator.People(posts, options));
 });
 
 router.get('/:pid/following', async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
 	const pid: number = parseInt(request.params.pid);
 
 	if (isNaN(pid)) {
