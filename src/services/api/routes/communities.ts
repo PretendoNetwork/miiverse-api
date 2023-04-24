@@ -172,7 +172,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	}
 
 	const communitiesCount: number = await Community.count();
-	const community: HydratedCommunityDocument = new Community({
+	const community: HydratedCommunityDocument = await Community.create({
 		platform_id: 0, // WiiU
 		name: request.body.name,
 		description: request.body.description,
@@ -187,8 +187,6 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		olive_community_id: (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)).toString(),
 		app_data: request.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 	});
-
-	await community.save();
 
 	response.send(await comPostGen.Community(community));
 });

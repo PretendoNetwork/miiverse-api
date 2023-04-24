@@ -70,7 +70,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 			return;
 		}
 
-		conversation = new Conversation({
+		conversation = await Conversation.create({
 			id: Snowflake.nextId(),
 			users: [
 				{
@@ -85,7 +85,6 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 				},
 			]
 		});
-		await conversation.save();
 	}
 
 	if (!conversation) {
@@ -157,7 +156,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		return;
 	}
 
-	const newPost = new Post({
+	await Post.create({
 		title_id: request.paramPack.title_id,
 		community_id: conversation.id,
 		screen_name: sender.mii.name,
@@ -186,7 +185,6 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		parent: null,
 		removed: false
 	});
-	newPost.save();
 
 	let postPreviewText = messageBody;
 	if (painting) {

@@ -361,8 +361,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	const newPost = new Post(document);
-	newPost.save();
+	const newPost: HydratedPostDocument = await Post.create(document);
 
 	if (parentPost) {
 		parentPost.reply_count = (parentPost.reply_count || 0) + 1;
