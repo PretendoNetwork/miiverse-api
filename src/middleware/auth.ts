@@ -1,5 +1,5 @@
 import express from 'express';
-import xml from 'object-to-xml';
+import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { getPNID, getEndpoint } from '@/database';
 import { getValueFromHeaders, decodeParamPack, getPIDFromServiceToken } from '@/util';
@@ -81,7 +81,7 @@ function badAuth(response: express.Response): void {
 	response.type('application/xml');
 	response.status(400);
 
-	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	response.send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
@@ -89,7 +89,7 @@ function badAuth(response: express.Response): void {
 			error_code: 7,
 			message: 'POSTING_FROM_NNID'
 		}
-	}));
+	}).end({ pretty: true }));
 }
 
 function serverError(response: express.Response, discovery: HydratedEndpointDocument): void {
@@ -134,7 +134,7 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 	response.type('application/xml');
 	response.status(400);
 
-	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	response.send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
@@ -142,7 +142,7 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 			error_code: error,
 			message: message
 		}
-	}));
+	}).end({ pretty: true }));
 }
 
 export default auth;

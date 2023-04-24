@@ -1,5 +1,5 @@
 import express from 'express';
-import xml from 'object-to-xml';
+import xmlbuilder from 'xmlbuilder';
 import { getPNID, getEndpoint } from '@/database';
 import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
@@ -30,7 +30,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	let errorCode: number = 0;
 	switch (discovery.status) {
 		case 0 :
-			response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+			response.send(xmlbuilder.create({
 				result: {
 					has_error: 0,
 					version: 1,
@@ -41,7 +41,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 						n3ds_host: discovery.n3ds_host
 					}
 				}
-			}));
+			}).end({ pretty: true }));
 
 			return ;
 		case 1 :
@@ -81,7 +81,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	}
 
 	response.status(400);
-	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	response.send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
@@ -89,7 +89,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			error_code: errorCode,
 			message: message
 		}
-	}));
+	}).end({ pretty: true }));
 });
 
 export default router;

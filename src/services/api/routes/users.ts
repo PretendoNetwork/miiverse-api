@@ -1,5 +1,5 @@
 import express from 'express';
-import xml from 'object-to-xml';
+import xmlbuilder from 'xmlbuilder';
 import { getValueFromQueryString } from '@/util';
 
 const router: express.Router = express.Router();
@@ -14,13 +14,13 @@ router.get('/:pid/notifications', function(request: express.Request, response: e
 	console.log(pid);
 
 	response.type('application/xml');
-	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	response.send(xmlbuilder.create({
 		result: {
 			has_error: 0,
 			version: 1,
 			posts: ' '
 		}
-	}));
+	}).end({ pretty: true }));
 });
 
 export default router;

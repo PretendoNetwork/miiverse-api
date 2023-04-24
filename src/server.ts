@@ -2,7 +2,7 @@ process.title = 'Pretendo - Miiverse';
 
 import express from 'express';
 import morgan from 'morgan';
-import xml from 'object-to-xml';
+import xmlbuilder from 'xmlbuilder';
 import { connect as connectDatabase } from '@/database';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import xmlparser from '@/middleware/xml-parser';
@@ -42,14 +42,14 @@ app.use((_request: express.Request, response: express.Response) => {
 	response.type('application/xml');
 	response.status(404);
 
-	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	return response.send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
 			code: 404,
 			message: 'Not Found'
 		}
-	}));
+	}).end({ pretty: true }));
 });
 
 // non-404 error handler
@@ -59,14 +59,14 @@ app.use((error: any, _request: express.Request, response: express.Response, _nex
 	response.type('application/xml');
 	response.status(404);
 
-	return response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	return response.send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
 			code: status,
 			message: 'Not Found'
 		}
-	}));
+	}).end({ pretty: true }));
 });
 
 async function main(): Promise<void> {

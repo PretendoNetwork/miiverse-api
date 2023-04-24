@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { Snowflake } from 'node-snowflake';
 import moment from 'moment';
-import xml from 'object-to-xml';
+import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { ParsedQs } from 'qs';
 import { getUserFriendPIDs, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
@@ -252,14 +252,14 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+	response.send(xmlbuilder.create({
 		result: {
 			has_error: 0,
 			version: 1,
 			request_name: 'friend_messages',
 			posts: postBody
 		}
-	}));
+	}).end({ pretty: true }));
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (_request: express.Request, response: express.Response): Promise<void> {

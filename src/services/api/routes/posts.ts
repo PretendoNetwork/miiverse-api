@@ -1,6 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import xml from 'object-to-xml';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
@@ -164,14 +163,14 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	if (!postID) {
 		response.type('application/xml');
 		response.status(404);
-		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+		response.send(xmlbuilder.create({
 			result: {
 				has_error: 1,
 				version: 1,
 				code: 404,
 				message: 'Not Found'
 			}
-		}));
+		}).end({ pretty: true }));
 		return;
 	}
 
@@ -179,14 +178,14 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	if (!post) {
 		response.status(404);
-		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+		response.send(xmlbuilder.create({
 			result: {
 				has_error: 1,
 				version: 1,
 				code: 404,
 				message: 'Not Found'
 			}
-		}));
+		}).end({ pretty: true }));
 		return;
 	}
 
@@ -343,7 +342,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 
 	if (duplicatePost) {
 		response.status(400);
-		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
+		response.send(xmlbuilder.create({
 			result: {
 				has_error: 1,
 				version: 1,
@@ -351,7 +350,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 				error_code: 7,
 				message: 'DUPLICATE_POST'
 			}
-		}));
+		}).end({ pretty: true }));
 		return;
 	}
 
