@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import xml from 'object-to-xml';
-import communityPostGen from '@/util/xmlResponseGenerator';
+import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
 import {
@@ -17,7 +17,6 @@ import {
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
-import { XMLResponseGeneratorOptions } from '@/types/common/xml-response-generator-options';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
 import { HydratedContentDocument } from '@/types/mongoose/content';
 import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
@@ -138,13 +137,23 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		return;
 	}
 
-	const options: XMLResponseGeneratorOptions = {
-		name: 'replies',
-		with_mii: request.query.with_mii as string === '1',
-		topic_tag: true
+	const json: Record<string, any> = {
+		has_error: 0,
+		version: 1,
+		request_name: 'replies',
+		posts: []
 	};
 
-	response.send(await communityPostGen.RepliesResponse(posts, options));
+	for (const post of posts) {
+		json.result.posts.push({
+			post: post.json({
+				with_mii: request.query.with_mii as string === '1',
+				topic_tag: true
+			})
+		});
+	}
+
+	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -178,9 +187,19 @@ router.get('/', async function (request: express.Request, response: express.Resp
 				message: 'Not Found'
 			}
 		}));
-	} else {
-		response.send(await communityPostGen.QueryResponse(post));
+		return;
 	}
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'posts.search',
+			posts: {
+				post: post.json({ with_mii: true })
+			}
+		}
+	}).end({ pretty: true, allowEmpty: true }));
 });
 
 async function newPost(request: express.Request, response: express.Response): Promise<void> {
@@ -364,7 +383,15 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		parentPost.save();
 	}
 
-	response.send(await communityPostGen.SinglePostResponse(post));
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			post: {
+				post: post.json({ with_mii: true })
+			}
+		}
+	}).end({ pretty: true, allowEmpty: true }));
 }
 
 export default router;

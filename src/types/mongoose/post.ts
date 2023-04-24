@@ -1,4 +1,6 @@
 import { Model, Types, HydratedDocument } from 'mongoose';
+import { HydratedCommunityDocument } from '@/types/mongoose/community';
+import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
 
 export interface IPost {
 	id: string;
@@ -42,6 +44,7 @@ export interface IPostMethods {
 	remove(reason: string): Promise<void>;
 	unRemove(reason: string): Promise<void>;
     generatePostUID(length: number): Promise<void>;
+    json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any>;
 }
 
 interface IPostQueryHelpers {}

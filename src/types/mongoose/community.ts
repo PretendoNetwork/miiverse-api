@@ -30,10 +30,11 @@ export interface ICommunity {
 }
 
 export interface ICommunityMethods {
-	upEmpathy(): Promise<void>
-	downEmpathy(): Promise<void>
-	upFollower(): Promise<void>
-	downFollower(): Promise<void>
+	upEmpathy(): Promise<void>;
+	downEmpathy(): Promise<void>;
+	upFollower(): Promise<void>;
+	downFollower(): Promise<void>;
+    json(): Record<string, any>;
 }
 
 interface ICommunityQueryHelpers {}

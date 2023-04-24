@@ -1,9 +1,9 @@
 import express from 'express';
-import xmlGenerator from '@/util/xmlResponseGenerator';
+import xmlbuilder from 'xmlbuilder';
+import moment from 'moment';
 import { getUserContent, getFollowedUsers } from '@/database';
 import { getValueFromQueryString, getUserFriendPIDs } from '@/util';
 import { Post } from '@/models/post';
-import { XMLResponseGeneratorOptions } from '@/types/common/xml-response-generator-options';
 import { HydratedContentDocument } from '@/types/mongoose/content';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedPostDocument } from '@/types/mongoose/post';
@@ -69,14 +69,30 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
 	}
 
-	/*  Build formatted response and send it off. */
-	const options: XMLResponseGeneratorOptions = {
-		name: 'posts',
-		with_mii: withMii === '1',
-		topic_tag: true
+	const json: Record<string, any> = {
+		has_error: 0,
+		version: 1,
+		expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
+		request_name: 'posts',
+		people: []
 	};
 
-	response.send(await xmlGenerator.People(posts, options));
+	for (const post of posts) {
+		json.result.people.push({
+			person: {
+				posts: [
+					{
+						post: post.json({
+							with_mii: withMii === '1',
+							topic_tag: true
+						})
+					}
+				]
+			}
+		});
+	}
+
+	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/:pid/following', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -98,7 +114,22 @@ router.get('/:pid/following', async function (request: express.Request, response
 
 	const people: HydratedSettingsDocument[] = await getFollowedUsers(userContent);
 
-	response.send(await xmlGenerator.Following(people));
+	const json: Record<string, any> = {
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'user_infos',
+			people: []
+		}
+	};
+
+	for (const person of people) {
+		json.result.people.push({
+			person: person.json()
+		});
+	}
+
+	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
 });
 
 export default router;

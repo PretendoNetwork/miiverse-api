@@ -1,4 +1,4 @@
-export interface XMLResponseGeneratorOptions {
+export interface PostToJSONOptions {
 	name?: string;
 	with_mii: boolean;
 	app_data?: boolean;

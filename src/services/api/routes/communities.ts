@@ -1,4 +1,5 @@
 import express from 'express';
+import xmlbuilder from 'xmlbuilder';
 import multer from 'multer';
 import { z } from 'zod';
 import {
@@ -9,12 +10,10 @@ import {
 	getUserContent,
 	getCommunityByTitleIDs
 } from '@/database';
-import comPostGen from '@/util/xmlResponseGenerator';
 import { getValueFromQueryString } from '@/util';
 import { LOG_WARN } from '@/logger';
 import { Community } from '@/models/community';
 import { Post } from '@/models/post';
-import { XMLResponseGeneratorOptions } from '@/types/common/xml-response-generator-options';
 import { CreateNewCommunityBody } from '@/types/common/create-new-community-body';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
@@ -34,18 +33,31 @@ const router: express.Router = express.Router();
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const community: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
-	if (!community) {
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
+	if (!parentCommunity) {
 		response.sendStatus(404);
 		return;
 	}
 
-	const subCommunities: HydratedCommunityDocument[] = await getSubCommunities(community.olive_community_id);
-	subCommunities.unshift(community);
+	const communities: HydratedCommunityDocument[] = await getSubCommunities(parentCommunity.olive_community_id);
+	communities.unshift(parentCommunity);
 
-	const communities: string = await comPostGen.Communities(subCommunities);
+	const json: Record<string, any> = {
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'communities',
+			communities: []
+		}
+	};
 
-	response.send(communities);
+	for (const community of communities) {
+		json.result.communities.push({
+			community: community.json()
+		});
+	}
+
+	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/popular', async function (_request: express.Request, response: express.Response): Promise<void> {
@@ -142,15 +154,27 @@ router.get('/:appID/posts', async function (request: express.Request, response: 
 		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
 	}
 
-	/*  Build formatted response and send it off. */
-	const options: XMLResponseGeneratorOptions = {
-		name: 'posts',
-		with_mii: withMii === '1',
-		app_data: true,
-		topic_tag: true
+	const json: Record<string, any> = {
+		has_error: 0,
+		version: 1,
+		request_name: 'posts',
+		topic: {
+			community_id: community.community_id
+		},
+		posts: []
 	};
 
-	response.send(await comPostGen.PostsResponse(posts, community, options));
+	for (const post of posts) {
+		json.result.posts.push({
+			post: post.json({
+				with_mii: withMii === '1',
+				app_data: true,
+				topic_tag: true
+			})
+		});
+	}
+
+	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
 });
 
 // Handler for POST on '/v1/communities'
@@ -188,7 +212,14 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		app_data: request.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 	});
 
-	response.send(await comPostGen.Community(community));
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
 });
 
 export default router;

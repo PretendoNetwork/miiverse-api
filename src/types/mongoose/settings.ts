@@ -26,6 +26,7 @@ export interface ISettingsMethods {
 	relationshipVisible(active: boolean): Promise<void>;
 	countryVisible(active: boolean): Promise<void>;
 	favCommunityVisible(active: boolean): Promise<void>;
+    json(): Record<string, any>;
 }
 
 interface ISettingsQueryHelpers {}

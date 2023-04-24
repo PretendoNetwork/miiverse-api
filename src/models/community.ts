@@ -93,4 +93,17 @@ CommunitySchema.method('downFollower', async function downFollower(): Promise<vo
 	await this.save();
 });
 
+CommunitySchema.method('json', function json(): Record<string, any> {
+	return {
+		community_id: this.community_id,
+		name: this.name,
+		description: this.description,
+		icon: '',
+		icon_3ds: '',
+		pid: '',
+		app_data: this.app_data,
+		is_user_community: '0'
+	};
+});
+
 export const Community: CommunityModel = model<ICommunity, CommunityModel>('Community', CommunitySchema);
