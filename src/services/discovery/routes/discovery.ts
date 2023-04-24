@@ -80,7 +80,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			break;
 	}
 
-	response.statusCode = 400;
+	response.status(400);
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
 			has_error: 1,

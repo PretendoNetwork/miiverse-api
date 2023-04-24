@@ -79,7 +79,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 
 function badAuth(response: express.Response): void {
 	response.type('application/xml');
-	response.statusCode = 400;
+	response.status(400);
 
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {
@@ -132,7 +132,7 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 	}
 
 	response.type('application/xml');
-	response.statusCode = 400;
+	response.status(400);
 
 	response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 		result: {

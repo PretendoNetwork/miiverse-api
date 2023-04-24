@@ -155,7 +155,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	if (!postID) {
 		response.type('application/xml');
-		response.statusCode = 404;
+		response.status(404);
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {
 				has_error: 1,
@@ -170,7 +170,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	const post: HydratedPostDocument | null = await getPostByID(postID);
 
 	if (!post) {
-		response.statusCode = 404;
+		response.status(404);
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {
 				has_error: 1,
@@ -348,7 +348,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	const duplicatePost = await getDuplicatePosts(request.pid, document);
 
 	if (duplicatePost) {
-		response.statusCode = 400;
+		response.status(400);
 		response.send('<?xml version="1.0" encoding="UTF-8"?>\n' + xml({
 			result: {
 				has_error: 1,
