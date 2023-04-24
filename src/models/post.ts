@@ -1,5 +1,6 @@
+import crypto from 'node:crypto';
 import { Schema, model } from 'mongoose';
-import { IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
+import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
 
 const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: String,
@@ -78,6 +79,8 @@ const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	removed_reason: String,
 	yeahs: [Number],
 	number: Number
+}, {
+	id: false // * Disables the .id() getter used by Mongoose in TypeScript. Needed to have our own .id field
 });
 
 PostSchema.method('upReply', async function upReply() {
@@ -112,6 +115,26 @@ PostSchema.method('unRemove', async function unRemove(reason) {
 	this.set('remove', false);
 	this.set('removed_reason', reason);
 	await this.save();
+});
+
+PostSchema.method('generatePostUID', async function generatePostUID(length: number) {
+	const id: string = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, '').substring(0, length);
+
+	const inuse: HydratedPostDocument | null = await Post.findOne({ id });
+
+	if (inuse) {
+		await this.generatePostUID(length);
+	} else {
+		this.id = id;
+	}
+});
+
+PostSchema.pre('save', async function(next) {
+	if (!this.id) {
+		await this.generatePostUID(21);
+	}
+
+	next();
 });
 
 export const Post: PostModel = model<IPost, PostModel>('Post', PostSchema);

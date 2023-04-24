@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import express from 'express';
 import multer from 'multer';
 import xml from 'object-to-xml';
@@ -198,9 +197,9 @@ async function newPost(request: express.Request, response: express.Response): Pr
 
 	const communityID: string = bodyCheck.data.community_id;
 	let messageBody: string = bodyCheck.data.body;
-	let painting: string = bodyCheck.data.painting?.trim() || '';
-	let screenshot: string = bodyCheck.data.screenshot?.trim() || '';
-	let appData: string = bodyCheck.data.app_data?.trim() || '';
+	const painting: string = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
+	const screenshot: string = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
+	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
 	const feelingID: number = parseInt(bodyCheck.data.feeling_id);
 	const searchKey: string[] = bodyCheck.data.search_key;
 	const topicTag: string = bodyCheck.data.topic_tag;
@@ -260,30 +259,6 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		}
 	}
 
-	if (appData) {
-		appData = appData.replace(/[^A-Za-z0-9+/=\s]/g, '');
-	}
-
-	const postID: string = await generatePostUID(21);
-
-	if (painting) {
-		painting = painting.replace(/\0/g, '').trim();
-		const paintingBuffer: Buffer | null = await processPainting(painting);
-
-		if (paintingBuffer) {
-			await uploadCDNAsset('pn-cdn', `paintings/${request.pid}/${postID}.png`, paintingBuffer, 'public-read');
-		} else {
-			LOG_WARN(`PAINTING FOR POST ${postID} FAILED TO PROCESS`);
-		}
-	}
-
-	if (screenshot) {
-		screenshot = screenshot.replace(/\0/g, '').trim();
-		const screenshotBuffer: Buffer = Buffer.from(screenshot, 'base64');
-
-		await uploadCDNAsset('pn-cdn', `screenshots/${request.pid}/${postID}.jpg`, screenshotBuffer, 'public-read');
-	}
-
 	let miiFace: string = 'normal_face.png';
 	switch (parseInt(request.body.feeling_id)) {
 		case 1:
@@ -317,18 +292,18 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	const document: IPost = {
+		id: '', // * This gets changed when saving the document for the first time
 		title_id: request.paramPack.title_id,
 		community_id: community.olive_community_id,
 		screen_name: userSettings.screen_name,
 		body: messageBody,
 		app_data: appData,
 		painting: painting,
-		screenshot: screenshot ? `/screenshots/${request.pid}/${postID}.jpg`: '',
-		screenshot_length: screenshot ? screenshot.length : 0,
+		screenshot: '',
+		screenshot_length: 0,
 		country_id: countryID,
 		created_at: new Date(),
 		feeling_id: feelingID,
-		id: postID,
 		search_key: searchKey,
 		topic_tag: topicTag,
 		is_autopost: (autopost) ? 1 : 0,
@@ -361,23 +336,35 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	const newPost: HydratedPostDocument = await Post.create(document);
+	const post: HydratedPostDocument = await Post.create(document);
+
+	if (painting) {
+		const paintingBuffer: Buffer | null = await processPainting(painting);
+
+		if (paintingBuffer) {
+			await uploadCDNAsset('pn-cdn', `paintings/${request.pid}/${post.id}.png`, paintingBuffer, 'public-read');
+		} else {
+			LOG_WARN(`PAINTING FOR POST ${post.id} FAILED TO PROCESS`);
+		}
+	}
+
+	if (screenshot) {
+		const screenshotBuffer: Buffer = Buffer.from(screenshot, 'base64');
+
+		await uploadCDNAsset('pn-cdn', `screenshots/${request.pid}/${post.id}.jpg`, screenshotBuffer, 'public-read');
+
+		post.screenshot = `/screenshots/${request.pid}/${post.id}.jpg`;
+		post.screenshot_length = screenshot.length;
+
+		await post.save();
+	}
 
 	if (parentPost) {
 		parentPost.reply_count = (parentPost.reply_count || 0) + 1;
 		parentPost.save();
 	}
 
-	response.send(await communityPostGen.SinglePostResponse(newPost));
-}
-
-async function generatePostUID(length: number): Promise<string> {
-	let id: string = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, '').substring(0, length);
-	const inuse: HydratedPostDocument | null = await Post.findOne({ id });
-
-	id = (inuse ? await generatePostUID(length) : id);
-
-	return id;
+	response.send(await communityPostGen.SinglePostResponse(post));
 }
 
 export default router;

@@ -41,6 +41,7 @@ export interface IPostMethods {
 	downReply(): Promise<void>;
 	remove(reason: string): Promise<void>;
 	unRemove(reason: string): Promise<void>;
+    generatePostUID(length: number): Promise<void>;
 }
 
 interface IPostQueryHelpers {}
