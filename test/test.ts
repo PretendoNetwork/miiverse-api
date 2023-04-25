@@ -149,7 +149,9 @@ function runNewmanTest(collection: string | Collection | CollectionDefinition, v
 		newman.run({
 			collection: collection,
 			reporters: ['cli', 'json'],
-			envVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] }))
+			envVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
+			globals: variables,
+			globalVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
 		}, (error, summary) => {
 			if (error) {
 				reject(error);
@@ -165,11 +167,11 @@ function communitiesRoutesTest(serviceToken: string): Promise<CondensedSummary> 
 	return runNewmanTest(CommunitiesCollection, {
 		DOMAIN: 'api.olv.pretendo.cc',
 		ServiceToken: serviceToken,
-		// TODO - Change this name. Should not be game-specific
+		// TODO - Change these names. Should not be game-specific
 		PP_Splatoon: 'XHRpdGxlX2lkXDE0MDczNzUxNTM1MjI5NDRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
-		// TODO - Change this name. Should not be game-specific
 		PP_MarioVsDK: 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMzcwODhcYWNjZXNzX2tleVw2OTI0NzQ1MTBccGxhdGZvcm1faWRcMVxyZWdpb25faWRcMlxsYW5ndWFnZV9pZFwxXGNvdW50cnlfaWRcNDlcYXJlYV9pZFwwXG5ldHdvcmtfcmVzdHJpY3Rpb25cMFxmcmllbmRfcmVzdHJpY3Rpb25cMFxyYXRpbmdfcmVzdHJpY3Rpb25cMTdccmF0aW5nX29yZ2FuaXphdGlvblwxXHRyYW5zZmVyYWJsZV9pZFw3NjA4MjAyOTE2MDc1ODg0NDI1XHR6X25hbWVcUGFjaWZpYy9NaWR3YXlcdXRjX29mZnNldFwtMzk2MDBc',
-		PP_Bad_TID: '000',
+		PP_Bad_TID: 'XHRpdGxlX2lkXDEyMzRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
+		PP_ACPlaza: 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMjE0NzJcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
 		'PP_Bad Format': 'XHR'
 	});
 }
