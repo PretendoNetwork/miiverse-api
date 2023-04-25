@@ -140,13 +140,13 @@ export function processPainting(painting: string): Buffer | null {
 		return null;
 	}
 
-	const tga = new TGA(Buffer.from(output));
+	const tga: TGA = new TGA(Buffer.from(output));
 	const png: PNG = new PNG({
 		width: tga.width,
 		height: tga.height
 	});
 
-	png.data = tga.pixels;
+	png.data = Buffer.from(tga.pixels);
 
 	return PNG.sync.write(png);
 }
