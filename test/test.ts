@@ -11,8 +11,8 @@ import dotenv from 'dotenv';
 import communitiesCollection from '../postman/collections/Communities.json';
 import peopleCollection from '../postman/collections/People.json';
 
-const PeopleCollection: CollectionDefinition = communitiesCollection as CollectionDefinition;
-const CommunitiesCollection: CollectionDefinition = peopleCollection as CollectionDefinition;
+const PeopleCollection: CollectionDefinition = peopleCollection as CollectionDefinition;
+const CommunitiesCollection: CollectionDefinition = communitiesCollection as CollectionDefinition;
 
 dotenv.config();
 
