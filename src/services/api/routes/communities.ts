@@ -74,11 +74,11 @@ router.get('/new', async function (_request: express.Request, response: express.
 	response.send(newCommunities);
 });
 
-router.get('/:appID/posts', async function (request: express.Request, response: express.Response): Promise<void> {
+router.get('/:communityID/posts', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
 	let community: HydratedCommunityDocument | null = await Community.findOne({
-		community_id: request.params.appID
+		community_id: request.params.communityID
 	});
 
 	if (!community) {
