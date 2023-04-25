@@ -70,11 +70,13 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	}
 
 	const json: Record<string, any> = {
-		has_error: 0,
-		version: 1,
-		expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
-		request_name: 'posts',
-		people: []
+		result: {
+			has_error: 0,
+			version: 1,
+			expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
+			request_name: 'posts',
+			people: []
+		}
 	};
 
 	for (const post of posts) {

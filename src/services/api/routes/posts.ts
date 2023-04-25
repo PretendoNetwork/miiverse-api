@@ -137,10 +137,12 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 	}
 
 	const json: Record<string, any> = {
-		has_error: 0,
-		version: 1,
-		request_name: 'replies',
-		posts: []
+		result: {
+			has_error: 0,
+			version: 1,
+			request_name: 'replies',
+			posts: []
+		}
 	};
 
 	for (const post of posts) {

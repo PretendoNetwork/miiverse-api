@@ -48,11 +48,13 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 async function generateTopicsXML(communities: HydratedCommunityDocument[]): Promise<string> {
 	const json: Record<string, any> = {
-		has_error: 0,
-		version: 1,
-		expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
-		request_name: 'topics',
-		topics: []
+		result: {
+			has_error: 0,
+			version: 1,
+			expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
+			request_name: 'topics',
+			topics: []
+		}
 	};
 
 	for (const community of communities) {

@@ -155,13 +155,15 @@ router.get('/:appID/posts', async function (request: express.Request, response: 
 	}
 
 	const json: Record<string, any> = {
-		has_error: 0,
-		version: 1,
-		request_name: 'posts',
-		topic: {
-			community_id: community.community_id
-		},
-		posts: []
+		result: {
+			has_error: 0,
+			version: 1,
+			request_name: 'posts',
+			topic: {
+				community_id: community.community_id
+			},
+			posts: []
+		}
 	};
 
 	for (const post of posts) {
