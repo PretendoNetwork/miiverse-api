@@ -6,7 +6,10 @@ import { Collection, CollectionDefinition } from 'postman-collection';
 import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
 import { create as parseXML } from 'xmlbuilder2';
+import { table } from 'table';
+import ora from 'ora';
 import dotenv from 'dotenv';
+import colors from 'colors';
 
 import communitiesCollection from '../postman/collections/Communities.json';
 import peopleCollection from '../postman/collections/People.json';
@@ -15,32 +18,15 @@ const PeopleCollection: CollectionDefinition = peopleCollection as CollectionDef
 const CommunitiesCollection: CollectionDefinition = communitiesCollection as CollectionDefinition;
 
 dotenv.config();
+colors.enable();
 
-interface CondensedSummary {
-	collection: {
-		name: string;
-		id: string;
-	};
-	run: {
-		stats: {
-			requests: newman.NewmanRunStat;
-			assertions: newman.NewmanRunStat;
-		};
-		failures: {
-			parent: {
-				name: string;
-				id: string;
-			},
-			source: {
-				name: string;
-				id: string;
-			},
-			error: {
-				message: string;
-				test: string;
-			}
-		}[];
-	};
+interface TestResult {
+	collection: string;
+	name: string;
+	url: string;
+	query: string;
+	assertion: string;
+	error?: string
 }
 
 const USERNAME: string = process.env.PN_MIIVERSE_API_TESTING_USERNAME?.trim() || '';
@@ -144,11 +130,11 @@ async function getMiiverseServiceToken(accessToken: string): Promise<string> {
 	return response.service_token.token;
 }
 
-function runNewmanTest(collection: string | Collection | CollectionDefinition, variables: Record<string, string>): Promise<CondensedSummary> {
+function runNewmanTest(collection: string | Collection | CollectionDefinition, variables: Record<string, string>): Promise<TestResult[]> {
 	return new Promise((resolve, reject) => {
 		newman.run({
 			collection: collection,
-			reporters: ['cli', 'json'],
+			reporters: ['json'],
 			envVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
 			globals: variables,
 			globalVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
@@ -156,13 +142,13 @@ function runNewmanTest(collection: string | Collection | CollectionDefinition, v
 			if (error) {
 				reject(error);
 			} else {
-				resolve(createCondensedSummary(summary));
+				resolve(createTestResults(summary));
 			}
 		});
 	});
 }
 
-function communitiesRoutesTest(serviceToken: string): Promise<CondensedSummary> {
+function communitiesRoutesTest(serviceToken: string): Promise<TestResult[]> {
 	// TODO - Make this more dynamic?
 	return runNewmanTest(CommunitiesCollection, {
 		DOMAIN: 'api.olv.pretendo.cc',
@@ -176,7 +162,7 @@ function communitiesRoutesTest(serviceToken: string): Promise<CondensedSummary> 
 	});
 }
 
-function peopleRoutesTest(serviceToken: string): Promise<CondensedSummary> {
+function peopleRoutesTest(serviceToken: string): Promise<TestResult[]> {
 	// TODO - Make this more dynamic?
 	return runNewmanTest(PeopleCollection, {
 		DOMAIN: 'api.olv.pretendo.cc',
@@ -187,42 +173,108 @@ function peopleRoutesTest(serviceToken: string): Promise<CondensedSummary> {
 }
 
 async function main(): Promise<void> {
+	const tokensSpinner = ora('Acquiring account tokens').start();
+
 	const pid: number = await getPID(USERNAME);
 	const passwordHash: string = nintendoPasswordHash(PASSWORD, pid);
 	const accessToken: string = await getAccessToken(USERNAME, passwordHash);
 	const serviceToken: string = await getMiiverseServiceToken(accessToken);
 
-	await communitiesRoutesTest(serviceToken);
-	await peopleRoutesTest(serviceToken);
+	tokensSpinner.succeed();
+
+	const testsSpinner = ora('Running tests').start();
+
+	const results: TestResult[] = [
+		...await communitiesRoutesTest(serviceToken),
+		...await peopleRoutesTest(serviceToken)
+	];
+
+	const passed = results.filter(result => !result.error);
+	const failed = results.filter(result => result.error);
+
+	if (failed.length !== 0) {
+		testsSpinner.warn('Some tests have failed! See before for details');
+	} else {
+		testsSpinner.succeed('All tests passed!');
+	}
+
+	const testsOverviewData = [
+		['Tests Ran'.cyan, results.length.toString().cyan],
+		['Passed'.green, passed.length.toString().green]
+	];
+
+	if (failed.length === 0) {
+		testsOverviewData.push(['Failed'.red, failed.length.toString().green]);
+	} else {
+		testsOverviewData.push(['Failed'.red, failed.length.toString().red]);
+	}
+
+	const config = {
+		singleLine: true,
+		border: {
+			topBody: '─',
+			topJoin: '┬',
+			topLeft: '┌',
+			topRight: '┐',
+
+			bottomBody: '─',
+			bottomJoin: '┴',
+			bottomLeft: '└',
+			bottomRight: '┘',
+
+			bodyLeft: '│',
+			bodyRight: '│',
+			bodyJoin: '│',
+
+			joinBody: '─',
+			joinLeft: '├',
+			joinRight: '┤',
+			joinJoin: '┼'
+		}
+	};
+
+	console.log(table(testsOverviewData, config));
+
+	if (failed.length !== 0) {
+		console.log('Failed tests:\n'.red.underline.italic.bold);
+		for (const test of failed) {
+			console.log('Collection:'.bold, test.collection.red.bold);
+			console.log('Test Name:'.bold, test.name.red.bold);
+			console.log('URL:'.bold, `${test.url}${test.query ? '?' + test.query : ''}`.red.bold);
+			console.log('Message:'.bold, test.error?.red.bold);
+			console.log('\n');
+		}
+	}
 }
 
 main();
 
-function createCondensedSummary(summary: newman.NewmanRunSummary): CondensedSummary {
-	return {
-		collection: {
-			name: summary.collection.name,
-			id: summary.collection.id
-		},
-		run: {
-			stats: {
-				requests : summary.run.stats.requests,
-				assertions : summary.run.stats.assertions
-			},
-			failures: summary.run.failures.map((failure: newman.NewmanRunFailure) => ({
-				parent: {
-					name: failure.parent.name,
-					id : failure.parent.id
-				},
-				source: {
-					name: failure.source?.name || 'Unknown',
-					id : failure.source?.id || 'Unknown'
-				},
-				error: {
-					message: failure.error.message,
-					test : failure.error.test
-				}
-			}))
+function createTestResults(summary: newman.NewmanRunSummary): TestResult[] {
+	const results: TestResult[] = [];
+
+	for (const execution of summary.run.executions) {
+		const request = execution.request;
+		for (const assertion of execution.assertions) {
+			const result: TestResult = {
+				collection: summary.collection.name,
+				name: execution.item.name,
+				url: `${request.url.protocol}://${request.url.host?.join('.')}/${request.url.path?.join('/')}`,
+				query: qs.stringify(request.url.query.all().reduce((object: Record<string, string>, item: { disabled?: boolean; key: string | null; value: string | null; }) => {
+					if (!item.disabled && item.key && item.value) {
+						object[item.key] = item.value;
+					}
+					return object;
+				}, {})),
+				assertion: assertion.assertion
+			};
+
+			if (assertion.error) {
+				result.error = `${assertion.error.name}: ${assertion.error.message}`;
+			}
+
+			results.push(result);
 		}
-	};
+	}
+
+	return results;
 }
