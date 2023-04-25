@@ -21,7 +21,8 @@ const ParamPackSchema = z.object({
 	rating_organization: z.string(),
 	transferable_id: z.string(),
 	tz_name: z.string(),
-	utc_offset: z.string()
+	utc_offset: z.string(),
+	remaster_version: z.string().optional()
 });
 
 async function auth(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void> {
