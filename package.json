@@ -6,7 +6,7 @@
 	"scripts": {
 		"lint": "npx eslint .",
 		"build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
-		"clean": "rm -rf ./dist",
+		"clean": "rimraf ./dist",
 		"start": "node .",
 		"test": "ts-node test/test.ts"
 	},
