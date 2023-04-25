@@ -1,0 +1,479 @@
+{
+	"info": {
+		"_postman_id": "cb605935-6073-42c5-afa9-96d9a19c70a3",
+		"name": "Communities",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "19511066-cb605935-6073-42c5-afa9-96d9a19c70a3"
+	},
+	"item": [
+		{
+			"name": "GET /v1/communities",
+			"item": [
+				{
+					"name": "Sub-Community",
+					"id": "0c9cf1fc-61a0-4deb-b910-e54701e39ae5",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_MarioVsDK}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Single Community",
+					"id": "77083b95-581f-40cf-8d83-ade183923ba0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Splatoon}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Title ID",
+					"id": "9bb6971f-f95a-4a53-960a-e9383854c2cc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Bad_TID}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid ParamPack Format",
+					"id": "7e5058a3-5faa-4016-a86d-e288a1e3355f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Bad Format}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "9a31cc53-451e-4fb2-aace-ee3db9641243"
+		},
+		{
+			"name": "GET /v1/communities/:id/posts",
+			"item": [
+				{
+					"name": "No Params",
+					"id": "3ea312f0-d205-4c25-b11a-218d0b28854d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Splatoon}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Limit",
+					"id": "84d199be-78f5-4d65-955b-08f47b7ed1e7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Splatoon}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?limit=2",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Key",
+					"id": "3754a070-9dbc-4b35-b0b8-4480d5d5aa38",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_ACPlaza}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?search_key=sza",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "search_key",
+									"value": "sza"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Type memo",
+					"id": "71362a5d-d976-402d-80d5-80e593d6ac0f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_ACPlaza}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?type=memo",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "memo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "By Followings",
+					"id": "70355c69-a29f-4fbc-bdb4-495b579b21f2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_ACPlaza}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?by=followings",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "by",
+									"value": "followings"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "By Self",
+					"id": "823b727d-f295-4cb3-9dbc-12c55a716ea1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Splatoon}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?by=self",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "by",
+									"value": "self"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Allow Spoiler",
+					"id": "875cd973-3de9-429c-b61b-ba80320ffd22",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Nintendo-ParamPack",
+								"value": "{{PP_Splatoon}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{DOMAIN}}/v1/communities/0/posts?allow_spoiler=1",
+							"host": [
+								"{{DOMAIN}}"
+							],
+							"path": [
+								"v1",
+								"communities",
+								"0",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "allow_spoiler",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "9078f117-f05e-459b-ac03-59be51f48ecf"
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{ServiceToken}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Nintendo-ServiceToken",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ab6f4437-0090-4f7e-a72e-36c1db11a5a7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "095ce2df-1f5a-4fcf-b4d4-c3b7616d3baa",
+				"type": "text/javascript",
+				"exec": [
+					"const headerSchema = {",
+					"    \"type\": \"object\",",
+					"    \"properties\": {",
+					"        \"result\": {",
+					"            \"type\": \"object\",",
+					"            \"properties\": {",
+					"                \"has_error\": {",
+					"                    \"type\": \"string\",",
+					"                    \"maxLength\": 1",
+					"                },",
+					"                \"version\": {",
+					"                    \"type\": \"string\",",
+					"                    \"maxLength\": 1",
+					"                },",
+					"                \"expire\": {",
+					"                    \"type\": \"string\",",
+					"                    \"pattern\": \"^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,3})?\"",
+					"                },",
+					"                \"request_name\": {",
+					"                    \"type\": \"string\"",
+					"                }",
+					"            },",
+					"            \"required\": [",
+					"                \"has_error\",",
+					"                \"version\",",
+					"                \"request_name\"",
+					"            ]",
+					"        },",
+					"",
+					"    },",
+					"    \"required\": [",
+					"        \"result\"",
+					"    ]",
+					"};",
+					"",
+					"pm.test(\"Valid XML Response Header\", function () {",
+					"    var json = xml2Json(pm.response.text());",
+					"    pm.expect(json).to.have.jsonSchema(headerSchema);",
+					"})"
+				]
+			}
+		}
+	]
+}
