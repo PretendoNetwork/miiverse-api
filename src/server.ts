@@ -5,7 +5,6 @@ import morgan from 'morgan';
 import xmlbuilder from 'xmlbuilder';
 import { connect as connectDatabase } from '@/database';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
-import xmlparser from '@/middleware/xml-parser';
 import auth from '@/middleware/auth';
 
 import discovery from '@/services/discovery';
@@ -29,7 +28,6 @@ app.use(express.urlencoded({
 	limit: '5mb',
 	parameterLimit: 100000
 }));
-app.use(xmlparser);
 app.use(auth);
 
 // import the servers into one

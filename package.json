@@ -33,7 +33,6 @@
 		"pretendo-grpc-ts": "github:PretendoNetwork/grpc-ts",
 		"tga": "^1.0.3",
 		"xmlbuilder": "^15.1.1",
-		"xmlbuilder2": "0.0.4",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
