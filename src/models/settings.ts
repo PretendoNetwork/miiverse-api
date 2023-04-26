@@ -88,4 +88,11 @@ SettingsSchema.method('favCommunityVisible', async function favCommunityVisible(
 	await this.save();
 });
 
+SettingsSchema.method('json', function json(): Record<string, any> {
+	return {
+		pid: this.pid,
+		screen_name: this.screen_name
+	};
+});
+
 export const Settings: SettingsModel = model<ISettings, SettingsModel>('Settings', SettingsSchema);
