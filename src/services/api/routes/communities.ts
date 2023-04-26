@@ -35,7 +35,16 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		response.sendStatus(404);
+		response.status(404);
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 919,
+				message: 'COMMUNITY_NOT_FOUND'
+			}
+		}).end({ pretty: true }));
 		return;
 	}
 
@@ -86,7 +95,16 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 	}
 
 	if (!community) {
-		response.sendStatus(404);
+		response.status(404);
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 919,
+				message: 'COMMUNITY_NOT_FOUND'
+			}
+		}).end({ pretty: true }));
 		return;
 	}
 
@@ -186,14 +204,31 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleIDs([request.paramPack.title_id]);
 
 	if (!parentCommunity) {
-		response.sendStatus(404);
+		response.status(404);
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 919,
+				message: 'COMMUNITY_NOT_FOUND'
+			}
+		}).end({ pretty: true }));
 		return;
 	}
 
 	// TODO - Better error codes, maybe do defaults?
 	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
 	if (!bodyCheck.success) {
-		response.sendStatus(404);
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 20,
+				message: 'BAD_COMMUNITY_DATA'
+			}
+		}).end({ pretty: true }));
 		return;
 	}
 
