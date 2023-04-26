@@ -94,6 +94,8 @@ async function generateTopicsXML(communities: HydratedCommunityDocument[]): Prom
 				}
 			});
 		}
+
+		json.result.topics.push(topic);
 	}
 
 	return xmlbuilder.create(json).end({ pretty: true, allowEmpty: true });
