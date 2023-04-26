@@ -6,7 +6,7 @@ import { getValueFromQueryString, getUserFriendPIDs } from '@/util';
 import { Post } from '@/models/post';
 import { HydratedContentDocument } from '@/types/mongoose/content';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
-import { HydratedPostDocument } from '@/types/mongoose/post';
+import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
 import { HydratedSettingsDocument } from '@/types/mongoose/settings';
 
 const router: express.Router = express.Router();
@@ -63,6 +63,8 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			{ $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
 			{ $limit: limit } // only return the top 10 results
 		]);
+
+		posts = posts.map((post: IPost) => Post.hydrate(post));
 	} else if (request.query.is_hot === '1') {
 		posts = await Post.find(query).sort({ empathy_count: -1}).limit(limit);
 	} else {
