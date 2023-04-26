@@ -193,7 +193,7 @@ async function main(): Promise<void> {
 	const failed = results.filter(result => result.error);
 
 	if (failed.length !== 0) {
-		testsSpinner.warn('Some tests have failed! See before for details');
+		testsSpinner.warn('Some tests have failed! See below for details');
 	} else {
 		testsSpinner.succeed('All tests passed!');
 	}
