@@ -36,24 +36,24 @@ async function auth(request: express.Request, response: express.Response, next: 
 	}
 
 	if (!token) {
-		return badAuth(response);
+		return badAuth(response, 15, 'NO_TOKEN');
 	}
 
 	const paramPack: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-parampack');
 	if (!paramPack) {
-		return badAuth(response);
+		return badAuth(response, 17, 'NO_PARAM');
 	}
 
 	const paramPackData: ParamPack = decodeParamPack(paramPack);
 	const paramPackCheck: z.SafeParseReturnType<ParamPack, ParamPack> = ParamPackSchema.safeParse(paramPackData);
 	if (!paramPackCheck.success) {
-		return badAuth(response);
+		return badAuth(response, 18, 'BAD_PARAM');
 	}
 
 	const pid: number = getPIDFromServiceToken(token);
 
 	if (pid === 0) {
-		return badAuth(response);
+		return badAuth(response, 16, 'BAD_TOKEN');
 	}
 
 	const user: HydratedPNIDDocument | null = await getPNID(pid);
@@ -65,7 +65,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 	}
 
 	if (!discovery) {
-		return badAuth(response);
+		return badAuth(response, 19, 'NO_DISCOVERY');
 	}
 
 	if (discovery.status !== 0) {
@@ -78,7 +78,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 	return next();
 }
 
-function badAuth(response: express.Response): void {
+function badAuth(response: express.Response, errorCode: number, message: string): void {
 	response.type('application/xml');
 	response.status(400);
 
@@ -87,8 +87,8 @@ function badAuth(response: express.Response): void {
 			has_error: 1,
 			version: 1,
 			code: 400,
-			error_code: 7,
-			message: 'POSTING_FROM_NNID'
+			error_code: errorCode,
+			message: message
 		}
 	}).end({ pretty: true }));
 }
