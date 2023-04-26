@@ -98,7 +98,7 @@ async function generateTopicsXML(communities: HydratedCommunityDocument[]): Prom
 		json.result.topics.push(topic);
 	}
 
-	return xmlbuilder.create(json).end({ pretty: true, allowEmpty: true });
+	return xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true });
 }
 
 async function calculateMostPopularCommunities(hours: number, limit: number): Promise<HydratedCommunityDocument[]> {

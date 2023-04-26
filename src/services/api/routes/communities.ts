@@ -66,7 +66,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/popular', async function (_request: express.Request, response: express.Response): Promise<void> {
@@ -194,7 +194,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
 // Handler for POST on '/v1/communities'

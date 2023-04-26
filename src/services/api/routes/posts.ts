@@ -154,7 +154,7 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		});
 	}
 
-	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {

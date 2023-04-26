@@ -94,7 +94,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
 router.get('/:pid/following', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -131,7 +131,7 @@ router.get('/:pid/following', async function (request: express.Request, response
 		});
 	}
 
-	response.send(xmlbuilder.create(json).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
 export default router;

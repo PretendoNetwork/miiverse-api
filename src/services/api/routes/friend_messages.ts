@@ -259,7 +259,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			request_name: 'friend_messages',
 			posts: postBody
 		}
-	}).end({ pretty: true }));
+	}, { separateArrayItems: true }).end({ pretty: true }));
 });
 
 router.post('/:post_id/empathies', upload.none(), async function (_request: express.Request, response: express.Response): Promise<void> {
