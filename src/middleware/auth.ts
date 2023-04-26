@@ -39,6 +39,11 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return badAuth(response, 15, 'NO_TOKEN');
 	}
 
+	const pid: number = getPIDFromServiceToken(token);
+	if (pid === 0) {
+		return badAuth(response, 16, 'BAD_TOKEN');
+	}
+
 	const paramPack: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-parampack');
 	if (!paramPack) {
 		return badAuth(response, 17, 'NO_PARAM');
@@ -48,12 +53,6 @@ async function auth(request: express.Request, response: express.Response, next: 
 	const paramPackCheck: z.SafeParseReturnType<ParamPack, ParamPack> = ParamPackSchema.safeParse(paramPackData);
 	if (!paramPackCheck.success) {
 		return badAuth(response, 18, 'BAD_PARAM');
-	}
-
-	const pid: number = getPIDFromServiceToken(token);
-
-	if (pid === 0) {
-		return badAuth(response, 16, 'BAD_TOKEN');
 	}
 
 	const user: HydratedPNIDDocument | null = await getPNID(pid);
