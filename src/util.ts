@@ -1,18 +1,15 @@
 import crypto from 'node:crypto';
 import { IncomingHttpHeaders } from 'node:http';
-import NodeRSA from 'node-rsa';
-import fs from 'fs-extra';
 import TGA from 'tga';
 import pako from 'pako';
 import { PNG } from 'pngjs';
 import aws from 'aws-sdk';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { ParsedQs } from 'qs';
-import { LOG_ERROR } from '@/logger';
 import { SafeQs } from '@/types/common/safe-qs';
 import { ParamPack } from '@/types/common/param-pack';
 import { config } from '@/config-manager';
-import { CryptoOptions } from '@/types/common/crypto-options';
+import { Token } from '@/types/common/token';
 
 import { FriendsClient, FriendsDefinition } from 'pretendo-grpc-ts/dist/friends/friends_service';
 import { GetUserFriendPIDsResponse } from 'pretendo-grpc-ts/dist/friends/get_user_friend_pids_rpc';
@@ -52,86 +49,41 @@ export function decodeParamPack(paramPack: string): ParamPack {
 
 export function getPIDFromServiceToken(token: string): number {
 	try {
-		const decoded: Buffer = Buffer.from(token, 'base64');
-		const decryptedToken: Buffer | null = decryptToken(decoded);
+		const decryptedToken: Buffer = decryptToken(Buffer.from(token, 'base64'));
 
 		if (!decryptedToken) {
 			return 0;
 		}
 
-		return decryptedToken.readUInt32LE(0x2);
+		const unpackedToken: Token = unpackToken(decryptedToken);
+
+		return unpackedToken.pid;
 	} catch (e) {
+		// TODO - Log this
 		return 0;
 	}
 }
 
-export function decryptToken(token: Buffer): Buffer | null {
-	const cryptoPath: string = `${__dirname}/../certs/access`;
+export function decryptToken(token: Buffer): Buffer {
+	const iv: Buffer = Buffer.alloc(16);
 
-	// Access and refresh tokens use a different format since they must be much smaller
-	// Assume a small length means access or refresh token
-	if (token.length <= 32) {
-		const aesKey: Buffer = Buffer.from(fs.readFileSync(`${cryptoPath}/aes.key`, { encoding: 'utf8' }), 'hex');
+	const decipher: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(config.aes_key, 'hex'), iv);
 
-		const iv: Buffer = Buffer.alloc(16);
-
-		const decipher: crypto.Decipher = crypto.createDecipheriv('aes-128-cbc', aesKey, iv);
-
-		return Buffer.concat([
-			decipher.update(token),
-			decipher.final()
-		]);
-	}
-
-	const cryptoOptions: CryptoOptions = {
-		private_key: fs.readFileSync(`${cryptoPath}/private.pem`),
-		hmac_secret: config.account_server_secret
-	};
-
-	const privateKey: NodeRSA = new NodeRSA(cryptoOptions.private_key, 'pkcs1-private-pem', {
-		environment: 'browser',
-		encryptionScheme: {
-			scheme: 'pkcs1_oaep',
-			hash: 'sha256'
-		}
-	});
-
-	const cryptoConfig: Buffer = token.subarray(0, 0x82);
-	const signature: Buffer = token.subarray(0x82, 0x96);
-	const encryptedBody: Buffer = token.subarray(0x96);
-
-	const encryptedAESKey: Buffer = cryptoConfig.subarray(0, 128);
-	const point1: number = cryptoConfig.readInt8(0x80);
-	const point2: number = cryptoConfig.readInt8(0x81);
-
-	const iv: Buffer = Buffer.concat([
-		Buffer.from(encryptedAESKey.subarray(point1, point1 + 8)),
-		Buffer.from(encryptedAESKey.subarray(point2, point2 + 8))
+	return Buffer.concat([
+		decipher.update(token),
+		decipher.final()
 	]);
+}
 
-	try {
-		const decryptedAESKey: Buffer = privateKey.decrypt(encryptedAESKey);
-
-		const decipher: crypto.Decipher = crypto.createDecipheriv('aes-128-cbc', decryptedAESKey, iv);
-
-		const decryptedBody: Buffer = Buffer.concat([
-			decipher.update(encryptedBody),
-			decipher.final()
-		]);
-
-		const hmac: crypto.Hmac = crypto.createHmac('sha1', cryptoOptions.hmac_secret).update(decryptedBody);
-		const calculatedSignature: Buffer = hmac.digest();
-
-		if (Buffer.compare(calculatedSignature, signature) !== 0) {
-			LOG_ERROR('Token signature did not match');
-			return null;
-		}
-
-		return decryptedBody;
-	} catch (error) {
-		LOG_ERROR('Failed to decrypt token. Probably a NNID from the topics request');
-		return null;
-	}
+export function unpackToken(token: Buffer): Token {
+	return {
+		system_type: token.readUInt8(0x0),
+		token_type: token.readUInt8(0x1),
+		pid: token.readUInt32LE(0x2),
+		expire_time: token.readBigUInt64LE(0x6),
+		title_id: token.readBigUInt64LE(0xE),
+		access_level: token.readUInt8(0x16)
+	};
 }
 
 export function processPainting(painting: string): Buffer | null {

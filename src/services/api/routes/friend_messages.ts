@@ -240,7 +240,6 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	const postBody: FormattedMessage[] = [];
 	for (const message of messages) {
-		console.log(message);
 		postBody.push({
 			post: {
 				body: message.body,

@@ -21,7 +21,6 @@ export const config: Config = {
 		port: Number(process.env.PN_MIIVERSE_API_CONFIG_HTTP_PORT || '')
 	},
 	account_server_address: process.env.PN_MIIVERSE_API_CONFIG_ACCOUNT_SERVER_ADDRESS || '',
-	account_server_secret: process.env.PN_MIIVERSE_API_CONFIG_ACCOUNT_SERVER_SECRET || '',
 	mongoose: {
 		connection_string: process.env.PN_MIIVERSE_API_CONFIG_MONGO_CONNECTION_STRING || '',
 		options: mongooseConnectOptionsMain
@@ -42,7 +41,8 @@ export const config: Config = {
 			port: Number(process.env.PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_PORT || ''),
 			api_key: process.env.PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_API_KEY || ''
 		}
-	}
+	},
+	aes_key: process.env.PN_MIIVERSE_API_CONFIG_AES_KEY || ''
 };
 
 LOG_INFO('Config loaded, checking integrity');
@@ -54,11 +54,6 @@ if (!config.http.port) {
 
 if (!config.account_server_address) {
 	LOG_ERROR('Failed to find account server address. Set the PN_MIIVERSE_API_CONFIG_ACCOUNT_SERVER_ADDRESS environment variable');
-	process.exit(0);
-}
-
-if (!config.account_server_secret) {
-	LOG_ERROR('Failed to find account server secret. Set the PN_MIIVERSE_API_CONFIG_ACCOUNT_SERVER_SECRET environment variable');
 	process.exit(0);
 }
 
@@ -109,5 +104,10 @@ if (!config.grpc.account.port) {
 
 if (!config.grpc.account.api_key) {
 	LOG_ERROR('Failed to find account server gRPC API key. Set the PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_API_KEY environment variable');
+	process.exit(0);
+}
+
+if (!config.aes_key) {
+	LOG_ERROR('Token AES key is not set. Set the PN_MIIVERSE_API_CONFIG_AES_KEY environment variable to your AES-256-CBC key');
 	process.exit(0);
 }

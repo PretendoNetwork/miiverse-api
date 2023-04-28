@@ -5,7 +5,6 @@ export interface Config {
 		port: number;
 	};
 	account_server_address: string;
-	account_server_secret: string;
 	mongoose: {
 		connection_string: string;
 		options: mongoose.ConnectOptions;
@@ -27,4 +26,5 @@ export interface Config {
 			api_key: string;
 		};
 	};
+	aes_key: string;
 }
