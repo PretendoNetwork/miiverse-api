@@ -2,12 +2,12 @@ import express from 'express';
 import multer from 'multer';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
-import { processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
 import {
 	getPostByID,
 	getUserContent,
 	getPostReplies,
-	getPNID,
 	getUserSettings,
 	getCommunityByID,
 	getCommunityByTitleID,
@@ -18,21 +18,20 @@ import { Post } from '@/models/post';
 import { Community } from '@/models/community';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
 import { HydratedContentDocument } from '@/types/mongoose/content';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 import { HydratedSettingsDocument } from '@/types/mongoose/settings';
 
 const newPostSchema = z.object({
-	community_id: z.string(),
+	community_id: z.string().optional(),
 	app_data: z.string().optional(),
 	painting: z.string().optional(),
 	screenshot: z.string().optional(),
 	body: z.string(),
 	feeling_id: z.string(),
-	search_key: z.string().array(),
-	topic_tag: z.string(),
+	search_key: z.string().array().optional(),
+	topic_tag: z.string().optional(),
 	is_autopost: z.string(),
-	spoiler: z.string().optional(),
-	is_app_jumpable: z.string(),
+	is_spoiler: z.string().optional(),
+	is_app_jumpable: z.string().optional(),
 	language_id: z.string()
 });
 
@@ -206,26 +205,42 @@ router.get('/', async function (request: express.Request, response: express.Resp
 async function newPost(request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const PNID: HydratedPNIDDocument | null = await getPNID(request.pid);
-	const userSettings: HydratedSettingsDocument | null = await getUserSettings(request.pid);
-	const bodyCheck = newPostSchema.safeParse(request.body);
+	let user: GetUserDataResponse;
 
-	if (!PNID || !userSettings || !bodyCheck.success) {
+	try {
+		user  = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
 		response.sendStatus(403);
 		return;
 	}
 
-	const communityID: string = bodyCheck.data.community_id;
+	if (!user.mii) {
+		// * This should never happen, but TypeScript complains so check anyway
+		// TODO - Better errors
+		response.status(422);
+		return;
+	}
+
+	const userSettings: HydratedSettingsDocument | null = await getUserSettings(request.pid);
+	const bodyCheck = newPostSchema.safeParse(request.body);
+
+	if (!userSettings || !bodyCheck.success) {
+		response.sendStatus(403);
+		return;
+	}
+
+	const communityID: string | undefined = bodyCheck.data.community_id || '';
 	let messageBody: string = bodyCheck.data.body;
 	const painting: string = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
 	const screenshot: string = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
 	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
 	const feelingID: number = parseInt(bodyCheck.data.feeling_id);
-	const searchKey: string[] = bodyCheck.data.search_key;
-	const topicTag: string = bodyCheck.data.topic_tag;
+	const searchKey: string[] | undefined = bodyCheck.data.search_key || [];
+	const topicTag: string | undefined = bodyCheck.data.topic_tag || '';
 	const autopost: string = bodyCheck.data.is_autopost;
-	const spoiler: string | undefined = bodyCheck.data.spoiler;
-	const jumpable: string = bodyCheck.data.is_app_jumpable;
+	const spoiler: string | undefined = bodyCheck.data.is_spoiler;
+	const jumpable: string | undefined = bodyCheck.data.is_app_jumpable;
 	const languageID: number = parseInt(bodyCheck.data.language_id);
 	const countryID: number = parseInt(request.paramPack.country_id);
 	const platformID: number = parseInt(request.paramPack.platform_id);
@@ -330,12 +345,12 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		is_spoiler: (spoiler) ? 1 : 0,
 		is_app_jumpable: (jumpable) ? 1 : 0,
 		language_id: languageID,
-		mii: PNID.mii.data,
-		mii_face_url: `https://mii.olv.pretendo.cc/mii/${PNID.pid}/${miiFace}`,
+		mii: user.mii.data,
+		mii_face_url: `https://mii.olv.pretendo.cc/mii/${user.pid}/${miiFace}`,
 		pid: request.pid,
 		platform_id: platformID,
 		region_id: regionID,
-		verified: (PNID.access_level === 2 || PNID.access_level === 3),
+		verified: (user.accessLevel === 2 || user.accessLevel === 3),
 		parent: parentPost ? parentPost.id : null,
 		removed: false
 	};

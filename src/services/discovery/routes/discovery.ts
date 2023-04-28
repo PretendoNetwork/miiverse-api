@@ -1,7 +1,8 @@
 import express from 'express';
 import xmlbuilder from 'xmlbuilder';
-import { getPNID, getEndpoint } from '@/database';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { getUserAccountData } from '@/util';
+import { getEndpoint } from '@/database';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 
 const router: express.Router = express.Router();
@@ -10,12 +11,20 @@ const router: express.Router = express.Router();
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const user: HydratedPNIDDocument | null = await getPNID(request.pid);
+	let user: GetUserDataResponse;
+
+	try {
+		user = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
+		response.sendStatus(404);
+		return;
+	}
 
 	let discovery: HydratedEndpointDocument | null;
 
 	if (user) {
-		discovery = await getEndpoint(user.server_access_level);
+		discovery = await getEndpoint(user.serverAccessLevel);
 	} else {
 		discovery = await getEndpoint('prod');
 	}

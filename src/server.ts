@@ -72,7 +72,6 @@ async function main(): Promise<void> {
 	LOG_INFO('Starting server');
 
 	await connectDatabase();
-	// TODO - Connect to account DB here too?
 
 	app.listen(port, () => {
 		LOG_SUCCESS(`Server started on port ${port}`);

@@ -1,16 +1,13 @@
 import mongoose from 'mongoose';
-import { verifyConnected as accountDBVerifyConnected } from '@/accountdb';
 import { LOG_INFO } from '@/logger';
 import { Community } from '@/models/community';
 import { Content } from '@/models/content';
 import { Conversation } from '@/models/conversation';
 import { Endpoint } from '@/models/endpoint';
-import { PNID } from '@/models/pnid';
 import { Post } from '@/models/post';
 import { Settings } from '@/models/settings';
 import { config } from '@/config-manager';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedSettingsDocument } from '@/types/mongoose/settings';
@@ -179,12 +176,4 @@ export async function getFriendMessages(pid: string, search_key: string[], limit
 		parent: null,
 		removed: false
 	}).sort({ created_at: 1 }).limit(limit);
-}
-
-export async function getPNID(pid: number): Promise<HydratedPNIDDocument | null> {
-	accountDBVerifyConnected();
-
-	return PNID.findOne({
-		pid: pid
-	});
 }

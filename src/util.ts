@@ -19,10 +19,15 @@ import { GetUserFriendPIDsResponse } from 'pretendo-grpc-ts/dist/friends/get_use
 import { GetUserFriendRequestsIncomingResponse } from 'pretendo-grpc-ts/dist/friends/get_user_friend_requests_incoming_rpc';
 import { FriendRequest } from 'pretendo-grpc-ts/dist/friends/friend_request';
 
-const { ip, port, api_key } = config.grpc.friends;
+import { AccountClient, AccountDefinition } from 'pretendo-grpc-ts/dist/account/account_service';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
 
-const gRPCChannel = createChannel(`${ip}:${port}`); // * nice-grpc doesn't export ChannelImplementation so this can't be typed
-const gRPCFriendsClient: FriendsClient = createClient(FriendsDefinition, gRPCChannel);
+// * nice-grpc doesn't export ChannelImplementation so this can't be typed
+const gRPCFriendsChannel = createChannel(`${config.grpc.friends.ip}:${config.grpc.friends.port}`);
+const gRPCFriendsClient: FriendsClient = createClient(FriendsDefinition, gRPCFriendsChannel);
+
+const gRPCAccountChannel = createChannel(`${config.grpc.account.ip}:${config.grpc.account.port}`);
+const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
 
 const s3: aws.S3 = new aws.S3({
 	endpoint: new aws.Endpoint(config.s3.endpoint),
@@ -167,7 +172,7 @@ export async function getUserFriendPIDs(pid: number): Promise<number[]> {
 		pid: pid
 	}, {
 		metadata: Metadata({
-			'X-API-Key': api_key
+			'X-API-Key': config.grpc.friends.api_key
 		})
 	});
 
@@ -175,15 +180,25 @@ export async function getUserFriendPIDs(pid: number): Promise<number[]> {
 }
 
 export async function getUserFriendRequestsIncoming(pid: number): Promise<FriendRequest[]> {
-	const requests: GetUserFriendRequestsIncomingResponse = await gRPCFriendsClient.getUserFriendRequestsIncoming({
+	const response: GetUserFriendRequestsIncomingResponse = await gRPCFriendsClient.getUserFriendRequestsIncoming({
 		pid: pid
 	}, {
 		metadata: Metadata({
-			'X-API-Key': api_key
+			'X-API-Key': config.grpc.friends.api_key
 		})
 	});
 
-	return requests.friendRequests;
+	return response.friendRequests;
+}
+
+export function getUserAccountData(pid: number): Promise<GetUserDataResponse> {
+	return gRPCAccountClient.getUserData({
+		pid: pid
+	}, {
+		metadata: Metadata({
+			'X-API-Key': config.grpc.account.api_key
+		})
+	});
 }
 
 export function makeSafeQs(query: ParsedQs): SafeQs {

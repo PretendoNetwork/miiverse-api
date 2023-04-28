@@ -16,14 +16,6 @@ if (process.env.PN_MIIVERSE_API_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH) {
 	LOG_WARN('No Mongoose connection options found for main connection. To add connection options, set PN_MIIVERSE_API_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH to the path of your options JSON file');
 }
 
-let mongooseConnectOptionsAccount: mongoose.ConnectOptions = {};
-
-if (process.env.PN_MIIVERSE_API_CONFIG_MONGOOSE_ACCOUNT_SERVER_CONNECT_OPTIONS_PATH) {
-	mongooseConnectOptionsAccount = fs.readJSONSync(process.env.PN_MIIVERSE_API_CONFIG_MONGOOSE_ACCOUNT_SERVER_CONNECT_OPTIONS_PATH);
-} else {
-	LOG_WARN('No Mongoose connection options found for main connection. To add connection options, set PN_MIIVERSE_API_CONFIG_MONGOOSE_ACCOUNT_SERVER_CONNECT_OPTIONS_PATH to the path of your options JSON file');
-}
-
 export const config: Config = {
 	http: {
 		port: Number(process.env.PN_MIIVERSE_API_CONFIG_HTTP_PORT || '')
@@ -33,10 +25,6 @@ export const config: Config = {
 	mongoose: {
 		connection_string: process.env.PN_MIIVERSE_API_CONFIG_MONGO_CONNECTION_STRING || '',
 		options: mongooseConnectOptionsMain
-	},
-	account_db: {
-		connection_string: process.env.PN_MIIVERSE_API_CONFIG_MONGO_ACCOUNT_SERVER_CONNECTION_STRING || '',
-		options: mongooseConnectOptionsAccount
 	},
 	s3: {
 		endpoint: process.env.PN_MIIVERSE_API_CONFIG_S3_ENDPOINT || '',
@@ -48,6 +36,11 @@ export const config: Config = {
 			ip: process.env.PN_MIIVERSE_API_CONFIG_GRPC_FRIENDS_IP || '',
 			port: Number(process.env.PN_MIIVERSE_API_CONFIG_GRPC_FRIENDS_PORT || ''),
 			api_key: process.env.PN_MIIVERSE_API_CONFIG_GRPC_FRIENDS_API_KEY || ''
+		},
+		account: {
+			ip: process.env.PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_IP || '',
+			port: Number(process.env.PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_PORT || ''),
+			api_key: process.env.PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_API_KEY || ''
 		}
 	}
 };
@@ -71,11 +64,6 @@ if (!config.account_server_secret) {
 
 if (!config.mongoose.connection_string) {
 	LOG_ERROR('Failed to find MongoDB connection string. Set the PN_MIIVERSE_API_CONFIG_MONGO_CONNECTION_STRING environment variable');
-	process.exit(0);
-}
-
-if (!config.account_db.connection_string) {
-	LOG_ERROR('Failed to find MongoDB Account Server connection string. Set the PN_MIIVERSE_API_CONFIG_MONGO_ACCOUNT_SERVER_CONNECTION_STRING environment variable');
 	process.exit(0);
 }
 
@@ -106,5 +94,20 @@ if (!config.grpc.friends.port) {
 
 if (!config.grpc.friends.api_key) {
 	LOG_ERROR('Failed to find NEX Friends gRPC API key. Set the PN_MIIVERSE_API_CONFIG_GRPC_FRIENDS_API_KEY environment variable');
+	process.exit(0);
+}
+
+if (!config.grpc.account.ip) {
+	LOG_ERROR('Failed to find account server gRPC ip. Set the PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_IP environment variable');
+	process.exit(0);
+}
+
+if (!config.grpc.account.port) {
+	LOG_ERROR('Failed to find account server gRPC port. Set the PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_PORT environment variable');
+	process.exit(0);
+}
+
+if (!config.grpc.account.api_key) {
+	LOG_ERROR('Failed to find account server gRPC API key. Set the PN_MIIVERSE_API_CONFIG_GRPC_ACCOUNT_API_KEY environment variable');
 	process.exit(0);
 }

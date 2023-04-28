@@ -2,10 +2,11 @@ import express from 'express';
 import memoize from 'memoizee';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
-import { getPNID, getEndpoint, getPostsBytitleID } from '@/database';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { getUserAccountData } from '@/util';
+import { getEndpoint, getPostsBytitleID } from '@/database';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { HydratedPostDocument } from '@/types/mongoose/post';
@@ -22,11 +23,20 @@ const memoizedGenerateTopicsXML = memoize(generateTopicsXML, {
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const user: HydratedPNIDDocument | null = await getPNID(request.pid);
+	let user: GetUserDataResponse;
+
+	try {
+		user  = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
+		response.sendStatus(403);
+		return;
+	}
+
 	let discovery: HydratedEndpointDocument | null;
 
 	if (user) {
-		discovery = await getEndpoint(user.server_access_level);
+		discovery = await getEndpoint(user.serverAccessLevel);
 	} else {
 		discovery = await getEndpoint('prod');
 	}

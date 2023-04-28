@@ -1,11 +1,11 @@
 import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
-import { getPNID, getEndpoint } from '@/database';
-import { getValueFromHeaders, decodeParamPack, getPIDFromServiceToken } from '@/util';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { getEndpoint } from '@/database';
+import { getUserAccountData, getValueFromHeaders, decodeParamPack, getPIDFromServiceToken } from '@/util';
 import { ParamPack } from '@/types/common/param-pack';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 
 const ParamPackSchema = z.object({
 	title_id: z.string(),
@@ -55,10 +55,18 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return badAuth(response, 18, 'BAD_PARAM');
 	}
 
-	const user: HydratedPNIDDocument | null = await getPNID(pid);
+	let user: GetUserDataResponse;
+
+	try {
+		user = await getUserAccountData(pid);
+	} catch (error) {
+		// TODO - Log this error
+		return badAuth(response, 18, 'BAD_PARAM');
+	}
+
 	let discovery: HydratedEndpointDocument | null;
 	if (user) {
-		discovery = await getEndpoint(user.server_access_level);
+		discovery = await getEndpoint(user.serverAccessLevel);
 	} else {
 		discovery = await getEndpoint('prod');
 	}

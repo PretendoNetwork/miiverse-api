@@ -5,14 +5,14 @@ import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { ParsedQs } from 'qs';
-import { getUserFriendPIDs, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
-import { getPNID, getConversationByUsers, getUserSettings, getFriendMessages } from '@/database';
+import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { getUserFriendPIDs, getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
+import { getConversationByUsers, getUserSettings, getFriendMessages } from '@/database';
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Conversation } from '@/models/conversation';
 import { SendMessageBody } from '@/types/common/send-message-body';
 import { FormattedMessage } from '@/types/common/formatted-message';
-import { HydratedPNIDDocument } from '@/types/mongoose/pnid';
 import { HydratedConversationDocument } from '@/types/mongoose/conversation';
 import { HydratedSettingsDocument } from '@/types/mongoose/settings';
 import { HydratedPostDocument } from '@/types/mongoose/post';
@@ -50,10 +50,29 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		return;
 	}
 
-	const sender: HydratedPNIDDocument | null = await getPNID(request.pid);
-	const recipient: HydratedPNIDDocument | null = await getPNID(recipientPID);
+	let sender: GetUserDataResponse;
 
-	if (!sender || !recipient) {
+	try {
+		sender = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
+		response.status(422);
+		return;
+	}
+
+	if (!sender.mii) {
+		// * This should never happen, but TypeScript complains so check anyway
+		// TODO - Better errors
+		response.status(422);
+		return;
+	}
+
+	let recipient: GetUserDataResponse;
+
+	try {
+		recipient = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
 		response.status(422);
 		return;
 	}
@@ -74,12 +93,12 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 			users: [
 				{
 					pid: sender.pid,
-					official: (sender.access_level === 2 || sender.access_level === 3),
+					official: (sender.accessLevel === 2 || sender.accessLevel === 3),
 					read: true
 				},
 				{
 					pid: recipient.pid,
-					official: (recipient.access_level === 2 || recipient.access_level === 3),
+					official: (recipient.accessLevel === 2 || recipient.accessLevel === 3),
 					read: false
 				},
 			]
@@ -154,7 +173,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		pid: request.pid,
 		platform_id: request.paramPack.platform_id,
 		region_id: request.paramPack.region_id,
-		verified: (sender.access_level === 2 || sender.access_level === 3),
+		verified: (sender.accessLevel === 2 || sender.accessLevel === 3),
 		message_to_pid: request.body.message_to_pid,
 		parent: null,
 		removed: false

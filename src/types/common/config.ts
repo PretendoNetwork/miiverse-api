@@ -10,10 +10,6 @@ export interface Config {
 		connection_string: string;
 		options: mongoose.ConnectOptions;
 	};
-	account_db: {
-		connection_string: string;
-		options: mongoose.ConnectOptions;
-	};
 	s3: {
 		endpoint: string;
 		key: string;
@@ -21,6 +17,11 @@ export interface Config {
 	};
 	grpc: {
 		friends: {
+			ip: string;
+			port: number;
+			api_key: string;
+		};
+		account: {
 			ip: string;
 			port: number;
 			api_key: string;
