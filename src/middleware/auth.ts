@@ -30,16 +30,16 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return next();
 	}
 
-	let token: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-servicetoken');
-	if (!token) {
-		token = getValueFromHeaders(request.headers, 'olive service token');
+	let encryptedToken: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-servicetoken');
+	if (!encryptedToken) {
+		encryptedToken = getValueFromHeaders(request.headers, 'olive service token');
 	}
 
-	if (!token) {
+	if (!encryptedToken) {
 		return badAuth(response, 15, 'NO_TOKEN');
 	}
 
-	const pid: number = getPIDFromServiceToken(token);
+	const pid: number = getPIDFromServiceToken(encryptedToken);
 	if (pid === 0) {
 		return badAuth(response, 16, 'BAD_TOKEN');
 	}
