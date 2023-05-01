@@ -6,6 +6,7 @@ import { PNG } from 'pngjs';
 import aws from 'aws-sdk';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { ParsedQs } from 'qs';
+import crc32 from 'crc/crc32';
 import { SafeQs } from '@/types/common/safe-qs';
 import { ParamPack } from '@/types/common/param-pack';
 import { config } from '@/config-manager';
@@ -67,12 +68,21 @@ export function getPIDFromServiceToken(token: string): number {
 export function decryptToken(token: Buffer): Buffer {
 	const iv: Buffer = Buffer.alloc(16);
 
+	const expectedChecksum: number = token.readUint32BE();
+	const encryptedBody: Buffer = token.subarray(4);
+
 	const decipher: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(config.aes_key, 'hex'), iv);
 
-	return Buffer.concat([
-		decipher.update(token),
+	const decrypted: Buffer = Buffer.concat([
+		decipher.update(encryptedBody),
 		decipher.final()
 	]);
+
+	if (expectedChecksum !== crc32(decrypted)) {
+		throw new Error('Checksum did not match. Failed decrypt. Are you using the right key?');
+	}
+
+	return decrypted;
 }
 
 export function unpackToken(token: Buffer): Token {
