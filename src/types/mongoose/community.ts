@@ -40,6 +40,6 @@ export interface ICommunityMethods {
 
 interface ICommunityQueryHelpers {}
 
-export type CommunityModel = Model<ICommunity, ICommunityQueryHelpers, ICommunityMethods>
+export interface CommunityModel extends Model<ICommunity, ICommunityQueryHelpers, ICommunityMethods> {}
 
 export type HydratedCommunityDocument = HydratedDocument<ICommunity, ICommunityMethods>
