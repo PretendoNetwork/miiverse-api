@@ -69,7 +69,7 @@ export async function getCommunityByTitleIDs(titleIDs: string[]): Promise<Hydrat
 	verifyConnected();
 
 	return Community.findOne({
-		title_ids: { $in: titleIDs }
+		title_id: { $in: titleIDs }
 	});
 }
 

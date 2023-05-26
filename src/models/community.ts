@@ -31,6 +31,7 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 		type: [Number],
 		default: undefined
 	},
+	owner: Number,
 	created_at: {
 		type: Date,
 		default: new Date(),
@@ -98,10 +99,10 @@ CommunitySchema.method('json', function json(): Record<string, any> {
 		community_id: this.community_id,
 		name: this.name,
 		description: this.description,
-		icon: '',
+		icon: this.icon.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 		icon_3ds: '',
-		pid: '',
-		app_data: this.app_data,
+		pid: this.owner || '',
+		app_data: this.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 		is_user_community: '0'
 	};
 });

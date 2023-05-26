@@ -16,6 +16,7 @@ export interface ICommunity {
     type: COMMUNITY_TYPE;
     parent: string;
     admins: Types.Array<number>;
+    owner: number;
     created_at: Date;
     empathy_count: number;
     followers: number;
@@ -39,6 +40,6 @@ export interface ICommunityMethods {
 
 interface ICommunityQueryHelpers {}
 
-export interface CommunityModel extends Model<ICommunity, ICommunityQueryHelpers, ICommunityMethods> {}
+export type CommunityModel = Model<ICommunity, ICommunityQueryHelpers, ICommunityMethods>
 
 export type HydratedCommunityDocument = HydratedDocument<ICommunity, ICommunityMethods>
