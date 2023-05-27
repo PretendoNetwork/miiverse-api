@@ -3,12 +3,10 @@ import xmlbuilder from 'xmlbuilder';
 import multer from 'multer';
 import { z } from 'zod';
 import {
-	getSubCommunities,
 	getMostPopularCommunities,
 	getNewCommunities,
 	getCommunityByTitleID,
 	getUserContent,
-	getCommunityByTitleIDs
 } from '@/database';
 import { getValueFromQueryString } from '@/util';
 import { LOG_WARN } from '@/logger';
@@ -16,6 +14,7 @@ import { Community } from '@/models/community';
 import { Post } from '@/models/post';
 import { CreateNewCommunityBody } from '@/types/common/create-new-community-body';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
+import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedContentDocument } from '@/types/mongoose/content';
 import { HydratedPostDocument } from '@/types/mongoose/post';
@@ -48,8 +47,33 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	const communities: HydratedCommunityDocument[] = await getSubCommunities(parentCommunity.olive_community_id);
-	communities.unshift(parentCommunity);
+	const type: string | undefined = getValueFromQueryString(request.query, 'type');
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
+
+	let limit: number = 8;
+	if (limitString) {
+		limit = parseInt(limitString);
+	}
+
+	if (isNaN(limit)) {
+		limit = 8;
+	}
+
+	if (limit > 32) {
+		limit = 32;
+	}
+
+	const query: SubCommunityQuery = {
+		parent: parentCommunity.olive_community_id
+	};
+
+	if (type === 'my') {
+		query.owner = request.pid;
+	} else if (type ==='favorite') {
+		// TODO
+	}
+
+	const communities: HydratedCommunityDocument[] = await Community.find(query).limit(limit);
 
 	const json: Record<string, any> = {
 		result: {
@@ -169,7 +193,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 			{ $limit: limit } // only return the top 10 results
 		]);
 	} else {
-		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
+		posts = await Post.find(query).sort({ created_at: -1 }).limit(limit);
 	}
 
 	const json: Record<string, any> = {
@@ -201,8 +225,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 router.post('/', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleIDs([request.paramPack.title_id]);
-
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
 		response.status(404);
 		response.send(xmlbuilder.create({
@@ -233,6 +256,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	}
 
 	const communitiesCount: number = await Community.count();
+	const communityId: number = (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)); // Change this to auto increment
 	const community: HydratedCommunityDocument = await Community.create({
 		platform_id: 0, // WiiU
 		name: request.body.name,
@@ -240,13 +264,14 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		open: true,
 		allows_comments: true,
 		type: 1,
-		parent: parentCommunity.community_id,
+		parent: parentCommunity.olive_community_id,
 		admins: parentCommunity.admins,
+		owner: request.pid,
 		icon: request.body.icon,
 		title_id: request.paramPack.title_id,
-		community_id: (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)).toString(),
-		olive_community_id: (parseInt(parentCommunity.community_id) + (5000 * communitiesCount)).toString(),
-		app_data: request.body.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
+		community_id: communityId.toString(),
+		olive_community_id: communityId.toString(),
+		app_data: request.body.app_data,
 	});
 
 	response.send(xmlbuilder.create({

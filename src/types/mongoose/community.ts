@@ -16,6 +16,7 @@ export interface ICommunity {
     type: COMMUNITY_TYPE;
     parent: string;
     admins: Types.Array<number>;
+    owner: number;
     created_at: Date;
     empathy_count: number;
     followers: number;
