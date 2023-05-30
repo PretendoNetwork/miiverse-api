@@ -28,22 +28,48 @@ const createNewCommunitySchema = z.object({
 
 const router: express.Router = express.Router();
 
+async function respondCommunityNotFound(response: express.Response) : Promise<void> {
+	response.status(404);
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: 1,
+			version: 1,
+			code: 404,
+			error_code: 919,
+			message: 'COMMUNITY_NOT_FOUND'
+		}
+	}).end({ pretty: true }));
+}
+
+async function commonGetSubCommunity(request: express.Request, response: express.Response, communityID: string | undefined) : Promise<HydratedCommunityDocument | null> {
+
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
+	if (!parentCommunity) {
+		await respondCommunityNotFound(response);
+		return parentCommunity;
+	}
+
+	const query: SubCommunityQuery = {
+		parent: parentCommunity.olive_community_id,
+		community_id: communityID
+	};
+
+	const community: HydratedCommunityDocument | null = await Community.findOne(query);
+	if (!community) {
+		await respondCommunityNotFound(response);
+		return community;
+	}
+
+	return community;
+}
+
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		response.status(404);
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 919,
-				message: 'COMMUNITY_NOT_FOUND'
-			}
-		}).end({ pretty: true }));
+		await respondCommunityNotFound(response);
 		return;
 	}
 
@@ -70,7 +96,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	if (type === 'my') {
 		query.owner = request.pid;
 	} else if (type ==='favorite') {
-		// TODO
+		query.user_favorites = request.pid;
 	}
 
 	const communities: HydratedCommunityDocument[] = await Community.find(query).limit(limit);
@@ -227,16 +253,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		response.status(404);
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 919,
-				message: 'COMMUNITY_NOT_FOUND'
-			}
-		}).end({ pretty: true }));
+		await respondCommunityNotFound(response);
 		return;
 	}
 
@@ -283,5 +300,123 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		}
 	}).end({ pretty: true, allowEmpty: true }));
 });
+
+router.post('/:community_action', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
+	if (!parentCommunity) {
+		await respondCommunityNotFound(response);
+		return;
+	}
+
+	const communityActions: string[] = request.params.community_action.split('.');
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request, response, communityActions[0]);
+	if (!community) {
+		return;
+	}
+
+	if (communityActions.length > 1) {
+		if (communityActions[1] === 'delete') {
+			await deleteSubCommunity(community, request, response);
+		} else if (communityActions[1] === 'favorite') {
+			await addFavoriteSubCommunity(community, request, response);
+		} else if (communityActions[1] === 'unfavorite') {
+			await delFavoriteSubCommunity(community, request, response);
+		} else { // '%s.search'
+			response.sendStatus(501); // Not Implemented
+		}
+	} else {
+		await updateSubCommunity(community, request, response);
+	}
+});
+
+async function updateSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	if (community.owner != request.pid) {
+		response.sendStatus(403); // Forbidden
+		return;
+	}
+
+	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
+	if (!bodyCheck.success) {
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 20,
+				message: 'BAD_COMMUNITY_DATA'
+			}
+		}).end({ pretty: true }));
+		return;
+	}
+
+	community.name = request.body.name;
+	community.description = request.body.description;
+	community.icon = request.body.icon;
+	community.app_data = request.body.app_data;
+	await community.save();
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+}
+
+async function deleteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	if (community.owner != request.pid) {
+		response.sendStatus(403); // Forbidden
+		return;
+	}
+
+	await Community.deleteOne({ _id: community._id });
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+}
+
+async function addFavoriteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	await community.addUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+}
+
+async function delFavoriteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	await community.delUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+}
 
 export default router;

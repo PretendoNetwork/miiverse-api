@@ -28,6 +28,7 @@ export interface ICommunity {
     olive_community_id: string;
     is_recommended: number;
     app_data: string;
+    user_favorites: Types.Array<number>;
 }
 
 export interface ICommunityMethods {
@@ -35,6 +36,8 @@ export interface ICommunityMethods {
 	downEmpathy(): Promise<void>;
 	upFollower(): Promise<void>;
 	downFollower(): Promise<void>;
+    addUserFavorite(pid: number): Promise<void>;
+    delUserFavorite(pid: number): Promise<void>;
     json(): Record<string, any>;
 }
 
