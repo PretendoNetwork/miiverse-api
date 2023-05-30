@@ -17,7 +17,7 @@ import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedContentDocument } from '@/types/mongoose/content';
-import { HydratedPostDocument } from '@/types/mongoose/post';
+import {HydratedPostDocument, IPost} from '@/types/mongoose/post';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
@@ -218,6 +218,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 			{ $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
 			{ $limit: limit } // only return the top 10 results
 		]);
+		posts = posts.map((post: IPost) => Post.hydrate(post));
 	} else {
 		posts = await Post.find(query).sort({ created_at: -1 }).limit(limit);
 	}
