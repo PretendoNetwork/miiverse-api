@@ -17,7 +17,8 @@ import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedContentDocument } from '@/types/mongoose/content';
-import { HydratedPostDocument } from '@/types/mongoose/post';
+import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
+import { ParamPack } from '@/types/common/param-pack';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
@@ -28,22 +29,46 @@ const createNewCommunitySchema = z.object({
 
 const router: express.Router = express.Router();
 
+function respondCommunityNotFound(response: express.Response) : void {
+	response.status(404);
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: 1,
+			version: 1,
+			code: 404,
+			error_code: 919,
+			message: 'COMMUNITY_NOT_FOUND'
+		}
+	}).end({ pretty: true }));
+}
+
+async function commonGetSubCommunity(paramPack: ParamPack, communityID: string | undefined) : Promise<HydratedCommunityDocument | null> {
+
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(paramPack.title_id);
+	if (!parentCommunity) {
+		return null;
+	}
+
+	const query: SubCommunityQuery = {
+		parent: parentCommunity.olive_community_id,
+		community_id: communityID
+	};
+
+	const community: HydratedCommunityDocument | null = await Community.findOne(query);
+	if (!community) {
+		return null;
+	}
+
+	return community;
+}
+
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		response.status(404);
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 919,
-				message: 'COMMUNITY_NOT_FOUND'
-			}
-		}).end({ pretty: true }));
+		respondCommunityNotFound(response);
 		return;
 	}
 
@@ -70,7 +95,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	if (type === 'my') {
 		query.owner = request.pid;
 	} else if (type ==='favorite') {
-		// TODO
+		query.user_favorites = request.pid;
 	}
 
 	const communities: HydratedCommunityDocument[] = await Community.find(query).limit(limit);
@@ -192,6 +217,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 			{ $replaceRoot: { newRoot: '$doc' } }, // replace the root with the 'doc' field
 			{ $limit: limit } // only return the top 10 results
 		]);
+		posts = posts.map((post: IPost) => Post.hydrate(post));
 	} else {
 		posts = await Post.find(query).sort({ created_at: -1 }).limit(limit);
 	}
@@ -227,16 +253,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		response.status(404);
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 919,
-				message: 'COMMUNITY_NOT_FOUND'
-			}
-		}).end({ pretty: true }));
+		respondCommunityNotFound(response);
 		return;
 	}
 
@@ -273,6 +290,119 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		olive_community_id: communityId.toString(),
 		app_data: request.body.app_data,
 	});
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+router.post('/:community_id.delete', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	if (community.owner != request.pid) {
+		response.sendStatus(403); // Forbidden
+		return;
+	}
+
+	await Community.deleteOne({ _id: community._id });
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+router.post('/:community_id.favorite', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	await community.addUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+router.post('/:community_id.unfavorite', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	await community.delUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+
+router.post('/:community_id', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	if (community.owner != request.pid) {
+		response.sendStatus(403); // Forbidden
+		return;
+	}
+
+	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
+	if (!bodyCheck.success) {
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 404,
+				error_code: 20,
+				message: 'BAD_COMMUNITY_DATA'
+			}
+		}).end({ pretty: true }));
+		return;
+	}
+
+	community.name = request.body.name;
+	community.description = request.body.description;
+	community.icon = request.body.icon;
+	community.app_data = request.body.app_data;
+	await community.save();
 
 	response.send(xmlbuilder.create({
 		result: {

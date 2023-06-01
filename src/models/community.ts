@@ -64,6 +64,10 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 		default: 0
 	},
 	app_data: String,
+	user_favorites: {
+		type: [Number],
+		default: []
+	}
 });
 
 CommunitySchema.method('upEmpathy', async function upEmpathy(): Promise<void> {
@@ -90,6 +94,24 @@ CommunitySchema.method('upFollower', async function upFollower(): Promise<void> 
 CommunitySchema.method('downFollower', async function downFollower(): Promise<void> {
 	const followers = this.get('followers');
 	this.set('followers', followers - 1);
+
+	await this.save();
+});
+
+CommunitySchema.method('addUserFavorite', async function addUserFavorite(pid: number): Promise<void> {
+	const userFavorites: number[] = this.get('user_favorites');
+	if (!userFavorites.includes(pid)) {
+		userFavorites.push(pid);
+	}
+
+	await this.save();
+});
+
+CommunitySchema.method('delUserFavorite', async function delUserFavorite(pid: number): Promise<void> {
+	const userFavorites: number[] = this.get('user_favorites');
+	if (userFavorites.includes(pid)) {
+		userFavorites.splice(userFavorites.indexOf(pid), 1);
+	}
 
 	await this.save();
 });

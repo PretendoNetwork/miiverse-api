@@ -3,7 +3,7 @@
 export interface SubCommunityQuery {
 	parent: string;
 	owner?: number;
-	olive_community_id?: {
-		$in: string[]
-	}
+	user_favorites?: number;
+	olive_community_id?: string;
+	community_id?: string;
 }
