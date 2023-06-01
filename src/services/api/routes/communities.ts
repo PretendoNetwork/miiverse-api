@@ -17,7 +17,8 @@ import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedContentDocument } from '@/types/mongoose/content';
-import {HydratedPostDocument, IPost} from '@/types/mongoose/post';
+import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
+import { ParamPack } from '@/types/common/param-pack';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
@@ -28,7 +29,7 @@ const createNewCommunitySchema = z.object({
 
 const router: express.Router = express.Router();
 
-async function respondCommunityNotFound(response: express.Response) : Promise<void> {
+function respondCommunityNotFound(response: express.Response) : void {
 	response.status(404);
 	response.send(xmlbuilder.create({
 		result: {
@@ -41,12 +42,11 @@ async function respondCommunityNotFound(response: express.Response) : Promise<vo
 	}).end({ pretty: true }));
 }
 
-async function commonGetSubCommunity(request: express.Request, response: express.Response, communityID: string | undefined) : Promise<HydratedCommunityDocument | null> {
+async function commonGetSubCommunity(paramPack: ParamPack, communityID: string | undefined) : Promise<HydratedCommunityDocument | null> {
 
-	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
+	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(paramPack.title_id);
 	if (!parentCommunity) {
-		await respondCommunityNotFound(response);
-		return parentCommunity;
+		return null;
 	}
 
 	const query: SubCommunityQuery = {
@@ -56,8 +56,7 @@ async function commonGetSubCommunity(request: express.Request, response: express
 
 	const community: HydratedCommunityDocument | null = await Community.findOne(query);
 	if (!community) {
-		await respondCommunityNotFound(response);
-		return community;
+		return null;
 	}
 
 	return community;
@@ -302,38 +301,83 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	}).end({ pretty: true, allowEmpty: true }));
 });
 
-router.post('/:community_action', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+router.post('/:community_id.delete', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
-	if (!parentCommunity) {
-		await respondCommunityNotFound(response);
-		return;
-	}
-
-	const communityActions: string[] = request.params.community_action.split('.');
-	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request, response, communityActions[0]);
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
 	if (!community) {
+		respondCommunityNotFound(response);
 		return;
 	}
 
-	if (communityActions.length > 1) {
-		if (communityActions[1] === 'delete') {
-			await deleteSubCommunity(community, request, response);
-		} else if (communityActions[1] === 'favorite') {
-			await addFavoriteSubCommunity(community, request, response);
-		} else if (communityActions[1] === 'unfavorite') {
-			await delFavoriteSubCommunity(community, request, response);
-		} else { // '%s.search'
-			response.sendStatus(501); // Not Implemented
-		}
-	} else {
-		await updateSubCommunity(community, request, response);
+	if (community.owner != request.pid) {
+		response.sendStatus(403); // Forbidden
+		return;
 	}
+
+	await Community.deleteOne({ _id: community._id });
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
 });
 
-async function updateSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
+router.post('/:community_id.favorite', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	await community.addUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+router.post('/:community_id.unfavorite', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
+
+	await community.delUserFavorite(request.pid);
+
+	response.send(xmlbuilder.create({
+		result: {
+			has_error: '0',
+			version: '1',
+			request_name: 'community',
+			community: community.json()
+		}
+	}).end({ pretty: true, allowEmpty: true }));
+});
+
+
+router.post('/:community_id', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
+	response.type('application/xml');
+
+	const community: HydratedCommunityDocument | null = await commonGetSubCommunity(request.paramPack, request.params.community_id);
+	if (!community) {
+		respondCommunityNotFound(response);
+		return;
+	}
 
 	if (community.owner != request.pid) {
 		response.sendStatus(403); // Forbidden
@@ -368,56 +412,6 @@ async function updateSubCommunity(community: HydratedCommunityDocument, request:
 			community: community.json()
 		}
 	}).end({ pretty: true, allowEmpty: true }));
-}
-
-async function deleteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
-	response.type('application/xml');
-
-	if (community.owner != request.pid) {
-		response.sendStatus(403); // Forbidden
-		return;
-	}
-
-	await Community.deleteOne({ _id: community._id });
-
-	response.send(xmlbuilder.create({
-		result: {
-			has_error: '0',
-			version: '1',
-			request_name: 'community',
-			community: community.json()
-		}
-	}).end({ pretty: true, allowEmpty: true }));
-}
-
-async function addFavoriteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
-	response.type('application/xml');
-
-	await community.addUserFavorite(request.pid);
-
-	response.send(xmlbuilder.create({
-		result: {
-			has_error: '0',
-			version: '1',
-			request_name: 'community',
-			community: community.json()
-		}
-	}).end({ pretty: true, allowEmpty: true }));
-}
-
-async function delFavoriteSubCommunity(community: HydratedCommunityDocument, request: express.Request, response: express.Response): Promise<void> {
-	response.type('application/xml');
-
-	await community.delUserFavorite(request.pid);
-
-	response.send(xmlbuilder.create({
-		result: {
-			has_error: '0',
-			version: '1',
-			request_name: 'community',
-			community: community.json()
-		}
-	}).end({ pretty: true, allowEmpty: true }));
-}
+});
 
 export default router;
