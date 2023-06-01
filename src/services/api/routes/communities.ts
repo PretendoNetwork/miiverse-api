@@ -68,7 +68,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		await respondCommunityNotFound(response);
+		respondCommunityNotFound(response);
 		return;
 	}
 
@@ -253,7 +253,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		await respondCommunityNotFound(response);
+		respondCommunityNotFound(response);
 		return;
 	}
 
