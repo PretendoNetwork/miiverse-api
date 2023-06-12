@@ -61,7 +61,7 @@ async function generateTopicsXML(communities: HydratedCommunityDocument[]): Prom
 		result: {
 			has_error: 0,
 			version: 1,
-			expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
+			expire: moment().add(2, 'days').format('YYYY-MM-DD HH:MM:SS'),
 			request_name: 'topics',
 			topics: []
 		}
