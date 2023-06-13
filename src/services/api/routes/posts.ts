@@ -25,7 +25,7 @@ const newPostSchema = z.object({
 	app_data: z.string().optional(),
 	painting: z.string().optional(),
 	screenshot: z.string().optional(),
-	body: z.string(),
+	body: z.string().optional(),
 	feeling_id: z.string(),
 	search_key: z.string().array().optional(),
 	topic_tag: z.string().optional(),
@@ -231,7 +231,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	const communityID: string | undefined = bodyCheck.data.community_id || '';
-	let messageBody: string = bodyCheck.data.body;
+	let messageBody: string | undefined = bodyCheck.data.body;
 	const painting: string = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
 	const screenshot: string = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
 	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
@@ -317,11 +317,11 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		messageBody = messageBody.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, '');
 	}
 
-	if (messageBody.length > 280) {
+	if (messageBody && messageBody.length > 280) {
 		messageBody = messageBody.substring(0, 280);
 	}
 
-	if (messageBody === '' && painting === '' && screenshot === '') {
+	if ((!messageBody || messageBody === '') && painting === '' && screenshot === '') {
 		response.status(400);
 		return;
 	}
@@ -331,7 +331,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		title_id: request.paramPack.title_id,
 		community_id: community.olive_community_id,
 		screen_name: userSettings.screen_name,
-		body: messageBody,
+		body: messageBody ? messageBody : '',
 		app_data: appData,
 		painting: painting,
 		screenshot: '',
@@ -342,7 +342,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		search_key: searchKey,
 		topic_tag: topicTag,
 		is_autopost: (autopost) ? 1 : 0,
-		is_spoiler: (spoiler) ? 1 : 0,
+		is_spoiler: (spoiler === '1') ? 1 : 0,
 		is_app_jumpable: (jumpable) ? 1 : 0,
 		language_id: languageID,
 		mii: user.mii.data,
