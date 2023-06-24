@@ -114,7 +114,32 @@ async function generateTopicsXML(communities: HydratedCommunityDocument[]): Prom
 async function calculateMostPopularCommunities(hours: number, limit: number): Promise<HydratedCommunityDocument[]> {
 	const now: Date = new Date();
 	const last24Hours: Date = new Date(now.getTime() - hours * 60 * 60 * 1000);
-
+	if (!last24Hours) {
+		throw new Error('Invalid date');
+	}
+	const validCommunities: {
+		_id: null;
+		communities: [string];
+	}[] = await Community.aggregate([
+		{
+			$match: {
+				type: 0,
+				parent: null
+			}
+		},
+		{
+			$group: {
+				_id: null,
+				communities: {
+					$push: '$olive_community_id'
+				}
+			}
+		}
+	]);
+	const communityIDs: [string] = validCommunities[0].communities;
+	if (!communityIDs) {
+		throw new Error('No communities found');
+	}
 	const popularCommunities: {
 		_id: string;
 		count: number;
@@ -124,7 +149,10 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 				created_at: {
 					$gte: last24Hours
 				},
-				message_to_pid: null
+				message_to_pid: null,
+				community_id: {
+					$in: communityIDs
+				}
 			}
 		},
 		{
