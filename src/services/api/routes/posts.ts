@@ -27,7 +27,7 @@ const newPostSchema = z.object({
 	screenshot: z.string().optional(),
 	body: z.string().optional(),
 	feeling_id: z.string(),
-	search_key: z.string().array().optional(),
+	search_key: z.string().array().or(z.string()).optional(),
 	topic_tag: z.string().optional(),
 	is_autopost: z.string(),
 	is_spoiler: z.string().optional(),
@@ -236,7 +236,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	const screenshot: string = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
 	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
 	const feelingID: number = parseInt(bodyCheck.data.feeling_id);
-	const searchKey: string[] | undefined = bodyCheck.data.search_key || [];
+	let searchKey: string | string[] = bodyCheck.data.search_key || [];
 	const topicTag: string | undefined = bodyCheck.data.topic_tag || '';
 	const autopost: string = bodyCheck.data.is_autopost;
 	const spoiler: string | undefined = bodyCheck.data.is_spoiler;
@@ -324,6 +324,10 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	if ((!messageBody || messageBody === '') && painting === '' && screenshot === '') {
 		response.status(400);
 		return;
+	}
+
+	if (!Array.isArray(searchKey)) {
+		searchKey = [searchKey];
 	}
 
 	const document: IPost = {
