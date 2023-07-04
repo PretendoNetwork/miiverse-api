@@ -261,9 +261,8 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		return respondCommunityError(response, 400, 20);
 	}
 
-	// Name must contain less than 5 numbers
-	const digitCount = (request.body.name.match(/\d/g) || []).length;
-	if (digitCount > 5) {
+	// Name must not start with whitespace
+	if (/^\s/.test(request.body.name)) {
 		return respondCommunityError(response, 400, 20);
 	}
 
@@ -418,12 +417,7 @@ router.post('/:community_id', multer().none(), async function (request: express.
 		return;
 	}
 
-	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
-	if (!bodyCheck.success) {
-		return respondCommunityError(response, 400, 20);
-	}
-
-	if (request.body.name) {
+	if (request.body.name && !(/^\s/.test(request.body.name))) {
 		community.name = request.body.name;
 	}
 
