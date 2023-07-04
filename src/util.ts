@@ -37,7 +37,7 @@ export function decodeParamPack(paramPack: string): ParamPack {
 	const values: string[] = Buffer.from(paramPack, 'base64').toString().split('\\');
 	const entries: string[][] = values.filter(value => value).reduce((entries: string[][], value: string, index: number) => {
 		if (0 === index % 2) {
-			entries.push([ value ]);
+			entries.push([value]);
 		} else {
 			entries[Math.ceil(index / 2 - 1)].push(value);
 		}
@@ -60,7 +60,7 @@ export function getPIDFromServiceToken(token: string): number {
 
 		return unpackedToken.pid;
 	} catch (e) {
-		// TODO - Log this
+		console.error(e);
 		return 0;
 	}
 }
@@ -215,5 +215,5 @@ export function getValueFromHeaders(headers: IncomingHttpHeaders, key: string): 
 }
 
 export function mapToObject(map: Map<any, any>): object {
-	return Object.fromEntries(Array.from(map.entries(), ([ k, v ]) => v instanceof Map ? [ k, mapToObject(v) ] : [ k, v ]));
+	return Object.fromEntries(Array.from(map.entries(), ([k, v]) => v instanceof Map ? [k, mapToObject(v)] : [k, v]));
 }

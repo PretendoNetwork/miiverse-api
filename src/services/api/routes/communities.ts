@@ -22,27 +22,31 @@ import { ParamPack } from '@/types/common/param-pack';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
-	description: z.string(),
+	description: z.string().optional(),
 	icon: z.string(),
-	app_data: z.string()
+	app_data: z.string().optional()
 });
 
 const router: express.Router = express.Router();
 
-function respondCommunityNotFound(response: express.Response) : void {
-	response.status(404);
-	response.send(xmlbuilder.create({
+function respondCommunityError(response: express.Response, http_code: number, error_code: number): void {
+	response.status(http_code).send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
-			code: 404,
-			error_code: 919,
-			message: 'COMMUNITY_NOT_FOUND'
+			code: http_code,
+			error_code: error_code,
+			message: 'COMMUNITY_ERROR' // This field is unused by the entire nn_olv.rpl
 		}
 	}).end({ pretty: true }));
 }
 
-async function commonGetSubCommunity(paramPack: ParamPack, communityID: string | undefined) : Promise<HydratedCommunityDocument | null> {
+function respondCommunityNotFound(response: express.Response): void {
+	respondCommunityError(response, 404, 919);
+}
+
+
+async function commonGetSubCommunity(paramPack: ParamPack, communityID: string | undefined): Promise<HydratedCommunityDocument | null> {
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(paramPack.title_id);
 	if (!parentCommunity) {
@@ -75,17 +79,17 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	const type: string | undefined = getValueFromQueryString(request.query, 'type');
 	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
 
-	let limit: number = 8;
+	let limit: number = 4;
 	if (limitString) {
 		limit = parseInt(limitString);
 	}
 
 	if (isNaN(limit)) {
-		limit = 8;
+		limit = 4;
 	}
 
-	if (limit > 32) {
-		limit = 32;
+	if (limit > 16) {
+		limit = 16;
 	}
 
 	const query: SubCommunityQuery = {
@@ -94,7 +98,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	if (type === 'my') {
 		query.owner = request.pid;
-	} else if (type ==='favorite') {
+	} else if (type === 'favorite') {
 		query.user_favorites = request.pid;
 	}
 
@@ -144,17 +148,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 	}
 
 	if (!community) {
-		response.status(404);
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 919,
-				message: 'COMMUNITY_NOT_FOUND'
-			}
-		}).end({ pretty: true }));
-		return;
+		return respondCommunityNotFound(response);
 	}
 
 	const query: CommunityPostsQuery = {
@@ -253,23 +247,46 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 
 	const parentCommunity: HydratedCommunityDocument | null = await getCommunityByTitleID(request.paramPack.title_id);
 	if (!parentCommunity) {
-		respondCommunityNotFound(response);
-		return;
+		return respondCommunityNotFound(response);
 	}
 
 	// TODO - Better error codes, maybe do defaults?
 	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
 	if (!bodyCheck.success) {
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 20,
-				message: 'BAD_COMMUNITY_DATA'
-			}
-		}).end({ pretty: true }));
-		return;
+		return respondCommunityError(response, 400, 20);
+	}
+
+	// Name must be at least 4 character long
+	if (request.body.name.length < 4) {
+		return respondCommunityError(response, 400, 20);
+	}
+
+	// Name must contain less than 5 numbers
+	const digitCount = (request.body.name.match(/\d/g) || []).length;
+	if (digitCount > 5) {
+		return respondCommunityError(response, 400, 20);
+	}
+
+	// Each user can only have 4 subcommunities per title
+	const ownedQuery: SubCommunityQuery = {
+		parent: parentCommunity.olive_community_id,
+		owner: request.pid
+	};
+
+	const ownedSubcommunityCount: number = await Community.countDocuments(ownedQuery);
+	if (ownedSubcommunityCount >= 4) {
+		return respondCommunityError(response, 401, 911);
+	}
+
+	// Each user can only have 16 favorite subcommunities per title
+	const favoriteQuery: SubCommunityQuery = {
+		parent: parentCommunity.olive_community_id,
+		user_favorites: request.pid
+	};
+
+	const ownedFavoriteCount: number = await Community.countDocuments(favoriteQuery);
+	if (ownedFavoriteCount >= 16) {
+		return respondCommunityError(response, 401, 912);
 	}
 
 	const communitiesCount: number = await Community.count();
@@ -277,7 +294,7 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	const community: HydratedCommunityDocument = await Community.create({
 		platform_id: 0, // WiiU
 		name: request.body.name,
-		description: request.body.description,
+		description: request.body.description || '',
 		open: true,
 		allows_comments: true,
 		type: 1,
@@ -288,7 +305,8 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		title_id: request.paramPack.title_id,
 		community_id: communityId.toString(),
 		olive_community_id: communityId.toString(),
-		app_data: request.body.app_data,
+		app_data: request.body.app_data || '',
+		user_favorites: [request.pid]
 	});
 
 	response.send(xmlbuilder.create({
@@ -336,6 +354,17 @@ router.post('/:community_id.favorite', multer().none(), async function (request:
 		return;
 	}
 
+	// Each user can only have 16 favorite subcommunities per title
+	const favoriteQuery: SubCommunityQuery = {
+		parent: community.parent,
+		user_favorites: request.pid
+	};
+
+	const ownedFavoriteCount: number = await Community.countDocuments(favoriteQuery);
+	if (ownedFavoriteCount >= 16) {
+		return respondCommunityError(response, 401, 914);
+	}
+
 	await community.addUserFavorite(request.pid);
 
 	response.send(xmlbuilder.create({
@@ -355,6 +384,11 @@ router.post('/:community_id.unfavorite', multer().none(), async function (reques
 	if (!community) {
 		respondCommunityNotFound(response);
 		return;
+	}
+
+	// You can't remove from your favorites a community you own
+	if (community.owner === request.pid) {
+		return respondCommunityError(response, 401, 916);
 	}
 
 	await community.delUserFavorite(request.pid);
@@ -386,22 +420,25 @@ router.post('/:community_id', multer().none(), async function (request: express.
 
 	const bodyCheck: z.SafeParseReturnType<CreateNewCommunityBody, CreateNewCommunityBody> = createNewCommunitySchema.safeParse(request.body);
 	if (!bodyCheck.success) {
-		response.send(xmlbuilder.create({
-			result: {
-				has_error: 1,
-				version: 1,
-				code: 404,
-				error_code: 20,
-				message: 'BAD_COMMUNITY_DATA'
-			}
-		}).end({ pretty: true }));
-		return;
+		return respondCommunityError(response, 400, 20);
 	}
 
-	community.name = request.body.name;
-	community.description = request.body.description;
-	community.icon = request.body.icon;
-	community.app_data = request.body.app_data;
+	if (request.body.name) {
+		community.name = request.body.name;
+	}
+
+	if (request.body.description) {
+		community.description = request.body.description;
+	}
+
+	if (request.body.icon) {
+		community.icon = request.body.icon;
+	}
+
+	if (request.body.app_data) {
+		community.app_data = request.body.app_data;
+	}
+
 	await community.save();
 
 	response.send(xmlbuilder.create({
