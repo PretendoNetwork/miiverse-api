@@ -29,13 +29,13 @@ const createNewCommunitySchema = z.object({
 
 const router: express.Router = express.Router();
 
-function respondCommunityError(response: express.Response, http_code: number, error_code: number): void {
-	response.status(http_code).send(xmlbuilder.create({
+function respondCommunityError(response: express.Response, httpStatusCode: number, errorCode: number): void {
+	response.status(httpStatusCode).send(xmlbuilder.create({
 		result: {
 			has_error: 1,
 			version: 1,
-			code: http_code,
-			error_code: error_code,
+			code: httpStatusCode,
+			error_code: errorCode,
 			message: 'COMMUNITY_ERROR' // This field is unused by the entire nn_olv.rpl
 		}
 	}).end({ pretty: true }));
