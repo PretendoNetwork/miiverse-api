@@ -257,9 +257,14 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	}
 
 	request.body.name = request.body.name.trim();
+	request.body.icon = request.body.icon.trim();
 
 	if (request.body.description) {
 		request.body.description = request.body.description.trim();
+	}
+
+	if (request.body.app_data) {
+		request.body.app_data = request.body.app_data.trim();
 	}
 
 	// Name must be at least 4 character long
@@ -427,11 +432,11 @@ router.post('/:community_id', multer().none(), async function (request: express.
 	}
 
 	if (request.body.icon) {
-		community.icon = request.body.icon;
+		community.icon = request.body.icon.trim();
 	}
 
 	if (request.body.app_data) {
-		community.app_data = request.body.app_data;
+		community.app_data = request.body.app_data.trim();
 	}
 
 	await community.save();
