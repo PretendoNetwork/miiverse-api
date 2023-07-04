@@ -256,13 +256,14 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 		return respondCommunityError(response, 400, 20);
 	}
 
-	// Name must be at least 4 character long
-	if (request.body.name.length < 4) {
-		return respondCommunityError(response, 400, 20);
+	request.body.name = request.body.name.trim();
+
+	if (request.body.description) {
+		request.body.description = request.body.description.trim();
 	}
 
-	// Name must not start with whitespace
-	if (/^\s/.test(request.body.name)) {
+	// Name must be at least 4 character long
+	if (request.body.name.length < 4) {
 		return respondCommunityError(response, 400, 20);
 	}
 
@@ -417,12 +418,12 @@ router.post('/:community_id', multer().none(), async function (request: express.
 		return;
 	}
 
-	if (request.body.name && !(/^\s/.test(request.body.name))) {
-		community.name = request.body.name;
+	if (request.body.name) {
+		community.name = request.body.name.trim();
 	}
 
 	if (request.body.description) {
-		community.description = request.body.description;
+		community.description = request.body.description.trim();
 	}
 
 	if (request.body.icon) {
