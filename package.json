@@ -7,7 +7,7 @@
 		"lint": "npx eslint .",
 		"build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
 		"clean": "rimraf ./dist",
-		"start": "node .",
+		"start": "node --enable-source-maps .",
 		"test": "ts-node test/test.ts"
 	},
 	"keywords": [],
