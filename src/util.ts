@@ -7,7 +7,6 @@ import aws from 'aws-sdk';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { ParsedQs } from 'qs';
 import crc32 from 'crc/crc32';
-import { SafeQs } from '@/types/common/safe-qs';
 import { ParamPack } from '@/types/common/param-pack';
 import { config } from '@/config-manager';
 import { Token } from '@/types/common/token';
@@ -163,40 +162,18 @@ export function getUserAccountData(pid: number): Promise<GetUserDataResponse> {
 	});
 }
 
-export function makeSafeQs(query: ParsedQs): SafeQs {
-	const entries = Object.entries(query);
-	const output: SafeQs = {};
-
-	for (const [key, value] of entries) {
-		if (typeof value !== 'string') {
-			// * ignore non-strings
-			continue;
-		}
-
-		output[key] = value;
-	}
-
-	return output;
-}
-
-export function getValueFromQueryString(qs: ParsedQs, key: string): string | undefined {
-	let property: string | ParsedQs | string[] | ParsedQs[] | SafeQs | undefined = qs[key];
-	let value: string | undefined;
+export function getValueFromQueryString(qs: ParsedQs, key: string): string[] {
+	const property: string | string[] | undefined = qs[key] as string | string[];
 
 	if (property) {
 		if (Array.isArray(property)) {
-			property = property[0];
-		}
-
-		if (typeof property !== 'string') {
-			property = makeSafeQs(<ParsedQs>property);
-			value = (<SafeQs>property)[key];
+			return property;
 		} else {
-			value = <string>property;
+			return [property];
 		}
 	}
 
-	return value;
+	return [];
 }
 
 export function getValueFromHeaders(headers: IncomingHttpHeaders, key: string): string | undefined {

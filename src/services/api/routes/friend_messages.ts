@@ -4,7 +4,6 @@ import { Snowflake } from 'node-snowflake';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
-import { ParsedQs } from 'qs';
 import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
 import { getUserFriendPIDs, getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
 import { getConversationByUsers, getUserSettings, getFriendMessages } from '@/database';
@@ -215,7 +214,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
 
 	// TODO - Is this the limit?
 	let limit: number = 10;
@@ -228,15 +227,14 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		limit = 10;
 	}
 
-	// TODO - Update getValueFromQueryString to return arrays optionally
-	const searchKey: string | ParsedQs | string[] | ParsedQs[] | undefined = request.query.search_key;
-
-	if (!searchKey) {
+	if (!request.query.search_key) {
 		response.sendStatus(404);
 		return;
 	}
 
-	const messages: HydratedPostDocument[] = await getFriendMessages(request.pid.toString(), searchKey as string[], limit);
+	const searchKey: string[] = getValueFromQueryString(request.query, 'search_key');
+
+	const messages: HydratedPostDocument[] = await getFriendMessages(request.pid.toString(), searchKey, limit);
 
 	const postBody: FormattedMessage[] = [];
 	for (const message of messages) {

@@ -30,10 +30,10 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		message_to_pid: { $eq: null }
 	};
 
-	const relation: string | undefined = getValueFromQueryString(request.query, 'relation');
-	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid');
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
-	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii');
+	const relation: string | undefined = getValueFromQueryString(request.query, 'relation')[0];
+	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid')[0];
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
+	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii')[0];
 
 	let limit: number = 10;
 
@@ -50,8 +50,10 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	} else if (relation === 'following') {
 		query.pid = { $in: userContent.followed_users };
 	} else if (request.query.pid) {
-		// TODO - Update getValueFromQueryString to return arrays optionally
-		query.pid = { $in: (request.query.pid as string[]).map(pid => Number(pid)) };
+		const pidInputs: string[] = getValueFromQueryString(request.query, 'pid');
+		const pids: number[] = pidInputs.map(pid => Number(pid)).filter(pid => !isNaN(pid));
+
+		query.pid = { $in: pids };
 	}
 
 	let posts: HydratedPostDocument[];

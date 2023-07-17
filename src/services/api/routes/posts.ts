@@ -110,7 +110,7 @@ router.post('/:post_id/empathies', upload.none(), async function (request: expre
 router.get('/:post_id/replies', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
 
 	let limit: number = 10; // TODO - Is there a real limit?
 
@@ -159,7 +159,7 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const postID: string | undefined = getValueFromQueryString(request.query, 'post_id');
+	const postID: string | undefined = getValueFromQueryString(request.query, 'post_id')[0];
 
 	if (!postID) {
 		response.type('application/xml');

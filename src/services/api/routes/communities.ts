@@ -76,8 +76,8 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	const type: string | undefined = getValueFromQueryString(request.query, 'type');
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
+	const type: string | undefined = getValueFromQueryString(request.query, 'type')[0];
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
 
 	let limit: number = 4;
 	if (limitString) {
@@ -158,13 +158,13 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 		message_to_pid: { $eq: null }
 	};
 
-	const searchKey: string | undefined = getValueFromQueryString(request.query, 'search_key');
-	const allowSpoiler: string | undefined = getValueFromQueryString(request.query, 'allow_spoiler');
-	const postType: string | undefined = getValueFromQueryString(request.query, 'type');
-	const queryBy: string | undefined = getValueFromQueryString(request.query, 'by');
-	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid');
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit');
-	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii');
+	const searchKey: string | undefined = getValueFromQueryString(request.query, 'search_key')[0];
+	const allowSpoiler: string | undefined = getValueFromQueryString(request.query, 'allow_spoiler')[0];
+	const postType: string | undefined = getValueFromQueryString(request.query, 'type')[0];
+	const queryBy: string | undefined = getValueFromQueryString(request.query, 'by')[0];
+	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid')[0];
+	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
+	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii')[0];
 
 	let limit: number = 10;
 
