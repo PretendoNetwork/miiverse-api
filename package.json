@@ -24,7 +24,7 @@
 			"url" : "https://jonbarrow.dev/"
 		}
 	],
-	"license": "ISC",
+	"license": "AGPL-3.0",
 	"dependencies": {
 		"aws-sdk": "^2.1204.0",
 		"colors": "^1.4.0",
