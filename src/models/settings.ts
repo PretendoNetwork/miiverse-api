@@ -95,4 +95,4 @@ SettingsSchema.method('json', function json(): Record<string, any> {
 	};
 });
 
-export const Settings: SettingsModel = model<ISettings, SettingsModel>('Settings', SettingsSchema);
+export const Settings = model<ISettings, SettingsModel>('Settings', SettingsSchema);

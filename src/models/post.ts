@@ -232,4 +232,4 @@ PostSchema.pre('save', async function(next) {
 	next();
 });
 
-export const Post: PostModel = model<IPost, PostModel>('Post', PostSchema);
+export const Post = model<IPost, PostModel>('Post', PostSchema);

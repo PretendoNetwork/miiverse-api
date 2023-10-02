@@ -11,4 +11,4 @@ const ReportSchema = new Schema<IReport, ReportModel, IReportMethods>({
 	}
 });
 
-export const Report: ReportModel = model<IReport, ReportModel>('Report', ReportSchema);
+export const Report = model<IReport, ReportModel>('Report', ReportSchema);

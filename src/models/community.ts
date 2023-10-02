@@ -129,4 +129,4 @@ CommunitySchema.method('json', function json(): Record<string, any> {
 	};
 });
 
-export const Community: CommunityModel = model<ICommunity, CommunityModel>('Community', CommunitySchema);
+export const Community = model<ICommunity, CommunityModel>('Community', CommunitySchema);

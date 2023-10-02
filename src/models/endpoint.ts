@@ -12,4 +12,4 @@ const endpointSchema = new Schema<IEndpoint, EndpointModel, IEndpointMethods>({
 	n3ds_host: String
 });
 
-export const Endpoint: EndpointModel = model<IEndpoint, EndpointModel>('Endpoint', endpointSchema);
+export const Endpoint = model<IEndpoint, EndpointModel>('Endpoint', endpointSchema);

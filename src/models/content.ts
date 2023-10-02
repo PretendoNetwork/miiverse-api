@@ -53,4 +53,4 @@ ContentSchema.method('removeFromFollowers', async function removeFromFollowers(p
 	await this.save();
 });
 
-export const Content: ContentModel = model<IContent, ContentModel>('Content', ContentSchema);
+export const Content = model<IContent, ContentModel>('Content', ContentSchema);

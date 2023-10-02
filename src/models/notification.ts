@@ -19,4 +19,4 @@ NotificationSchema.method('markRead', async function markRead() {
 	await this.save();
 });
 
-export const Notification: NotificationModel = model<INotification, NotificationModel>('Notification', NotificationSchema);
+export const Notification = model<INotification, NotificationModel>('Notification', NotificationSchema);

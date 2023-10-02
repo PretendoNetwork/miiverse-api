@@ -58,4 +58,4 @@ ConversationSchema.method('markAsRead', async function markAsRead(pid) {
 	await this.save();
 });
 
-export const Conversation: ConversationModel = model<IConversation, ConversationModel>('Conversation', ConversationSchema);
+export const Conversation = model<IConversation, ConversationModel>('Conversation', ConversationSchema);
