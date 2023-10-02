@@ -1,4 +1,5 @@
 import { Model, HydratedDocument } from 'mongoose';
+import { SettingsData } from '@/types/miiverse/settings';
 
 export interface ISettings {
 	pid: number;
@@ -18,7 +19,7 @@ export interface ISettings {
 }
 
 export interface ISettingsMethods {
-	json(): Record<string, any>;
+	json(): SettingsData;
 }
 
 interface ISettingsQueryHelpers {}

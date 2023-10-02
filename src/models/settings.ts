@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { SettingsData } from '@/types/miiverse/settings';
 import { HydratedSettingsDocument, ISettings, ISettingsMethods, SettingsModel } from '@/types/mongoose/settings';
 
 const SettingsSchema = new Schema<ISettings, SettingsModel, ISettingsMethods>({
@@ -48,7 +49,7 @@ const SettingsSchema = new Schema<ISettings, SettingsModel, ISettingsMethods>({
 	}
 });
 
-SettingsSchema.method<HydratedSettingsDocument>('json', function json(): Record<string, any> {
+SettingsSchema.method<HydratedSettingsDocument>('json', function json(): SettingsData {
 	return {
 		pid: this.pid,
 		screen_name: this.screen_name
