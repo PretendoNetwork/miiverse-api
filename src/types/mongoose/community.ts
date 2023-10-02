@@ -32,10 +32,6 @@ export interface ICommunity {
 }
 
 export interface ICommunityMethods {
-	upEmpathy(): Promise<void>;
-	downEmpathy(): Promise<void>;
-	upFollower(): Promise<void>;
-	downFollower(): Promise<void>;
 	addUserFavorite(pid: number): Promise<void>;
 	delUserFavorite(pid: number): Promise<void>;
 	json(): Record<string, any>;

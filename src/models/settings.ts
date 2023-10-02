@@ -48,46 +48,6 @@ const SettingsSchema = new Schema<ISettings, SettingsModel, ISettingsMethods>({
 	}
 });
 
-SettingsSchema.method<HydratedSettingsDocument>('updateComment', async function updateComment(comment) {
-	this.profile_comment = comment;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('updateSkill', async function updateSkill(skill) {
-	this.game_skill = skill;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('commentVisible', async function commentVisible(active) {
-	this.profile_comment_visibility = active;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('skillVisible', async function skillVisible(active) {
-	this.game_skill_visibility = active;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('birthdayVisible', async function birthdayVisible(active) {
-	this.birthday_visibility = active;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('relationshipVisible', async function relationshipVisible(active) {
-	this.relationship_visibility = active;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('countryVisible', async function countryVisible(active) {
-	this.country_visibility = active;
-	await this.save();
-});
-
-SettingsSchema.method<HydratedSettingsDocument>('favCommunityVisible', async function favCommunityVisible(active) {
-	this.profile_favorite_community_visibility = active;
-	await this.save();
-});
-
 SettingsSchema.method<HydratedSettingsDocument>('json', function json(): Record<string, any> {
 	return {
 		pid: this.pid,

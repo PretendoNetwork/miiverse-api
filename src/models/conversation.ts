@@ -47,18 +47,4 @@ ConversationSchema.method<HydratedConversationDocument>('newMessage', async func
 	await this.save();
 });
 
-ConversationSchema.method<HydratedConversationDocument>('markAsRead', async function markAsRead(pid) {
-	const users = this.get('users');
-	if (users[0].pid === pid) {
-		users[0].read = true;
-	} else if (users[1].pid === pid) {
-		users[1].read = true;
-	}
-
-	this.users = users;
-	this.markModified('users');
-
-	await this.save();
-});
-
 export const Conversation = model<IConversation, ConversationModel>('Conversation', ConversationSchema);

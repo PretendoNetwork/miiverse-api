@@ -70,30 +70,6 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 	}
 });
 
-CommunitySchema.method<HydratedCommunityDocument>('upEmpathy', async function upEmpathy(): Promise<void> {
-	this.empathy_count += 1;
-
-	await this.save();
-});
-
-CommunitySchema.method<HydratedCommunityDocument>('downEmpathy', async function downEmpathy(): Promise<void> {
-	this.empathy_count -= 1;
-
-	await this.save();
-});
-
-CommunitySchema.method<HydratedCommunityDocument>('upFollower', async function upFollower(): Promise<void> {
-	this.followers += 1;
-
-	await this.save();
-});
-
-CommunitySchema.method<HydratedCommunityDocument>('downFollower', async function downFollower(): Promise<void> {
-	this.followers -= 1;
-
-	await this.save();
-});
-
 CommunitySchema.method<HydratedCommunityDocument>('addUserFavorite', async function addUserFavorite(pid: number): Promise<void> {
 	if (!this.user_favorites.includes(pid)) {
 		this.user_favorites.push(pid);

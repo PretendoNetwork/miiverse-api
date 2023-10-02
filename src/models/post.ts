@@ -87,36 +87,9 @@ const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: false // * Disables the .id() getter used by Mongoose in TypeScript. Needed to have our own .id field
 });
 
-PostSchema.method<HydratedPostDocument>('upReply', async function upReply() {
-	const replyCount = this.reply_count || 0;
-	if (replyCount + 1 < 0) {
-		this.reply_count = 0;
-	} else {
-		this.reply_count = replyCount + 1;
-	}
-
-	await this.save();
-});
-
-PostSchema.method<HydratedPostDocument>('downReply', async function downReply() {
-	const replyCount = this.reply_count || 0;
-	if (replyCount - 1 < 0) {
-		this.reply_count = 0;
-	} else {
-		this.reply_count = replyCount - 1;
-	}
-
-	await this.save();
-});
 
 PostSchema.method<HydratedPostDocument>('remove', async function remove(reason) {
 	this.removed = true;
-	this.removed_reason = reason;
-	await this.save();
-});
-
-PostSchema.method<HydratedPostDocument>('unRemove', async function unRemove(reason) {
-	this.removed = false;
 	this.removed_reason = reason;
 	await this.save();
 });

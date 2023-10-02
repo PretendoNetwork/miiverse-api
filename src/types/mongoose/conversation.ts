@@ -15,8 +15,7 @@ export interface IConversation {
 }
 
 export interface IConversationMethods {
-	newMessage(message: string, senderPID: number): Promise<void>
-	markAsRead(pid: number): Promise<void>
+	newMessage(message: string, senderPID: number): Promise<void>;
 }
 
 interface IConversationQueryHelpers {}

@@ -7,14 +7,7 @@ export interface IContent {
     following_users: Types.Array<number>;
 }
 
-export interface IContentMethods {
-	addToCommunities(): Promise<void>
-	removeFromCommunities(): Promise<void>
-	addToUsers(): Promise<void>
-	removeFromUsers(): Promise<void>
-	addToFollowers(): Promise<void>
-	removeFromFollowers(): Promise<void>
-}
+export interface IContentMethods {}
 
 interface IContentQueryHelpers {}
 

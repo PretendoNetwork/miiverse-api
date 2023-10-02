@@ -18,15 +18,7 @@ export interface ISettings {
 }
 
 export interface ISettingsMethods {
-	updateComment(comment: string): Promise<void>;
-	updateSkill(skill: number): Promise<void>;
-	commentVisible(active: boolean): Promise<void>;
-	skillVisible(active: boolean): Promise<void>;
-	birthdayVisible(active: boolean): Promise<void>;
-	relationshipVisible(active: boolean): Promise<void>;
-	countryVisible(active: boolean): Promise<void>;
-	favCommunityVisible(active: boolean): Promise<void>;
-    json(): Record<string, any>;
+	json(): Record<string, any>;
 }
 
 interface ISettingsQueryHelpers {}

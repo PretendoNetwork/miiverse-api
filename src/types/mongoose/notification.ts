@@ -15,9 +15,7 @@ export interface INotification {
     lastUpdated: number;
 }
 
-export interface INotificationMethods {
-	markRead(): Promise<void>
-}
+export interface INotificationMethods {}
 
 interface INotificationQueryHelpers {}
 
