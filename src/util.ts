@@ -11,11 +11,11 @@ import { ParamPack } from '@/types/common/param-pack';
 import { config } from '@/config-manager';
 import { Token } from '@/types/common/token';
 
-import { FriendsDefinition } from 'pretendo-grpc-ts/dist/friends/friends_service';
-import { FriendRequest } from 'pretendo-grpc-ts/dist/friends/friend_request';
+import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
+import { FriendRequest } from '@pretendonetwork/grpc/friends/friend_request';
 
-import { AccountDefinition } from 'pretendo-grpc-ts/dist/account/account_service';
-import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 
 // * nice-grpc doesn't export ChannelImplementation so this can't be typed
 const gRPCFriendsChannel = createChannel(`${config.grpc.friends.ip}:${config.grpc.friends.port}`);

@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
-import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
 import {
 	getPostByID,

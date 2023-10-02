@@ -1,6 +1,6 @@
 import express from 'express';
 import xmlbuilder from 'xmlbuilder';
-import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getUserAccountData } from '@/util';
 import { getEndpoint } from '@/database';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';

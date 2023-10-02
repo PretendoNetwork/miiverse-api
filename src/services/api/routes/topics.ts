@@ -1,7 +1,7 @@
 import express from 'express';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
-import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getUserAccountData } from '@/util';
 import Cache from '@/cache';
 import { getEndpoint } from '@/database';
