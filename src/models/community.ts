@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { CommunityData } from '@/types/miiverse/community';
 import { ICommunity, ICommunityMethods, CommunityModel, HydratedCommunityDocument } from '@/types/mongoose/community';
 
 const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods>({
@@ -86,14 +87,14 @@ CommunitySchema.method<HydratedCommunityDocument>('delUserFavorite', async funct
 	await this.save();
 });
 
-CommunitySchema.method<HydratedCommunityDocument>('json', function json(): Record<string, any> {
+CommunitySchema.method<HydratedCommunityDocument>('json', function json(): CommunityData {
 	return {
 		community_id: this.community_id,
 		name: this.name,
 		description: this.description,
 		icon: this.icon.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 		icon_3ds: '',
-		pid: this.owner || '',
+		pid: this.owner,
 		app_data: this.app_data.replace(/[^A-Za-z0-9+/=\s]/g, ''),
 		is_user_community: '0'
 	};

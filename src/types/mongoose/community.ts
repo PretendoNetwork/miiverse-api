@@ -1,4 +1,5 @@
 import { Model, Types, HydratedDocument } from 'mongoose';
+import { CommunityData } from '@/types/miiverse/community';
 
 enum COMMUNITY_TYPE {
 	Main = 0,
@@ -34,7 +35,7 @@ export interface ICommunity {
 export interface ICommunityMethods {
 	addUserFavorite(pid: number): Promise<void>;
 	delUserFavorite(pid: number): Promise<void>;
-	json(): Record<string, any>;
+	json(): CommunityData;
 }
 
 interface ICommunityQueryHelpers {}
