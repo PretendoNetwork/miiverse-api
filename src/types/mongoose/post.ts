@@ -1,7 +1,7 @@
 import { Model, Types, HydratedDocument } from 'mongoose';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
-import { PostPainting, PostScreenshot } from '@/types/common/post';
+import { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
 
 export interface IPost {
 	id: string;
@@ -51,7 +51,8 @@ export interface IPostMethods {
 	cleanedAppData(): string;
 	formatPainting(): PostPainting | undefined;
 	formatScreenshot(): PostScreenshot | undefined;
-	json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any>;
+	formatTopicTag(): PostTopicTag;
+	json(options: PostToJSONOptions, community?: HydratedCommunityDocument): PostData;
 }
 
 interface IPostQueryHelpers {}

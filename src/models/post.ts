@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose';
 import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
-import { PostPainting, PostScreenshot } from '@/types/common/post';
+import { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
 
 const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: String,
@@ -169,59 +169,60 @@ PostSchema.method<HydratedPostDocument>('formatScreenshot', function formatScree
 	}
 });
 
-PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any> {
-	const json: Record<string, any> = {
+PostSchema.method<HydratedPostDocument>('formatTopicTag', function formatTopicTag(): PostTopicTag {
+	return {
+		name: this.topic_tag,
+		title_id: this.title_id
+	};
+});
+
+PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): PostData {
+	const post: PostData = {
+		app_data: undefined, // TODO - I try to keep these fields in the real order they show up in, but idk where this one goes
 		body: this.cleanedBody(),
-		country_id: this.country_id ? this.country_id : 254,
+		community_id: this.community_id, // TODO - This sucks
+		country_id: this.country_id,
 		created_at: moment(this.created_at).format('YYYY-MM-DD HH:MM:SS'),
 		feeling_id: this.feeling_id,
 		id: this.id,
-		is_autopost: this.is_autopost,
-		is_community_private_autopost: this.is_community_private_autopost,
-		is_spoiler: this.is_spoiler,
-		is_app_jumpable: this.is_app_jumpable,
-		empathy_count: this.empathy_count,
+		is_autopost: this.is_autopost ? 1 : 0,
+		is_community_private_autopost: this.is_community_private_autopost ? 1 : 0,
+		is_spoiler: this.is_spoiler ? 1 : 0,
+		is_app_jumpable: this.is_app_jumpable ? 1 : 0,
+		empathy_count: this.empathy_count || 0,
 		language_id: this.language_id,
-		number: '0',
+		mii: undefined, // * Conditionally set later
+		mii_face_url: undefined, // * Conditionally set later
+		number: 0,
+		painting: this.formatPainting(),
 		pid: this.pid,
 		platform_id: this.platform_id,
 		region_id: this.region_id,
-		reply_count: this.reply_count,
+		reply_count: this.reply_count || 0,
 		screen_name: this.screen_name,
-		title_id: this.title_id
+		screenshot: this.formatScreenshot(),
+		topic_tag: undefined, // * Conditionally set later
+		title_id: this.title_id,
 	};
 
-	if (this.app_data && options.app_data) {
-		json.app_data = this.cleanedAppData();
-	}
-
-	if (options.topics && community) {
-		json.community_id = community.community_id;
-	} else {
-		json.community_id = this.community_id;
+	if (options.app_data) {
+		post.app_data = this.cleanedAppData();
 	}
 
 	if (options.with_mii) {
-		json.mii = this.cleanedMiiData();
-		json.mii_face_url = this.mii_face_url;
+		post.mii = this.cleanedMiiData();
+		post.mii_face_url = this.mii_face_url;
 	}
 
-	if (this.painting) {
-		json.painting = this.formatPainting();
+	if (options.topic_tag) {
+		post.topic_tag = this.formatTopicTag();
 	}
 
-	if (this.screenshot && this.screenshot_length) {
-		json.screenshot = this.formatScreenshot();
+	if (community) {
+		post.community_id = community.community_id;
 	}
 
-	if (this.topic_tag && options.topic_tag) {
-		json.topic_tag = {
-			name: this.topic_tag,
-			title_id: this.title_id
-		};
-	}
-
-	return json;
+	return post;
 });
 
 PostSchema.pre('save', async function(next) {

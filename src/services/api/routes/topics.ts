@@ -10,7 +10,7 @@ import { Community } from '@/models/community';
 import { IPost } from '@/types/mongoose/post';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { WWPData, WWPPost, WWPTopic } from '@/types/common/wara-wara-plaza';
+import { WWPData, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
 
 const router = express.Router();
 const ONE_HOUR = 60 * 60 * 1000;
@@ -115,33 +115,12 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 		const people = await getCommunityPeople(community);
 
 		for (const person of people) {
-			const hydratedPost = Post.hydrate(person.post);
+			const post = Post.hydrate(person.post).json({
+				with_mii: true,
+				topic_tag: true
+			});
 
-			const post: WWPPost = {
-				body: hydratedPost.cleanedBody(),
-				community_id: 0xFFFFFFFF, // * This is how it was in the real WWP. Unsure why, but it works
-				country_id: hydratedPost.country_id,
-				created_at: moment(hydratedPost.created_at).format('YYYY-MM-DD HH:MM:SS'),
-				feeling_id: hydratedPost.feeling_id,
-				id: hydratedPost.id,
-				is_autopost: hydratedPost.is_autopost ? 1 : 0,
-				is_community_private_autopost: hydratedPost.is_community_private_autopost ? 1 : 0,
-				is_spoiler: hydratedPost.is_spoiler ? 1 : 0,
-				is_app_jumpable: hydratedPost.is_app_jumpable ? 1 : 0,
-				empathy_count: hydratedPost.empathy_count || 0,
-				language_id: hydratedPost.language_id,
-				mii: hydratedPost.cleanedMiiData(),
-				mii_face_url: hydratedPost.mii_face_url,
-				number: 0,
-				painting: hydratedPost.formatPainting(),
-				pid: hydratedPost.pid,
-				platform_id: hydratedPost.platform_id,
-				region_id: hydratedPost.region_id,
-				reply_count: hydratedPost.reply_count || 0,
-				screen_name: hydratedPost.screen_name,
-				screenshot: hydratedPost.formatScreenshot(),
-				title_id: hydratedPost.title_id,
-			};
+			post.community_id = 0xFFFFFFFF; // * Make this match above. This is how it was in the real WWP. Unsure why, but it works
 
 			topic.people.push({
 				person: {
