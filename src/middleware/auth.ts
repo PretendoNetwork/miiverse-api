@@ -52,6 +52,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 	const paramPackData: ParamPack = decodeParamPack(paramPack);
 	const paramPackCheck: z.SafeParseReturnType<ParamPack, ParamPack> = ParamPackSchema.safeParse(paramPackData);
 	if (!paramPackCheck.success) {
+		console.log(paramPackCheck.error);
 		return badAuth(response, 18, 'BAD_PARAM');
 	}
 
@@ -61,6 +62,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 		user = await getUserAccountData(pid);
 	} catch (error) {
 		// TODO - Log this error
+		console.log(error);
 		return badAuth(response, 18, 'BAD_PARAM');
 	}
 

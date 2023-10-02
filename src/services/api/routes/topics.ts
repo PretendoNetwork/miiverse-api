@@ -1,23 +1,19 @@
 import express from 'express';
-import memoize from 'memoizee';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
 import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
 import { getUserAccountData } from '@/util';
-import { getEndpoint, getPostsBytitleID } from '@/database';
+import Cache from '@/cache';
+import { getEndpoint } from '@/database';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { HydratedPostDocument } from '@/types/mongoose/post';
+import { WWPData, WWPPost, WWPTopic } from '@/types/common/wara-wara-plaza';
 
-const router: express.Router = express.Router();
-
-// TODO - Need to add types to memoize in @/types/memoize.d.ts
-const memoizedGenerateTopicsXML = memoize(generateTopicsXML, {
-	async: true,
-	maxAge: 1000 * 60 * 60 // * cache for 1 hour
-});
+const router = express.Router();
+const ONE_HOUR = 60 * 60 * 1000;
+const WARA_WARA_PLAZA_CACHE = new Cache<WWPData>(ONE_HOUR);
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -46,77 +42,184 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	const communities: HydratedCommunityDocument[] = await calculateMostPopularCommunities(24, 10);
+	if (!WARA_WARA_PLAZA_CACHE.valid()) {
+		const communities: HydratedCommunityDocument[] = await calculateMostPopularCommunities(24, 10);
 
-	if (communities.length < 10) {
-		response.sendStatus(404);
-		return;
+		if (communities.length < 10) {
+			response.sendStatus(404);
+			return;
+		}
+
+		WARA_WARA_PLAZA_CACHE.update(await generateTopicsData(communities));
 	}
 
-	response.send(await memoizedGenerateTopicsXML(communities));
+	const data = WARA_WARA_PLAZA_CACHE.get() || {};
+
+	response.send(xmlbuilder.create(data, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
 });
 
-async function generateTopicsXML(communities: HydratedCommunityDocument[]): Promise<string> {
-	const json: Record<string, any> = {
-		result: {
-			has_error: 0,
-			version: 1,
-			expire: moment().add(2, 'days').format('YYYY-MM-DD HH:MM:SS'),
-			request_name: 'topics',
-			topics: []
-		}
-	};
+async function generateTopicsData(communities: HydratedCommunityDocument[]): Promise<WWPData> {
+	const topics: {
+		topic: WWPTopic;
+	}[] = [];
 
-	for (const community of communities) {
-		const topic: Record<string, any> = {
-			topic: {
-				empathy_count: community.empathy_count,
-				has_shop_page: community.has_shop_page,
-				icon: community.icon,
-				title_ids: [],
-				title_id: community.title_id[0],
-				community_id: community.community_id,
-				is_recommended: community.is_recommended,
-				name: community.name,
-				people: []
+	for (let i = 0; i < communities.length; i++) {
+		const community = communities[i];
+
+		const empathies = await Post.aggregate([
+			{
+				$match: {
+					community_id: community.olive_community_id
+				}
+			},
+			{
+				$group : {
+					_id : null,
+					total : {
+						$sum : '$empathy_count'
+					}
+				}
+			},
+			{
+				$limit: 1
 			}
+		]);
+
+		const topic: WWPTopic = {
+			empathy_count: empathies[0]?.total || 0,
+			has_shop_page: community.has_shop_page ? 1 : 0,
+			icon: community.icon,
+			title_ids: [],
+			title_id: community.title_id[0],
+			community_id: 0xFFFFFFFF, // * This is how it was in the real WWP. Unsure why, but it works
+			is_recommended: community.is_recommended ? 1 : 0,
+			name: community.name,
+			people: [],
+			position: i+1
 		};
 
-		community.title_id.forEach(function (title_id: string) {
-			if (title_id !== '') {
-				topic.topic.title_ids.push({ title_id });
+		community.title_id.forEach(title_id => {
+			// * Just in case
+			if (title_id) {
+				topic.title_ids.push({ title_id });
 			}
 		});
 
-		const posts: HydratedPostDocument[] = await getPostsBytitleID(community.title_id, 30);
+		const people = await getCommunityPeople(community);
 
-		for (const post of posts) {
-			topic.topic.people.push({
+		for (const person of people) {
+			const hydratedPost = Post.hydrate(person.post);
+
+			const post: WWPPost = {
+				body: hydratedPost.cleanedBody(),
+				community_id: 0xFFFFFFFF, // * This is how it was in the real WWP. Unsure why, but it works
+				country_id: hydratedPost.country_id,
+				created_at: moment(hydratedPost.created_at).format('YYYY-MM-DD HH:MM:SS'),
+				feeling_id: hydratedPost.feeling_id,
+				id: hydratedPost.id,
+				is_autopost: hydratedPost.is_autopost ? 1 : 0,
+				is_community_private_autopost: hydratedPost.is_community_private_autopost ? 1 : 0,
+				is_spoiler: hydratedPost.is_spoiler ? 1 : 0,
+				is_app_jumpable: hydratedPost.is_app_jumpable ? 1 : 0,
+				empathy_count: hydratedPost.empathy_count || 0,
+				language_id: hydratedPost.language_id,
+				mii: hydratedPost.cleanedMiiData(),
+				mii_face_url: hydratedPost.mii_face_url,
+				number: 0,
+				painting: hydratedPost.formatPainting(),
+				pid: hydratedPost.pid,
+				platform_id: hydratedPost.platform_id,
+				region_id: hydratedPost.region_id,
+				reply_count: hydratedPost.reply_count || 0,
+				screen_name: hydratedPost.screen_name,
+				screenshot: hydratedPost.formatScreenshot(),
+				title_id: hydratedPost.title_id,
+			};
+
+			topic.people.push({
 				person: {
 					posts: [
 						{
-							post: post.json({
-								with_mii: true,
-								topics: true
-							})
+							post
 						}
 					]
 				}
 			});
 		}
 
-		json.result.topics.push(topic);
+		topics.push({
+			topic: topic
+		});
 	}
 
-	return xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true });
+	return {
+		result: {
+			has_error: 0,
+			version: 1,
+			expire: moment().add(2, 'days').format('YYYY-MM-DD HH:MM:SS'),
+			request_name: 'topics',
+			topics
+		}
+	};
+}
+
+async function getCommunityPeople(community: HydratedCommunityDocument, hours = 24): Promise<any> {
+	const now = new Date();
+	const last24Hours = new Date(now.getTime() - hours * 60 * 60 * 1000);
+	const people = await Post.aggregate([
+		{
+			$match: {
+				title_id: {
+					$in: community.title_id
+				},
+				created_at: {
+					$gte: last24Hours
+				},
+				message_to_pid: null,
+				parent: null,
+				removed: false
+			}
+		},
+		{
+			$group: {
+				_id: '$pid',
+				post: {
+					$first: '$$ROOT'
+				}
+			}
+		},
+		{
+			$limit: 70 // * Arbitrary
+		}
+	]);
+
+	// TODO - Remove this check once out of beta and have more users
+	// * We only do this because Juxtaposition is not super active
+	// * due to it being in beta. If we don't expand the search
+	// * time range then WWP still ends up fairly empty
+	// *
+	// * Ensure we have at *least* 20 people. Arbitrary.
+	// * If the year is less than 2020, assume we've gone
+	// * too far back. There are no more posts, just return
+	// * what was found
+	if (people.length < 20 && last24Hours.getFullYear() >= 2020) {
+		// * Double the search range each time to get
+		// * exponentially more posts. This speeds up
+		// * the search at the cost of using older posts
+		return getCommunityPeople(community, hours * 2);
+	}
+
+	return people;
 }
 
 async function calculateMostPopularCommunities(hours: number, limit: number): Promise<HydratedCommunityDocument[]> {
-	const now: Date = new Date();
-	const last24Hours: Date = new Date(now.getTime() - hours * 60 * 60 * 1000);
+	const now = new Date();
+	const last24Hours = new Date(now.getTime() - hours * 60 * 60 * 1000);
+
 	if (!last24Hours) {
 		throw new Error('Invalid date');
 	}
+
 	const validCommunities: {
 		_id: null;
 		communities: [string];
@@ -136,10 +239,13 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 			}
 		}
 	]);
+
 	const communityIDs: [string] = validCommunities[0].communities;
+
 	if (!communityIDs) {
 		throw new Error('No communities found');
 	}
+
 	const popularCommunities: {
 		_id: string;
 		count: number;

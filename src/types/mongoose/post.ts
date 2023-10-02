@@ -1,6 +1,7 @@
 import { Model, Types, HydratedDocument } from 'mongoose';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
+import { PostPainting, PostScreenshot } from '@/types/common/post';
 
 export interface IPost {
 	id: string;
@@ -44,6 +45,12 @@ export interface IPostMethods {
 	remove(reason: string): Promise<void>;
 	unRemove(reason: string): Promise<void>;
     generatePostUID(length: number): Promise<void>;
+	cleanedBody(): string;
+	cleanedMiiData(): string;
+	cleanedPainting(): string;
+	cleanedAppData(): string;
+	formatPainting(): PostPainting | undefined;
+	formatScreenshot(): PostScreenshot | undefined;
     json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any>;
 }
 

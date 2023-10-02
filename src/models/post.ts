@@ -4,6 +4,7 @@ import { Schema, model } from 'mongoose';
 import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
+import { PostPainting, PostScreenshot } from '@/types/common/post';
 
 const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: String,
@@ -132,9 +133,45 @@ PostSchema.method('generatePostUID', async function generatePostUID(length: numb
 	}
 });
 
+PostSchema.method('cleanedBody', function cleanedBody(): string {
+	return this.body ? this.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"[\]]/g, '').replace(/[\n\r]+/gm, '') : '';
+});
+
+PostSchema.method('cleanedMiiData', function cleanedMiiData(): string {
+	return this.mii.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
+});
+
+PostSchema.method('cleanedPainting', function cleanedPainting(): string {
+	return this.painting.replace(/[\n\r]+/gm, '').trim();
+});
+
+PostSchema.method('cleanedAppData', function cleanedAppData(): string {
+	return this.app_data.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
+});
+
+PostSchema.method('formatPainting', function formatPainting(): PostPainting | undefined {
+	if (this.painting) {
+		return {
+			format: 'tga',
+			content: this.cleanedPainting(),
+			size: this.painting.length,
+			url: `https://pretendo-cdn.b-cdn.net/paintings/${this.pid}/${this.id}.png`
+		};
+	}
+});
+
+PostSchema.method('formatScreenshot', function formatScreenshot(): PostScreenshot | undefined {
+	if (this.screenshot && this.screenshot_length) {
+		return {
+			size: this.screenshot_length,
+			url: `https://pretendo-cdn.b-cdn.net/screenshots/${this.pid}/${this.id}.jpg`
+		};
+	}
+});
+
 PostSchema.method('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any> {
 	const json: Record<string, any> = {
-		body: this.body ? this.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"[\]]/g, '').replace(/[\n\r]+/gm, '') : '',
+		body: this.cleanedBody(),
 		country_id: this.country_id ? this.country_id : 254,
 		created_at: moment(this.created_at).format('YYYY-MM-DD HH:MM:SS'),
 		feeling_id: this.feeling_id,
@@ -155,7 +192,7 @@ PostSchema.method('json', function json(options: PostToJSONOptions, community?: 
 	};
 
 	if (this.app_data && options.app_data) {
-		json.app_data = this.app_data.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
+		json.app_data = this.cleanedAppData();
 	}
 
 	if (options.topics && community) {
@@ -165,24 +202,16 @@ PostSchema.method('json', function json(options: PostToJSONOptions, community?: 
 	}
 
 	if (options.with_mii) {
-		json.mii = this.mii.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
+		json.mii = this.cleanedMiiData();
 		json.mii_face_url = this.mii_face_url;
 	}
 
 	if (this.painting) {
-		json.painting = {
-			format: 'tga',
-			content: this.painting.replace(/[\n\r]+/gm, '').trim(),
-			size: this.painting.length,
-			url: `https://pretendo-cdn.b-cdn.net/paintings/${this.pid}/${this.id}.png`
-		};
+		json.painting = this.formatPainting();
 	}
 
 	if (this.screenshot && this.screenshot_length) {
-		json.screenshot = {
-			size: this.screenshot_length,
-			url: `https://pretendo-cdn.b-cdn.net/screenshots/${this.pid}/${this.id}.jpg`
-		};
+		json.screenshot = this.formatScreenshot();
 	}
 
 	if (this.topic_tag && options.topic_tag) {
