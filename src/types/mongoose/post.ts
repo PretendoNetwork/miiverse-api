@@ -40,7 +40,7 @@ export interface IPost {
 }
 
 export interface IPostMethods {
-	remove(reason: string): Promise<void>;
+	del(reason: string): Promise<void>;
 	generatePostUID(length: number): Promise<void>;
 	cleanedBody(): string;
 	cleanedMiiData(): string;

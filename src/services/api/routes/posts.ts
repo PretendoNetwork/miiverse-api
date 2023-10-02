@@ -53,7 +53,7 @@ router.post('/:post_id.delete', async function (request: express.Request, respon
 	}
 
 	if (post.pid === userContent.pid) {
-		await post.remove('User requested removal');
+		await post.del('User requested removal');
 		response.sendStatus(200);
 	} else {
 		response.sendStatus(401);

@@ -88,7 +88,7 @@ const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 });
 
 
-PostSchema.method<HydratedPostDocument>('remove', async function remove(reason) {
+PostSchema.method<HydratedPostDocument>('del', async function del(reason: string) {
 	this.removed = true;
 	this.removed_reason = reason;
 	await this.save();
