@@ -31,6 +31,9 @@ interface TestResult {
 
 const USERNAME: string = process.env.PN_MIIVERSE_API_TESTING_USERNAME?.trim() || '';
 const PASSWORD: string = process.env.PN_MIIVERSE_API_TESTING_PASSWORD?.trim() || '';
+const DEVICE_ID: string = process.env.PN_MIIVERSE_API_TESTING_DEVICE_ID?.trim() || '';
+const SERIAL_NUMBER: string = process.env.PN_MIIVERSE_API_TESTING_SERIAL_NUMBER?.trim() || '';
+const CERTIFICATE: string = process.env.PN_MIIVERSE_API_TESTING_CONSOLE_CERT?.trim() || '';
 
 if (!USERNAME) {
 	throw new Error('PNID username missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_USERNAME');
@@ -40,15 +43,30 @@ if (!PASSWORD) {
 	throw new Error('PNID password missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_PASSWORD');
 }
 
+if (!DEVICE_ID) {
+	throw new Error('Console device ID missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_DEVICE_ID');
+}
+
+if (!SERIAL_NUMBER) {
+	throw new Error('Console serial number missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_SERIAL_NUMBER');
+}
+
+if (!CERTIFICATE) {
+	throw new Error('Console certificate missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_CONSOLE_CERT');
+}
+
 const BASE_URL: string = 'https://account.pretendo.cc';
 const API_URL: string = `${BASE_URL}/v1/api`;
 const MAPPED_IDS_URL: string = `${API_URL}/admin/mapped_ids`;
 const ACCESS_TOKEN_URL: string = `${API_URL}/oauth20/access_token/generate`;
-const SERVICE_TOKEN_URL: string = `${API_URL}/provider/service_token/@me`;
+const SERVICE_TOKEN_URL: string = `${API_URL}/provider/service_token/@me?client_id=87cd32617f1985439ea608c2746e4610`;
 
 const DEFAULT_HEADERS: Record<string, string> = {
 	'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
-	'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a'
+	'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a',
+	'X-Nintendo-Device-ID': DEVICE_ID,
+	'X-Nintendo-Serial-Number': SERIAL_NUMBER,
+	'X-Nintendo-Device-Cert': CERTIFICATE
 };
 
 export function nintendoPasswordHash(password: string, pid: number): string {
