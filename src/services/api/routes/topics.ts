@@ -7,6 +7,7 @@ import Cache from '@/cache';
 import { getEndpoint } from '@/database';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
+import { IPost } from '@/types/mongoose/post';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { WWPData, WWPPost, WWPTopic } from '@/types/common/wara-wara-plaza';
@@ -43,7 +44,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	}
 
 	if (!WARA_WARA_PLAZA_CACHE.valid()) {
-		const communities: HydratedCommunityDocument[] = await calculateMostPopularCommunities(24, 10);
+		const communities = await calculateMostPopularCommunities(24, 10);
 
 		if (communities.length < 10) {
 			response.sendStatus(404);
@@ -54,8 +55,14 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	}
 
 	const data = WARA_WARA_PLAZA_CACHE.get() || {};
+	const xml = xmlbuilder.create(data, {
+		separateArrayItems: true
+	}).end({
+		pretty: true,
+		allowEmpty: true
+	});
 
-	response.send(xmlbuilder.create(data, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
+	response.send(xml);
 });
 
 async function generateTopicsData(communities: HydratedCommunityDocument[]): Promise<WWPData> {
@@ -66,17 +73,17 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 	for (let i = 0; i < communities.length; i++) {
 		const community = communities[i];
 
-		const empathies = await Post.aggregate([
+		const empathies = await Post.aggregate<{ _id: null; total: number; }>([
 			{
 				$match: {
 					community_id: community.olive_community_id
 				}
 			},
 			{
-				$group : {
-					_id : null,
-					total : {
-						$sum : '$empathy_count'
+				$group: {
+					_id: null,
+					total: {
+						$sum: '$empathy_count'
 					}
 				}
 			},
@@ -163,10 +170,10 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 	};
 }
 
-async function getCommunityPeople(community: HydratedCommunityDocument, hours = 24): Promise<any> {
+async function getCommunityPeople(community: HydratedCommunityDocument, hours = 24): Promise<{ _id: number; post: IPost }[]> {
 	const now = new Date();
 	const last24Hours = new Date(now.getTime() - hours * 60 * 60 * 1000);
-	const people = await Post.aggregate([
+	const people = await Post.aggregate<{ _id: number; post: IPost }>([
 		{
 			$match: {
 				title_id: {
@@ -220,10 +227,7 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 		throw new Error('Invalid date');
 	}
 
-	const validCommunities: {
-		_id: null;
-		communities: [string];
-	}[] = await Community.aggregate([
+	const validCommunities = await Community.aggregate<{ _id: null; communities: string[]; }>([
 		{
 			$match: {
 				type: 0,
@@ -240,16 +244,13 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 		}
 	]);
 
-	const communityIDs: [string] = validCommunities[0].communities;
+	const communityIDs = validCommunities[0].communities;
 
 	if (!communityIDs) {
 		throw new Error('No communities found');
 	}
 
-	const popularCommunities: {
-		_id: string;
-		count: number;
-	}[] = await Post.aggregate([
+	const popularCommunities = await Post.aggregate<{ _id: null; count: number; }>([
 		{
 			$match: {
 				created_at: {

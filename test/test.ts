@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import newman from 'newman';
 import { Collection, CollectionDefinition } from 'postman-collection';
 import qs from 'qs';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { create as parseXML } from 'xmlbuilder2';
 import { table } from 'table';
 import ora from 'ora';
@@ -29,11 +29,11 @@ interface TestResult {
 	error?: string
 }
 
-const USERNAME: string = process.env.PN_MIIVERSE_API_TESTING_USERNAME?.trim() || '';
-const PASSWORD: string = process.env.PN_MIIVERSE_API_TESTING_PASSWORD?.trim() || '';
-const DEVICE_ID: string = process.env.PN_MIIVERSE_API_TESTING_DEVICE_ID?.trim() || '';
-const SERIAL_NUMBER: string = process.env.PN_MIIVERSE_API_TESTING_SERIAL_NUMBER?.trim() || '';
-const CERTIFICATE: string = process.env.PN_MIIVERSE_API_TESTING_CONSOLE_CERT?.trim() || '';
+const USERNAME = process.env.PN_MIIVERSE_API_TESTING_USERNAME?.trim() || '';
+const PASSWORD = process.env.PN_MIIVERSE_API_TESTING_PASSWORD?.trim() || '';
+const DEVICE_ID = process.env.PN_MIIVERSE_API_TESTING_DEVICE_ID?.trim() || '';
+const SERIAL_NUMBER = process.env.PN_MIIVERSE_API_TESTING_SERIAL_NUMBER?.trim() || '';
+const CERTIFICATE = process.env.PN_MIIVERSE_API_TESTING_CONSOLE_CERT?.trim() || '';
 
 if (!USERNAME) {
 	throw new Error('PNID username missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_USERNAME');
@@ -55,13 +55,13 @@ if (!CERTIFICATE) {
 	throw new Error('Console certificate missing. Required for requesting service tokens. Set PN_MIIVERSE_API_TESTING_CONSOLE_CERT');
 }
 
-const BASE_URL: string = 'https://account.pretendo.cc';
-const API_URL: string = `${BASE_URL}/v1/api`;
-const MAPPED_IDS_URL: string = `${API_URL}/admin/mapped_ids`;
-const ACCESS_TOKEN_URL: string = `${API_URL}/oauth20/access_token/generate`;
-const SERVICE_TOKEN_URL: string = `${API_URL}/provider/service_token/@me?client_id=87cd32617f1985439ea608c2746e4610`;
+const BASE_URL = 'https://account.pretendo.cc';
+const API_URL = `${BASE_URL}/v1/api`;
+const MAPPED_IDS_URL = `${API_URL}/admin/mapped_ids`;
+const ACCESS_TOKEN_URL = `${API_URL}/oauth20/access_token/generate`;
+const SERVICE_TOKEN_URL = `${API_URL}/provider/service_token/@me?client_id=87cd32617f1985439ea608c2746e4610`;
 
-const DEFAULT_HEADERS: Record<string, string> = {
+const DEFAULT_HEADERS = {
 	'X-Nintendo-Client-ID': 'a2efa818a34fa16b8afbc8a74eba3eda',
 	'X-Nintendo-Client-Secret': 'c91cdb5658bd4954ade78533a339cf9a',
 	'X-Nintendo-Device-ID': DEVICE_ID,
@@ -70,10 +70,10 @@ const DEFAULT_HEADERS: Record<string, string> = {
 };
 
 export function nintendoPasswordHash(password: string, pid: number): string {
-	const pidBuffer: Buffer = Buffer.alloc(4);
+	const pidBuffer = Buffer.alloc(4);
 	pidBuffer.writeUInt32LE(pid);
 
-	const unpacked: Buffer = Buffer.concat([
+	const unpacked = Buffer.concat([
 		pidBuffer,
 		Buffer.from('\x02\x65\x43\x46'),
 		Buffer.from(password)
@@ -83,7 +83,7 @@ export function nintendoPasswordHash(password: string, pid: number): string {
 }
 
 async function apiGetRequest(url: string, headers = {}): Promise<Record<string, any>> {
-	const response: AxiosResponse<any, any> = await axios.get(url, {
+	const response = await axios.get(url, {
 		headers: Object.assign(headers, DEFAULT_HEADERS),
 		validateStatus: () => true
 	});
@@ -102,7 +102,7 @@ async function apiGetRequest(url: string, headers = {}): Promise<Record<string, 
 }
 
 async function apiPostRequest(url: string, body: string): Promise<Record<string, any>> {
-	const response: AxiosResponse<any, any> = await axios.post(url, body, {
+	const response = await axios.post(url, body, {
 		headers: DEFAULT_HEADERS,
 		validateStatus: () => true,
 	});
@@ -121,26 +121,26 @@ async function apiPostRequest(url: string, body: string): Promise<Record<string,
 }
 
 async function getPID(username: string): Promise<number> {
-	const response: Record<string, any> = await apiGetRequest(`${MAPPED_IDS_URL}?input_type=user_id&output_type=pid&input=${username}`);
+	const response = await apiGetRequest(`${MAPPED_IDS_URL}?input_type=user_id&output_type=pid&input=${username}`);
 
 	return Number(response.mapped_ids.mapped_id.out_id);
 }
 
 async function getAccessToken(username: string, passwordHash: string): Promise<string> {
-	const data: string = qs.stringify({
+	const data = qs.stringify({
 		grant_type: 'password',
 		user_id: username,
 		password: passwordHash,
 		password_type: 'hash',
 	});
 
-	const response: Record<string, any> = await apiPostRequest(ACCESS_TOKEN_URL, data);
+	const response = await apiPostRequest(ACCESS_TOKEN_URL, data);
 
 	return response.OAuth20.access_token.token;
 }
 
 async function getMiiverseServiceToken(accessToken: string): Promise<string> {
-	const response: Record<string, any> = await apiGetRequest(SERVICE_TOKEN_URL, {
+	const response = await apiGetRequest(SERVICE_TOKEN_URL, {
 		'X-Nintendo-Title-ID': '0005001010040100',
 		Authorization: `Bearer ${accessToken}`
 	});
@@ -193,10 +193,10 @@ function peopleRoutesTest(serviceToken: string): Promise<TestResult[]> {
 async function main(): Promise<void> {
 	const tokensSpinner = ora('Acquiring account tokens').start();
 
-	const pid: number = await getPID(USERNAME);
-	const passwordHash: string = nintendoPasswordHash(PASSWORD, pid);
-	const accessToken: string = await getAccessToken(USERNAME, passwordHash);
-	const serviceToken: string = await getMiiverseServiceToken(accessToken);
+	const pid = await getPID(USERNAME);
+	const passwordHash = nintendoPasswordHash(PASSWORD, pid);
+	const accessToken = await getAccessToken(USERNAME, passwordHash);
+	const serviceToken = await getMiiverseServiceToken(accessToken);
 
 	tokensSpinner.succeed();
 

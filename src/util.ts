@@ -11,30 +11,28 @@ import { ParamPack } from '@/types/common/param-pack';
 import { config } from '@/config-manager';
 import { Token } from '@/types/common/token';
 
-import { FriendsClient, FriendsDefinition } from 'pretendo-grpc-ts/dist/friends/friends_service';
-import { GetUserFriendPIDsResponse } from 'pretendo-grpc-ts/dist/friends/get_user_friend_pids_rpc';
-import { GetUserFriendRequestsIncomingResponse } from 'pretendo-grpc-ts/dist/friends/get_user_friend_requests_incoming_rpc';
+import { FriendsDefinition } from 'pretendo-grpc-ts/dist/friends/friends_service';
 import { FriendRequest } from 'pretendo-grpc-ts/dist/friends/friend_request';
 
-import { AccountClient, AccountDefinition } from 'pretendo-grpc-ts/dist/account/account_service';
+import { AccountDefinition } from 'pretendo-grpc-ts/dist/account/account_service';
 import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
 
 // * nice-grpc doesn't export ChannelImplementation so this can't be typed
 const gRPCFriendsChannel = createChannel(`${config.grpc.friends.ip}:${config.grpc.friends.port}`);
-const gRPCFriendsClient: FriendsClient = createClient(FriendsDefinition, gRPCFriendsChannel);
+const gRPCFriendsClient = createClient(FriendsDefinition, gRPCFriendsChannel);
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.ip}:${config.grpc.account.port}`);
-const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
+const gRPCAccountClient = createClient(AccountDefinition, gRPCAccountChannel);
 
-const s3: aws.S3 = new aws.S3({
+const s3 = new aws.S3({
 	endpoint: new aws.Endpoint(config.s3.endpoint),
 	accessKeyId: config.s3.key,
 	secretAccessKey: config.s3.secret
 });
 
 export function decodeParamPack(paramPack: string): ParamPack {
-	const values: string[] = Buffer.from(paramPack, 'base64').toString().split('\\');
-	const entries: string[][] = values.filter(value => value).reduce((entries: string[][], value: string, index: number) => {
+	const values = Buffer.from(paramPack, 'base64').toString().split('\\');
+	const entries = values.filter(value => value).reduce((entries: string[][], value: string, index: number) => {
 		if (0 === index % 2) {
 			entries.push([value]);
 		} else {
@@ -49,13 +47,13 @@ export function decodeParamPack(paramPack: string): ParamPack {
 
 export function getPIDFromServiceToken(token: string): number {
 	try {
-		const decryptedToken: Buffer = decryptToken(Buffer.from(token, 'base64'));
+		const decryptedToken = decryptToken(Buffer.from(token, 'base64'));
 
 		if (!decryptedToken) {
 			return 0;
 		}
 
-		const unpackedToken: Token = unpackToken(decryptedToken);
+		const unpackedToken = unpackToken(decryptedToken);
 
 		return unpackedToken.pid;
 	} catch (e) {
@@ -65,14 +63,14 @@ export function getPIDFromServiceToken(token: string): number {
 }
 
 export function decryptToken(token: Buffer): Buffer {
-	const iv: Buffer = Buffer.alloc(16);
+	const iv = Buffer.alloc(16);
 
-	const expectedChecksum: number = token.readUint32BE();
-	const encryptedBody: Buffer = token.subarray(4);
+	const expectedChecksum = token.readUint32BE();
+	const encryptedBody = token.subarray(4);
 
-	const decipher: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(config.aes_key, 'hex'), iv);
+	const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(config.aes_key, 'hex'), iv);
 
-	const decrypted: Buffer = Buffer.concat([
+	const decrypted = Buffer.concat([
 		decipher.update(encryptedBody),
 		decipher.final()
 	]);
@@ -96,7 +94,7 @@ export function unpackToken(token: Buffer): Token {
 }
 
 export function processPainting(painting: string): Buffer | null {
-	const paintingBuffer: Buffer = Buffer.from(painting, 'base64');
+	const paintingBuffer = Buffer.from(painting, 'base64');
 	let output: Uint8Array;
 
 	try {
@@ -106,8 +104,8 @@ export function processPainting(painting: string): Buffer | null {
 		return null;
 	}
 
-	const tga: TGA = new TGA(Buffer.from(output));
-	const png: PNG = new PNG({
+	const tga = new TGA(Buffer.from(output));
+	const png = new PNG({
 		width: tga.width,
 		height: tga.height
 	});
@@ -118,7 +116,7 @@ export function processPainting(painting: string): Buffer | null {
 }
 
 export async function uploadCDNAsset(bucket: string, key: string, data: Buffer, acl: string): Promise<void> {
-	const awsPutParams: aws.S3.PutObjectRequest = {
+	const awsPutParams = {
 		Body: data,
 		Key: key,
 		Bucket: bucket,
@@ -129,7 +127,7 @@ export async function uploadCDNAsset(bucket: string, key: string, data: Buffer, 
 }
 
 export async function getUserFriendPIDs(pid: number): Promise<number[]> {
-	const response: GetUserFriendPIDsResponse = await gRPCFriendsClient.getUserFriendPIDs({
+	const response = await gRPCFriendsClient.getUserFriendPIDs({
 		pid: pid
 	}, {
 		metadata: Metadata({
@@ -141,7 +139,7 @@ export async function getUserFriendPIDs(pid: number): Promise<number[]> {
 }
 
 export async function getUserFriendRequestsIncoming(pid: number): Promise<FriendRequest[]> {
-	const response: GetUserFriendRequestsIncomingResponse = await gRPCFriendsClient.getUserFriendRequestsIncoming({
+	const response = await gRPCFriendsClient.getUserFriendRequestsIncoming({
 		pid: pid
 	}, {
 		metadata: Metadata({
@@ -163,7 +161,7 @@ export function getUserAccountData(pid: number): Promise<GetUserDataResponse> {
 }
 
 export function getValueFromQueryString(qs: ParsedQs, key: string): string[] {
-	const property: string | string[] | undefined = qs[key] as string | string[];
+	const property = qs[key] as string | string[];
 
 	if (property) {
 		if (Array.isArray(property)) {
@@ -177,7 +175,7 @@ export function getValueFromQueryString(qs: ParsedQs, key: string): string[] {
 }
 
 export function getValueFromHeaders(headers: IncomingHttpHeaders, key: string): string | undefined {
-	let header: string | string[] | undefined = headers[key];
+	let header = headers[key];
 	let value: string | undefined;
 
 	if (header) {

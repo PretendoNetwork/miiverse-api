@@ -10,11 +10,7 @@ import { getConversationByUsers, getUserSettings, getFriendMessages } from '@/da
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Conversation } from '@/models/conversation';
-import { SendMessageBody } from '@/types/common/send-message-body';
 import { FormattedMessage } from '@/types/common/formatted-message';
-import { HydratedConversationDocument } from '@/types/mongoose/conversation';
-import { HydratedSettingsDocument } from '@/types/mongoose/settings';
-import { HydratedPostDocument } from '@/types/mongoose/post';
 
 const sendMessageSchema = z.object({
 	message_to_pid: z.string().transform(Number),
@@ -24,25 +20,25 @@ const sendMessageSchema = z.object({
 	app_data: z.string().optional()
 });
 
-const router: express.Router = express.Router();
-const upload: multer.Multer = multer();
+const router = express.Router();
+const upload = multer();
 
 router.post('/', upload.none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
 	// TODO - Better error codes, maybe do defaults?
-	const bodyCheck: z.SafeParseReturnType<SendMessageBody, SendMessageBody> = sendMessageSchema.safeParse(request.body);
+	const bodyCheck = sendMessageSchema.safeParse(request.body);
 
 	if (!bodyCheck.success) {
 		response.status(422);
 		return;
 	}
 
-	const recipientPID: number = bodyCheck.data.message_to_pid;
-	let messageBody: string = bodyCheck.data.body;
-	const painting: string = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
-	const screenshot: string = bodyCheck.data.screenshot?.trim().replace(/\0/g, '').trim() || '';
-	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
+	const recipientPID = bodyCheck.data.message_to_pid;
+	let messageBody = bodyCheck.data.body;
+	const painting = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
+	const screenshot = bodyCheck.data.screenshot?.trim().replace(/\0/g, '').trim() || '';
+	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
 
 	if (isNaN(recipientPID)) {
 		response.status(422);
@@ -76,11 +72,11 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		return;
 	}
 
-	let conversation: HydratedConversationDocument | null = await getConversationByUsers([sender.pid, recipient.pid]);
+	let conversation = await getConversationByUsers([sender.pid, recipient.pid]);
 
 	if (!conversation) {
-		const userSettings: HydratedSettingsDocument | null = await getUserSettings(request.pid);
-		const user2Settings: HydratedSettingsDocument | null = await getUserSettings(recipient.pid);
+		const userSettings = await getUserSettings(request.pid);
+		const user2Settings = await getUserSettings(recipient.pid);
 
 		if (!sender || !recipient || userSettings || user2Settings) {
 			response.sendStatus(422);
@@ -109,14 +105,14 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		return;
 	}
 
-	const friendPIDs: number[] = await getUserFriendPIDs(recipient.pid);
+	const friendPIDs = await getUserFriendPIDs(recipient.pid);
 
 	if (friendPIDs.indexOf(request.pid) === -1) {
 		response.sendStatus(422);
 		return;
 	}
 
-	let miiFace: string = 'normal_face.png';
+	let miiFace = 'normal_face.png';
 	switch (parseInt(request.body.feeling_id)) {
 		case 1:
 			miiFace = 'smile_open_mouth.png';
@@ -179,7 +175,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	});
 
 	if (painting) {
-		const paintingBuffer: Buffer | null = await processPainting(painting);
+		const paintingBuffer = await processPainting(painting);
 
 		if (paintingBuffer) {
 			await uploadCDNAsset('pn-cdn', `paintings/${request.pid}/${post.id}.png`, paintingBuffer, 'public-read');
@@ -189,7 +185,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	}
 
 	if (screenshot) {
-		const screenshotBuffer: Buffer = Buffer.from(screenshot, 'base64');
+		const screenshotBuffer = Buffer.from(screenshot, 'base64');
 
 		await uploadCDNAsset('pn-cdn', `screenshots/${request.pid}/${post.id}.jpg`, screenshotBuffer, 'public-read');
 
@@ -214,10 +210,10 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
+	const limitString = getValueFromQueryString(request.query, 'limit')[0];
 
 	// TODO - Is this the limit?
-	let limit: number = 10;
+	let limit = 10;
 
 	if (limitString) {
 		limit = parseInt(limitString);
@@ -232,9 +228,9 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	const searchKey: string[] = getValueFromQueryString(request.query, 'search_key');
+	const searchKey = getValueFromQueryString(request.query, 'search_key');
 
-	const messages: HydratedPostDocument[] = await getFriendMessages(request.pid.toString(), searchKey, limit);
+	const messages = await getFriendMessages(request.pid.toString(), searchKey, limit);
 
 	const postBody: FormattedMessage[] = [];
 	for (const message of messages) {

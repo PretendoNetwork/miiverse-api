@@ -11,6 +11,8 @@
 		"allowJs": true,
 		"target": "es2022",
 		"noEmitOnError": true,
+		"noImplicitAny": true,
+		"strictPropertyInitialization": true,
 		"paths": {
 			"@/*": ["./*"]
 		}

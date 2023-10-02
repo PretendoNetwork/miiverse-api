@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import moment from 'moment';
 import { Schema, model } from 'mongoose';
-import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
+import { IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
 import { PostPainting, PostScreenshot } from '@/types/common/post';
@@ -122,9 +122,9 @@ PostSchema.method('unRemove', async function unRemove(reason) {
 });
 
 PostSchema.method('generatePostUID', async function generatePostUID(length: number) {
-	const id: string = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, '').substring(0, length);
+	const id = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, '').substring(0, length);
 
-	const inuse: HydratedPostDocument | null = await Post.findOne({ id });
+	const inuse = await Post.findOne({ id });
 
 	if (inuse) {
 		await this.generatePostUID(length);

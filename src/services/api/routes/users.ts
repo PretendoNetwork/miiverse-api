@@ -2,12 +2,12 @@ import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import { getValueFromQueryString } from '@/util';
 
-const router: express.Router = express.Router();
+const router = express.Router();
 
 router.get('/:pid/notifications', function(request: express.Request, response: express.Response): void {
-	const type: string | undefined = getValueFromQueryString(request.query, 'type')[0];
-	const titleID: string | undefined = getValueFromQueryString(request.query, 'title_id')[0];
-	const pid: string | undefined = getValueFromQueryString(request.query, 'pid')[0];
+	const type = getValueFromQueryString(request.query, 'type')[0];
+	const titleID = getValueFromQueryString(request.query, 'title_id')[0];
+	const pid = getValueFromQueryString(request.query, 'pid')[0];
 
 	console.log(type);
 	console.log(titleID);

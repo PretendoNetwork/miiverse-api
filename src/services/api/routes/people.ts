@@ -4,18 +4,16 @@ import moment from 'moment';
 import { getUserContent, getFollowedUsers } from '@/database';
 import { getValueFromQueryString, getUserFriendPIDs } from '@/util';
 import { Post } from '@/models/post';
-import { HydratedContentDocument } from '@/types/mongoose/content';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
-import { HydratedSettingsDocument } from '@/types/mongoose/settings';
 
-const router: express.Router = express.Router();
+const router = express.Router();
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const userContent: HydratedContentDocument | null = await getUserContent(request.pid);
+	const userContent = await getUserContent(request.pid);
 
 	if (!userContent) {
 		response.sendStatus(404);
@@ -30,12 +28,12 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		message_to_pid: { $eq: null }
 	};
 
-	const relation: string | undefined = getValueFromQueryString(request.query, 'relation')[0];
-	const distinctPID: string | undefined = getValueFromQueryString(request.query, 'distinct_pid')[0];
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
-	const withMii: string | undefined = getValueFromQueryString(request.query, 'with_mii')[0];
+	const relation = getValueFromQueryString(request.query, 'relation')[0];
+	const distinctPID = getValueFromQueryString(request.query, 'distinct_pid')[0];
+	const limitString = getValueFromQueryString(request.query, 'limit')[0];
+	const withMii = getValueFromQueryString(request.query, 'with_mii')[0];
 
-	let limit: number = 10;
+	let limit = 10;
 
 	if (limitString) {
 		limit = parseInt(limitString);
@@ -50,15 +48,16 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	} else if (relation === 'following') {
 		query.pid = { $in: userContent.followed_users };
 	} else if (request.query.pid) {
-		const pidInputs: string[] = getValueFromQueryString(request.query, 'pid');
-		const pids: number[] = pidInputs.map(pid => Number(pid)).filter(pid => !isNaN(pid));
+		const pidInputs = getValueFromQueryString(request.query, 'pid');
+		const pids = pidInputs.map(pid => Number(pid)).filter(pid => !isNaN(pid));
 
 		query.pid = { $in: pids };
 	}
 
 	let posts: HydratedPostDocument[];
+
 	if (distinctPID === '1') {
-		posts = await Post.aggregate([
+		const unhydratedPosts = await Post.aggregate<IPost>([
 			{ $match: query }, // filter based on input query
 			{ $sort: { created_at: -1 } }, // sort by 'created_at' in descending order
 			{ $group: { _id: '$pid', doc: { $first: '$$ROOT' } } }, // remove any duplicate 'pid' elements
@@ -66,7 +65,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			{ $limit: limit } // only return the top 10 results
 		]);
 
-		posts = posts.map((post: IPost) => Post.hydrate(post));
+		posts = unhydratedPosts.map((post: IPost) => Post.hydrate(post));
 	} else if (request.query.is_hot === '1') {
 		posts = await Post.find(query).sort({ empathy_count: -1}).limit(limit);
 	} else {
@@ -98,27 +97,32 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create(json, {
+		separateArrayItems: true
+	}).end({
+		pretty: true,
+		allowEmpty: true
+	}));
 });
 
 router.get('/:pid/following', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const pid: number = parseInt(request.params.pid);
+	const pid = parseInt(request.params.pid);
 
 	if (isNaN(pid)) {
 		response.sendStatus(404);
 		return;
 	}
 
-	const userContent: HydratedContentDocument | null = await getUserContent(pid);
+	const userContent = await getUserContent(pid);
 
 	if (!userContent) {
 		response.sendStatus(404);
 		return;
 	}
 
-	const people: HydratedSettingsDocument[] = await getFollowedUsers(userContent);
+	const people = await getFollowedUsers(userContent);
 
 	const json: Record<string, any> = {
 		result: {

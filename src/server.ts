@@ -53,7 +53,7 @@ app.use((_request: express.Request, response: express.Response) => {
 // non-404 error handler
 LOG_INFO('Creating non-404 status handler');
 app.use((error: any, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
-	const status: number = error.status || 500;
+	const status = error.status || 500;
 	response.type('application/xml');
 	response.status(404);
 

@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { GetUserDataResponse } from 'pretendo-grpc-ts/dist/account/get_user_data_rpc';
 import { getEndpoint } from '@/database';
 import { getUserAccountData, getValueFromHeaders, decodeParamPack, getPIDFromServiceToken } from '@/util';
-import { ParamPack } from '@/types/common/param-pack';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 
 const ParamPackSchema = z.object({
@@ -30,7 +29,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return next();
 	}
 
-	let encryptedToken: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-servicetoken');
+	let encryptedToken = getValueFromHeaders(request.headers, 'x-nintendo-servicetoken');
 	if (!encryptedToken) {
 		encryptedToken = getValueFromHeaders(request.headers, 'olive service token');
 	}
@@ -44,13 +43,13 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return badAuth(response, 16, 'BAD_TOKEN');
 	}
 
-	const paramPack: string | undefined = getValueFromHeaders(request.headers, 'x-nintendo-parampack');
+	const paramPack = getValueFromHeaders(request.headers, 'x-nintendo-parampack');
 	if (!paramPack) {
 		return badAuth(response, 17, 'NO_PARAM');
 	}
 
-	const paramPackData: ParamPack = decodeParamPack(paramPack);
-	const paramPackCheck: z.SafeParseReturnType<ParamPack, ParamPack> = ParamPackSchema.safeParse(paramPackData);
+	const paramPackData = decodeParamPack(paramPack);
+	const paramPackCheck = ParamPackSchema.safeParse(paramPackData);
 	if (!paramPackCheck.success) {
 		console.log(paramPackCheck.error);
 		return badAuth(response, 18, 'BAD_PARAM');
@@ -67,6 +66,7 @@ async function auth(request: express.Request, response: express.Response, next: 
 	}
 
 	let discovery: HydratedEndpointDocument | null;
+
 	if (user) {
 		discovery = await getEndpoint(user.serverAccessLevel);
 	} else {
@@ -103,8 +103,8 @@ function badAuth(response: express.Response, errorCode: number, message: string)
 }
 
 function serverError(response: express.Response, discovery: HydratedEndpointDocument): void {
-	let message: string = '';
-	let error: number = 0;
+	let message = '';
+	let error = 0;
 
 	switch (discovery.status) {
 		case 1 :

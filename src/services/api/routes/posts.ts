@@ -16,9 +16,7 @@ import {
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
-import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
-import { HydratedContentDocument } from '@/types/mongoose/content';
-import { HydratedSettingsDocument } from '@/types/mongoose/settings';
+import { HydratedPostDocument } from '@/types/mongoose/post';
 
 const newPostSchema = z.object({
 	community_id: z.string().optional(),
@@ -35,8 +33,8 @@ const newPostSchema = z.object({
 	language_id: z.string()
 });
 
-const router: express.Router = express.Router();
-const upload: multer.Multer = multer();
+const router = express.Router();
+const upload = multer();
 
 /* GET post titles. */
 router.post('/', upload.none(), newPost);
@@ -46,8 +44,8 @@ router.post('/:post_id/replies', upload.none(), newPost);
 router.post('/:post_id.delete', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const post: HydratedPostDocument | null = await getPostByID(request.params.post_id);
-	const userContent: HydratedContentDocument | null = await getUserContent(request.pid);
+	const post = await getPostByID(request.params.post_id);
+	const userContent = await getUserContent(request.pid);
 
 	if (!post || !userContent) {
 		response.sendStatus(504);
@@ -65,7 +63,7 @@ router.post('/:post_id.delete', async function (request: express.Request, respon
 router.post('/:post_id/empathies', upload.none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const post: HydratedPostDocument | null = await getPostByID(request.params.post_id);
+	const post = await getPostByID(request.params.post_id);
 
 	if (!post) {
 		response.sendStatus(404);
@@ -110,9 +108,9 @@ router.post('/:post_id/empathies', upload.none(), async function (request: expre
 router.get('/:post_id/replies', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const limitString: string | undefined = getValueFromQueryString(request.query, 'limit')[0];
+	const limitString = getValueFromQueryString(request.query, 'limit')[0];
 
-	let limit: number = 10; // TODO - Is there a real limit?
+	let limit = 10; // TODO - Is there a real limit?
 
 	if (limitString) {
 		limit = parseInt(limitString);
@@ -122,14 +120,14 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		limit = 10;
 	}
 
-	const post: HydratedPostDocument | null = await getPostByID(request.params.post_id);
+	const post = await getPostByID(request.params.post_id);
 
 	if (!post) {
 		response.sendStatus(404);
 		return;
 	}
 
-	const posts: HydratedPostDocument[] = await getPostReplies(post.id, limit);
+	const posts = await getPostReplies(post.id, limit);
 	if (posts.length === 0) {
 		response.sendStatus(404);
 		return;
@@ -159,7 +157,7 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	const postID: string | undefined = getValueFromQueryString(request.query, 'post_id')[0];
+	const postID = getValueFromQueryString(request.query, 'post_id')[0];
 
 	if (!postID) {
 		response.type('application/xml');
@@ -175,7 +173,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	const post: HydratedPostDocument | null = await getPostByID(postID);
+	const post = await getPostByID(postID);
 
 	if (!post) {
 		response.status(404);
@@ -222,7 +220,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	const userSettings: HydratedSettingsDocument | null = await getUserSettings(request.pid);
+	const userSettings = await getUserSettings(request.pid);
 	const bodyCheck = newPostSchema.safeParse(request.body);
 
 	if (!userSettings || !bodyCheck.success) {
@@ -230,21 +228,21 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	const communityID: string | undefined = bodyCheck.data.community_id || '';
-	let messageBody: string | undefined = bodyCheck.data.body;
-	const painting: string = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
-	const screenshot: string = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
-	const appData: string = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
-	const feelingID: number = parseInt(bodyCheck.data.feeling_id);
-	let searchKey: string | string[] = bodyCheck.data.search_key || [];
-	const topicTag: string | undefined = bodyCheck.data.topic_tag || '';
-	const autopost: string = bodyCheck.data.is_autopost;
-	const spoiler: string | undefined = bodyCheck.data.is_spoiler;
-	const jumpable: string | undefined = bodyCheck.data.is_app_jumpable;
-	const languageID: number = parseInt(bodyCheck.data.language_id);
-	const countryID: number = parseInt(request.paramPack.country_id);
-	const platformID: number = parseInt(request.paramPack.platform_id);
-	const regionID: number = parseInt(request.paramPack.region_id);
+	const communityID = bodyCheck.data.community_id || '';
+	let messageBody = bodyCheck.data.body;
+	const painting = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
+	const screenshot = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
+	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
+	const feelingID = parseInt(bodyCheck.data.feeling_id);
+	let searchKey = bodyCheck.data.search_key || [];
+	const topicTag = bodyCheck.data.topic_tag || '';
+	const autopost = bodyCheck.data.is_autopost;
+	const spoiler = bodyCheck.data.is_spoiler;
+	const jumpable = bodyCheck.data.is_app_jumpable;
+	const languageID = parseInt(bodyCheck.data.language_id);
+	const countryID = parseInt(request.paramPack.country_id);
+	const platformID = parseInt(request.paramPack.platform_id);
+	const regionID = parseInt(request.paramPack.region_id);
 
 	if (
 		isNaN(feelingID) ||
@@ -294,7 +292,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		}
 	}
 
-	let miiFace: string = 'normal_face.png';
+	let miiFace = 'normal_face.png';
 	switch (parseInt(request.body.feeling_id)) {
 		case 1:
 			miiFace = 'smile_open_mouth.png';
@@ -330,7 +328,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		searchKey = [searchKey];
 	}
 
-	const document: IPost = {
+	const document = {
 		id: '', // * This gets changed when saving the document for the first time
 		title_id: request.paramPack.title_id,
 		community_id: community.olive_community_id,
@@ -375,10 +373,10 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	const post: HydratedPostDocument = await Post.create(document);
+	const post = await Post.create(document);
 
 	if (painting) {
-		const paintingBuffer: Buffer | null = await processPainting(painting);
+		const paintingBuffer = await processPainting(painting);
 
 		if (paintingBuffer) {
 			await uploadCDNAsset('pn-cdn', `paintings/${request.pid}/${post.id}.png`, paintingBuffer, 'public-read');
@@ -388,7 +386,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	if (screenshot) {
-		const screenshotBuffer: Buffer = Buffer.from(screenshot, 'base64');
+		const screenshotBuffer = Buffer.from(screenshot, 'base64');
 
 		await uploadCDNAsset('pn-cdn', `screenshots/${request.pid}/${post.id}.jpg`, screenshotBuffer, 'public-read');
 

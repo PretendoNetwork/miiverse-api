@@ -5,7 +5,7 @@ import { getUserAccountData } from '@/util';
 import { getEndpoint } from '@/database';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 
-const router: express.Router = express.Router();
+const router = express.Router();
 
 /* GET discovery server. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -35,10 +35,10 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		return;
 	}
 
-	let message: string = '';
-	let errorCode: number = 0;
+	let message = '';
+	let errorCode = 0;
 	switch (discovery.status) {
-		case 0 :
+		case 0:
 			response.send(xmlbuilder.create({
 				result: {
 					has_error: 0,
@@ -53,15 +53,15 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			}).end({ pretty: true }));
 
 			return ;
-		case 1 :
+		case 1:
 			message = 'SYSTEM_UPDATE_REQUIRED';
 			errorCode = 1;
 			break;
-		case 2 :
+		case 2:
 			message = 'SETUP_NOT_COMPLETE';
 			errorCode = 2;
 			break;
-		case 3 :
+		case 3:
 			message = 'SERVICE_MAINTENANCE';
 			errorCode = 3;
 			break;
@@ -69,20 +69,20 @@ router.get('/', async function (request: express.Request, response: express.Resp
 			message = 'SERVICE_CLOSED';
 			errorCode = 4;
 			break;
-		case 5 :
+		case 5:
 			message = 'PARENTAL_CONTROLS_ENABLED';
 			errorCode = 5;
 			break;
-		case 6 :
+		case 6:
 			message = 'POSTING_LIMITED_PARENTAL_CONTROLS';
 			errorCode = 6;
 			break;
-		case 7 :
+		case 7:
 			message = 'NNID_BANNED';
 			errorCode = 7;
 			response.type('application/xml');
 			break;
-		default :
+		default:
 			message = 'SERVER_ERROR';
 			errorCode = 15;
 			response.type('application/xml');
