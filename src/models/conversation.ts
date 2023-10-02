@@ -32,7 +32,7 @@ const ConversationSchema = new Schema<IConversation, ConversationModel, IConvers
 	}]
 });
 
-ConversationSchema.method<HydratedConversationDocument>('newMessage', async function newMessage(message, senderPID) {
+ConversationSchema.method<HydratedConversationDocument>('newMessage', async function newMessage(message: string, senderPID: number) {
 	if (this.users[0].pid === senderPID) {
 		this.users[1].read = false;
 		this.markModified('users[1].read');
