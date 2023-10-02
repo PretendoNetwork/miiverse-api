@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IContent, IContentMethods, ContentModel } from '@/types/mongoose/content';
+import { IContent, IContentMethods, ContentModel, HydratedContentDocument } from '@/types/mongoose/content';
 
 const ContentSchema = new Schema<IContent, ContentModel, IContentMethods>({
 	pid: Number,
@@ -17,39 +17,33 @@ const ContentSchema = new Schema<IContent, ContentModel, IContentMethods>({
 	}
 });
 
-ContentSchema.method('addToCommunities', async function addToCommunities(postID) {
-	const communities = this.get('followed_communities');
-	communities.addToSet(postID);
+ContentSchema.method<HydratedContentDocument>('addToCommunities', async function addToCommunities(postID) {
+	this.followed_communities.addToSet(postID);
 	await this.save();
 });
 
-ContentSchema.method('removeFromCommunities', async function removeFromCommunities(postID) {
-	const communities = this.get('followed_communities');
-	communities.pull(postID);
+ContentSchema.method<HydratedContentDocument>('removeFromCommunities', async function removeFromCommunities(postID) {
+	this.followed_communities.pull(postID);
 	await this.save();
 });
 
-ContentSchema.method('addToUsers', async function addToUsers(postID) {
-	const users = this.get('followed_users');
-	users.addToSet(postID);
+ContentSchema.method<HydratedContentDocument>('addToUsers', async function addToUsers(postID) {
+	this.followed_users.addToSet(postID);
 	await this.save();
 });
 
-ContentSchema.method('removeFromUsers', async function removeFromUsers(postID) {
-	const users = this.get('followed_users');
-	users.pull(postID);
+ContentSchema.method<HydratedContentDocument>('removeFromUsers', async function removeFromUsers(postID) {
+	this.followed_users.pull(postID);
 	await this.save();
 });
 
-ContentSchema.method('addToFollowers', async function addToFollowers(postID) {
-	const users = this.get('following_users');
-	users.addToSet(postID);
+ContentSchema.method<HydratedContentDocument>('addToFollowers', async function addToFollowers(postID) {
+	this.following_users.addToSet(postID);
 	await this.save();
 });
 
-ContentSchema.method('removeFromFollowers', async function removeFromFollowers(postID) {
-	const users = this.get('following_users');
-	users.pull(postID);
+ContentSchema.method<HydratedContentDocument>('removeFromFollowers', async function removeFromFollowers(postID) {
+	this.following_users.pull(postID);
 	await this.save();
 });
 

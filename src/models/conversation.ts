@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose';
-import moment from 'moment';
 import { Snowflake } from 'node-snowflake';
-import { IConversation, IConversationMethods, ConversationModel } from '@/types/mongoose/conversation';
+import { IConversation, IConversationMethods, ConversationModel, HydratedConversationDocument } from '@/types/mongoose/conversation';
 
 const ConversationSchema = new Schema<IConversation, ConversationModel, IConversationMethods>({
 	id: {
@@ -33,7 +32,7 @@ const ConversationSchema = new Schema<IConversation, ConversationModel, IConvers
 	}]
 });
 
-ConversationSchema.method('newMessage', async function newMessage(message, senderPID) {
+ConversationSchema.method<HydratedConversationDocument>('newMessage', async function newMessage(message, senderPID) {
 	if (this.users[0].pid === senderPID) {
 		this.users[1].read = false;
 		this.markModified('users[1].read');
@@ -41,20 +40,24 @@ ConversationSchema.method('newMessage', async function newMessage(message, sende
 		this.users[0].read = false;
 		this.markModified('users[0].read');
 	}
-	this.set('last_updated', moment(new Date()));
-	this.set('message_preview', message);
+
+	this.last_updated = new Date();
+	this.message_preview = message;
+
 	await this.save();
 });
 
-ConversationSchema.method('markAsRead', async function markAsRead(pid) {
+ConversationSchema.method<HydratedConversationDocument>('markAsRead', async function markAsRead(pid) {
 	const users = this.get('users');
 	if (users[0].pid === pid) {
 		users[0].read = true;
 	} else if (users[1].pid === pid) {
 		users[1].read = true;
 	}
-	this.set('users', users);
+
+	this.users = users;
 	this.markModified('users');
+
 	await this.save();
 });
 

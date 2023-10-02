@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import moment from 'moment';
 import { Schema, model } from 'mongoose';
-import { IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
+import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
 import { PostPainting, PostScreenshot } from '@/types/common/post';
@@ -87,41 +87,41 @@ const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: false // * Disables the .id() getter used by Mongoose in TypeScript. Needed to have our own .id field
 });
 
-PostSchema.method('upReply', async function upReply() {
-	const replyCount = this.get('reply_count');
+PostSchema.method<HydratedPostDocument>('upReply', async function upReply() {
+	const replyCount = this.reply_count || 0;
 	if (replyCount + 1 < 0) {
-		this.set('reply_count', 0);
+		this.reply_count = 0;
 	} else {
-		this.set('reply_count', replyCount + 1);
+		this.reply_count = replyCount + 1;
 	}
 
 	await this.save();
 });
 
-PostSchema.method('downReply', async function downReply() {
-	const replyCount = this.get('reply_count');
+PostSchema.method<HydratedPostDocument>('downReply', async function downReply() {
+	const replyCount = this.reply_count || 0;
 	if (replyCount - 1 < 0) {
-		this.set('reply_count', 0);
+		this.reply_count = 0;
 	} else {
-		this.set('reply_count', replyCount - 1);
+		this.reply_count = replyCount - 1;
 	}
 
 	await this.save();
 });
 
-PostSchema.method('remove', async function remove(reason) {
-	this.set('remove', true);
-	this.set('removed_reason', reason);
+PostSchema.method<HydratedPostDocument>('remove', async function remove(reason) {
+	this.removed = true;
+	this.removed_reason = reason;
 	await this.save();
 });
 
-PostSchema.method('unRemove', async function unRemove(reason) {
-	this.set('remove', false);
-	this.set('removed_reason', reason);
+PostSchema.method<HydratedPostDocument>('unRemove', async function unRemove(reason) {
+	this.removed = false;
+	this.removed_reason = reason;
 	await this.save();
 });
 
-PostSchema.method('generatePostUID', async function generatePostUID(length: number) {
+PostSchema.method<HydratedPostDocument>('generatePostUID', async function generatePostUID(length: number) {
 	const id = Buffer.from(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(length * 2))), 'binary').toString('base64').replace(/[+/]/g, '').substring(0, length);
 
 	const inuse = await Post.findOne({ id });
@@ -133,23 +133,23 @@ PostSchema.method('generatePostUID', async function generatePostUID(length: numb
 	}
 });
 
-PostSchema.method('cleanedBody', function cleanedBody(): string {
+PostSchema.method<HydratedPostDocument>('cleanedBody', function cleanedBody(): string {
 	return this.body ? this.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"[\]]/g, '').replace(/[\n\r]+/gm, '') : '';
 });
 
-PostSchema.method('cleanedMiiData', function cleanedMiiData(): string {
+PostSchema.method<HydratedPostDocument>('cleanedMiiData', function cleanedMiiData(): string {
 	return this.mii.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
 });
 
-PostSchema.method('cleanedPainting', function cleanedPainting(): string {
+PostSchema.method<HydratedPostDocument>('cleanedPainting', function cleanedPainting(): string {
 	return this.painting.replace(/[\n\r]+/gm, '').trim();
 });
 
-PostSchema.method('cleanedAppData', function cleanedAppData(): string {
+PostSchema.method<HydratedPostDocument>('cleanedAppData', function cleanedAppData(): string {
 	return this.app_data.replace(/[^A-Za-z0-9+/=]/g, '').replace(/[\n\r]+/gm, '').trim();
 });
 
-PostSchema.method('formatPainting', function formatPainting(): PostPainting | undefined {
+PostSchema.method<HydratedPostDocument>('formatPainting', function formatPainting(): PostPainting | undefined {
 	if (this.painting) {
 		return {
 			format: 'tga',
@@ -160,7 +160,7 @@ PostSchema.method('formatPainting', function formatPainting(): PostPainting | un
 	}
 });
 
-PostSchema.method('formatScreenshot', function formatScreenshot(): PostScreenshot | undefined {
+PostSchema.method<HydratedPostDocument>('formatScreenshot', function formatScreenshot(): PostScreenshot | undefined {
 	if (this.screenshot && this.screenshot_length) {
 		return {
 			size: this.screenshot_length,
@@ -169,7 +169,7 @@ PostSchema.method('formatScreenshot', function formatScreenshot(): PostScreensho
 	}
 });
 
-PostSchema.method('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any> {
+PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): Record<string, any> {
 	const json: Record<string, any> = {
 		body: this.cleanedBody(),
 		country_id: this.country_id ? this.country_id : 254,

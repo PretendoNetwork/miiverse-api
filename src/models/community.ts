@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ICommunity, ICommunityMethods, CommunityModel } from '@/types/mongoose/community';
+import { ICommunity, ICommunityMethods, CommunityModel, HydratedCommunityDocument } from '@/types/mongoose/community';
 
 const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods>({
 	platform_id: Number,
@@ -70,53 +70,47 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 	}
 });
 
-CommunitySchema.method('upEmpathy', async function upEmpathy(): Promise<void> {
-	const empathy = this.get('empathy_count');
-	this.set('empathy_count', empathy + 1);
+CommunitySchema.method<HydratedCommunityDocument>('upEmpathy', async function upEmpathy(): Promise<void> {
+	this.empathy_count += 1;
 
 	await this.save();
 });
 
-CommunitySchema.method('downEmpathy', async function downEmpathy(): Promise<void> {
-	const empathy = this.get('empathy_count');
-	this.set('empathy_count', empathy - 1);
+CommunitySchema.method<HydratedCommunityDocument>('downEmpathy', async function downEmpathy(): Promise<void> {
+	this.empathy_count -= 1;
 
 	await this.save();
 });
 
-CommunitySchema.method('upFollower', async function upFollower(): Promise<void> {
-	const followers = this.get('followers');
-	this.set('followers', followers + 1);
+CommunitySchema.method<HydratedCommunityDocument>('upFollower', async function upFollower(): Promise<void> {
+	this.followers += 1;
 
 	await this.save();
 });
 
-CommunitySchema.method('downFollower', async function downFollower(): Promise<void> {
-	const followers = this.get('followers');
-	this.set('followers', followers - 1);
+CommunitySchema.method<HydratedCommunityDocument>('downFollower', async function downFollower(): Promise<void> {
+	this.followers -= 1;
 
 	await this.save();
 });
 
-CommunitySchema.method('addUserFavorite', async function addUserFavorite(pid: number): Promise<void> {
-	const userFavorites: number[] = this.get('user_favorites');
-	if (!userFavorites.includes(pid)) {
-		userFavorites.push(pid);
+CommunitySchema.method<HydratedCommunityDocument>('addUserFavorite', async function addUserFavorite(pid: number): Promise<void> {
+	if (!this.user_favorites.includes(pid)) {
+		this.user_favorites.push(pid);
 	}
 
 	await this.save();
 });
 
-CommunitySchema.method('delUserFavorite', async function delUserFavorite(pid: number): Promise<void> {
-	const userFavorites: number[] = this.get('user_favorites');
-	if (userFavorites.includes(pid)) {
-		userFavorites.splice(userFavorites.indexOf(pid), 1);
+CommunitySchema.method<HydratedCommunityDocument>('delUserFavorite', async function delUserFavorite(pid: number): Promise<void> {
+	if (this.user_favorites.includes(pid)) {
+		this.user_favorites.splice(this.user_favorites.indexOf(pid), 1);
 	}
 
 	await this.save();
 });
 
-CommunitySchema.method('json', function json(): Record<string, any> {
+CommunitySchema.method<HydratedCommunityDocument>('json', function json(): Record<string, any> {
 	return {
 		community_id: this.community_id,
 		name: this.name,

@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { INotification, INotificationMethods, NotificationModel } from '@/types/mongoose/notification';
+import { HydratedNotificationDocument, INotification, INotificationMethods, NotificationModel } from '@/types/mongoose/notification';
 
 const NotificationSchema = new Schema<INotification, NotificationModel, INotificationMethods>({
 	pid: String,
@@ -14,8 +14,8 @@ const NotificationSchema = new Schema<INotification, NotificationModel, INotific
 	lastUpdated: Date
 });
 
-NotificationSchema.method('markRead', async function markRead() {
-	this.set('read', true);
+NotificationSchema.method<HydratedNotificationDocument>('markRead', async function markRead() {
+	this.read = true;
 	await this.save();
 });
 
