@@ -11,7 +11,19 @@
 		"test": "ts-node test/test.ts"
 	},
 	"keywords": [],
-	"author": "Jemma",
+	"author": "Pretendo Network",
+	"contributors": [
+		{
+			"name" : "Jemma Poffinbarger",
+			"email" : "contact@jemsoftware.dev",
+			"url" : "https://jemsoftware.dev/"
+		},
+		{
+			"name" : "Jonathan Barrow",
+			"email" : "jonbarrow1998@gmail.com",
+			"url" : "https://jonbarrow.dev/"
+		}
+	],
 	"license": "ISC",
 	"dependencies": {
 		"aws-sdk": "^2.1204.0",
