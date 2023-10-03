@@ -198,7 +198,7 @@ PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSO
 	}
 
 	// * Some sanity checks
-	if (post.feeling_id < 5) {
+	if (post.feeling_id > 5) {
 		post.feeling_id = 0;
 	}
 
