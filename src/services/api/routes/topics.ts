@@ -72,6 +72,8 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 		topic: WWPTopic;
 	}[] = [];
 
+	const seenPeople: number[] = [];
+
 	for (let i = 0; i < communities.length; i++) {
 		const community = communities[i];
 
@@ -114,7 +116,7 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 			}
 		});
 
-		const people = await getCommunityPeople(community);
+		const people = await getCommunityPeople(community, seenPeople);
 
 		for (const person of people) {
 			const post = Post.hydrate(person.post).json({
@@ -133,6 +135,8 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 					]
 				}
 			});
+
+			seenPeople.push(person._id);
 		}
 
 		topics.push({
@@ -149,7 +153,7 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 	};
 }
 
-async function getCommunityPeople(community: HydratedCommunityDocument, hours = 24): Promise<{ _id: number; post: IPost }[]> {
+async function getCommunityPeople(community: HydratedCommunityDocument, seenPeople: number[], hours = 24): Promise<{ _id: number; post: IPost }[]> {
 	const now = new Date();
 	const last24Hours = new Date(now.getTime() - hours * 60 * 60 * 1000);
 	const people = await Post.aggregate<{ _id: number; post: IPost }>([
@@ -163,7 +167,13 @@ async function getCommunityPeople(community: HydratedCommunityDocument, hours = 
 				},
 				message_to_pid: null,
 				parent: null,
-				removed: false
+				removed: false,
+				pid: {
+					// * Exclude people we have seen in other communities.
+					// * This increases generation time, but ensures the
+					// * max number of slots we can fill end up getting used
+					$nin: seenPeople
+				}
 			}
 		},
 		{
@@ -192,7 +202,7 @@ async function getCommunityPeople(community: HydratedCommunityDocument, hours = 
 		// * Double the search range each time to get
 		// * exponentially more posts. This speeds up
 		// * the search at the cost of using older posts
-		return getCommunityPeople(community, hours * 2);
+		return getCommunityPeople(community, seenPeople, hours * 2);
 	}
 
 	return people;
