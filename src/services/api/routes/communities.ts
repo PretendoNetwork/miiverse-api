@@ -17,6 +17,7 @@ import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
 import { ParamPack } from '@/types/common/param-pack';
+import { CommunitiesResult, CommunityPostsResult } from '@/types/miiverse/community';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
@@ -104,22 +105,22 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	const communities = await Community.find(query).limit(limit);
 
-	const json: Record<string, any> = {
-		result: {
-			has_error: '0',
-			version: '1',
-			request_name: 'communities',
-			communities: []
-		}
+	const result: CommunitiesResult = {
+		has_error: 0,
+		version: 1,
+		request_name: 'communities',
+		communities: []
 	};
 
 	for (const community of communities) {
-		json.result.communities.push({
+		result.communities.push({
 			community: community.json()
 		});
 	}
 
-	response.send(xmlbuilder.create(json, {
+	response.send(xmlbuilder.create({
+		result
+	}, {
 		separateArrayItems: true
 	}).end({
 		pretty: true,
@@ -222,20 +223,18 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 		posts = await Post.find(query).sort({ created_at: -1 }).limit(limit);
 	}
 
-	const json: Record<string, any> = {
-		result: {
-			has_error: 0,
-			version: 1,
-			request_name: 'posts',
-			topic: {
-				community_id: community.community_id
-			},
-			posts: []
-		}
+	const result: CommunityPostsResult = {
+		has_error: 0,
+		version: 1,
+		request_name: 'posts',
+		topic: {
+			community_id: community.community_id
+		},
+		posts: []
 	};
 
 	for (const post of posts) {
-		json.result.posts.push({
+		result.posts.push({
 			post: post.json({
 				with_mii: withMii === '1',
 				app_data: true,
@@ -244,7 +243,9 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json, {
+	response.send(xmlbuilder.create({
+		result
+	}, {
 		separateArrayItems: true
 	}).end({
 		pretty: true,
