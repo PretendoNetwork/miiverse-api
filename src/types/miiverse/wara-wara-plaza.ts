@@ -1,12 +1,4 @@
-import { PostData } from '@/types/miiverse/post';
-
-export type WWPPerson = {
-	person: {
-		posts: {
-			post: PostData;
-		}[];
-	}
-};
+import { PersonPosts } from '@/types/miiverse/people';
 
 export type WWPTopic = {
 	empathy_count: number;
@@ -19,7 +11,7 @@ export type WWPTopic = {
 	community_id: number;
 	is_recommended: 0 | 1;
 	name: string;
-	people: WWPPerson[];
+	people: PersonPosts[];
 	position: number;
 };
 

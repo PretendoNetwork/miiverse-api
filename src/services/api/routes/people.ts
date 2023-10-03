@@ -6,6 +6,7 @@ import { getValueFromQueryString, getUserFriendPIDs } from '@/util';
 import { Post } from '@/models/post';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
 import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
+import { PeopleFollowingResult, PeoplePostsResult } from '@/types/miiverse/people';
 
 const router = express.Router();
 
@@ -72,18 +73,16 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
 	}
 
-	const json: Record<string, any> = {
-		result: {
-			has_error: 0,
-			version: 1,
-			expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
-			request_name: 'posts',
-			people: []
-		}
+	const result: PeoplePostsResult = {
+		has_error: 0,
+		version: 1,
+		expire: moment().add(1, 'days').format('YYYY-MM-DD HH:MM:SS'),
+		request_name: 'posts',
+		people: []
 	};
 
 	for (const post of posts) {
-		json.result.people.push({
+		result.people.push({
 			person: {
 				posts: [
 					{
@@ -97,7 +96,9 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		});
 	}
 
-	response.send(xmlbuilder.create(json, {
+	response.send(xmlbuilder.create({
+		result
+	}, {
 		separateArrayItems: true
 	}).end({
 		pretty: true,
@@ -124,22 +125,27 @@ router.get('/:pid/following', async function (request: express.Request, response
 
 	const people = await getFollowedUsers(userContent);
 
-	const json: Record<string, any> = {
-		result: {
-			has_error: '0',
-			version: '1',
-			request_name: 'user_infos',
-			people: []
-		}
+	const result: PeopleFollowingResult = {
+		has_error: 0,
+		version: 1,
+		request_name: 'user_infos',
+		people: []
 	};
 
 	for (const person of people) {
-		json.result.people.push({
+		result.people.push({
 			person: person.json()
 		});
 	}
 
-	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create({
+		result
+	}, {
+		separateArrayItems: true
+	}).end({
+		pretty: true,
+		allowEmpty: true
+	}));
 });
 
 export default router;
