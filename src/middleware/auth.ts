@@ -29,6 +29,11 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return next();
 	}
 
+	// * Just don't care about the token here
+	if (request.path === '/v1/topics') {
+		return next();
+	}
+
 	let encryptedToken = getValueFromHeaders(request.headers, 'x-nintendo-servicetoken');
 	if (!encryptedToken) {
 		encryptedToken = getValueFromHeaders(request.headers, 'olive service token');

@@ -1,14 +1,10 @@
 import express from 'express';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { getUserAccountData } from '@/util';
 import Cache from '@/cache';
-import { getEndpoint } from '@/database';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
 import { IPost } from '@/types/mongoose/post';
-import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { WWPResult, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
 
@@ -20,28 +16,35 @@ const WARA_WARA_PLAZA_CACHE = new Cache<WWPResult>(ONE_HOUR);
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');
 
-	let user: GetUserDataResponse;
-
-	try {
-		user  = await getUserAccountData(request.pid);
-	} catch (error) {
-		// TODO - Log this error
-		response.sendStatus(403);
-		return;
-	}
-
-	let discovery: HydratedEndpointDocument | null;
-
-	if (user) {
-		discovery = await getEndpoint(user.serverAccessLevel);
-	} else {
-		discovery = await getEndpoint('prod');
-	}
-
-	if (!discovery || !discovery.topics) {
-		response.sendStatus(404);
-		return;
-	}
+	// * Commented out for now because we just don't
+	// * need this data here. WWP does not use the
+	// * current users data atm. Also some users have
+	// * BOSS tasks with outdated tokens, which aren't
+	// * usable and thus break this request. This is
+	// * done as a quick/hacky fix around that
+	// TODO - Re-enable this and filter out the current users posts
+	//let user: GetUserDataResponse;
+	//
+	//try {
+	//	user  = await getUserAccountData(request.pid);
+	//} catch (error) {
+	//	// TODO - Log this error
+	//	response.sendStatus(403);
+	//	return;
+	//}
+	//
+	//let discovery: HydratedEndpointDocument | null;
+	//
+	//if (user) {
+	//	discovery = await getEndpoint(user.serverAccessLevel);
+	//} else {
+	//	discovery = await getEndpoint('prod');
+	//}
+	//
+	//if (!discovery || !discovery.topics) {
+	//	response.sendStatus(404);
+	//	return;
+	//}
 
 	if (!WARA_WARA_PLAZA_CACHE.valid()) {
 		const communities = await calculateMostPopularCommunities(24, 10);
