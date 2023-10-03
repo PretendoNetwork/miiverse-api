@@ -11,10 +11,6 @@ export interface IEndpoint {
     n3ds_host: string;
 }
 
-export interface IEndpointMethods {}
+export type EndpointModel = Model<IEndpoint>;
 
-interface IEndpointQueryHelpers {}
-
-export interface EndpointModel extends Model<IEndpoint, IEndpointQueryHelpers, IEndpointMethods> {}
-
-export type HydratedEndpointDocument = HydratedDocument<IEndpoint, IEndpointMethods>
+export type HydratedEndpointDocument = HydratedDocument<IEndpoint>;

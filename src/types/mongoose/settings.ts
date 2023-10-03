@@ -22,8 +22,6 @@ export interface ISettingsMethods {
 	json(): SettingsData;
 }
 
-interface ISettingsQueryHelpers {}
+export type SettingsModel = Model<ISettings, object, ISettingsMethods>;
 
-export interface SettingsModel extends Model<ISettings, ISettingsQueryHelpers, ISettingsMethods> {}
-
-export type HydratedSettingsDocument = HydratedDocument<ISettings, ISettingsMethods>
+export type HydratedSettingsDocument = HydratedDocument<ISettings, ISettingsMethods>;

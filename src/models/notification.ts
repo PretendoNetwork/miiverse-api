@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { INotification, INotificationMethods, NotificationModel } from '@/types/mongoose/notification';
+import { INotification, NotificationModel } from '@/types/mongoose/notification';
 
-const NotificationSchema = new Schema<INotification, NotificationModel, INotificationMethods>({
+const NotificationSchema = new Schema<INotification, NotificationModel>({
 	pid: String,
 	type: String,
 	link: String,

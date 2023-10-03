@@ -52,8 +52,6 @@ export interface IPostMethods {
 	json(options: PostToJSONOptions, community?: HydratedCommunityDocument): PostData;
 }
 
-interface IPostQueryHelpers {}
+export type PostModel = Model<IPost, object, IPostMethods>;
 
-export interface PostModel extends Model<IPost, IPostQueryHelpers, IPostMethods> {}
-
-export type HydratedPostDocument = HydratedDocument<IPost, IPostMethods>
+export type HydratedPostDocument = HydratedDocument<IPost, IPostMethods>;

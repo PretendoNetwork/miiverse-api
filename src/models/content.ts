@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { IContent, IContentMethods, ContentModel } from '@/types/mongoose/content';
+import { IContent, ContentModel } from '@/types/mongoose/content';
 
-const ContentSchema = new Schema<IContent, ContentModel, IContentMethods>({
+const ContentSchema = new Schema<IContent, ContentModel>({
 	pid: Number,
 	followed_communities: {
 		type: [String],

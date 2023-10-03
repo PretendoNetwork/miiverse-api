@@ -38,8 +38,6 @@ export interface ICommunityMethods {
 	json(): CommunityData;
 }
 
-interface ICommunityQueryHelpers {}
+export type CommunityModel = Model<ICommunity, object, ICommunityMethods>;
 
-export interface CommunityModel extends Model<ICommunity, ICommunityQueryHelpers, ICommunityMethods> {}
-
-export type HydratedCommunityDocument = HydratedDocument<ICommunity, ICommunityMethods>
+export type HydratedCommunityDocument = HydratedDocument<ICommunity, ICommunityMethods>;

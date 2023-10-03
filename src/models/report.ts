@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { IReport, IReportMethods, ReportModel } from '@/types/mongoose/report';
+import { IReport, ReportModel } from '@/types/mongoose/report';
 
-const ReportSchema = new Schema<IReport, ReportModel, IReportMethods>({
+const ReportSchema = new Schema<IReport, ReportModel>({
 	pid: String,
 	post_id: String,
 	reason: Number,

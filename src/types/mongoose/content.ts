@@ -7,10 +7,6 @@ export interface IContent {
     following_users: Types.Array<number>;
 }
 
-export interface IContentMethods {}
+export type ContentModel = Model<IContent>;
 
-interface IContentQueryHelpers {}
-
-export interface ContentModel extends Model<IContent, IContentQueryHelpers, IContentMethods> {}
-
-export type HydratedContentDocument = HydratedDocument<IContent, IContentMethods>
+export type HydratedContentDocument = HydratedDocument<IContent>;

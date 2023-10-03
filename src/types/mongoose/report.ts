@@ -7,10 +7,6 @@ export interface IReport {
     created_at: Date;
 }
 
-export interface IReportMethods {}
+export type ReportModel = Model<IReport>;
 
-interface IReportQueryHelpers {}
-
-export interface ReportModel extends Model<IReport, IReportQueryHelpers, IReportMethods> {}
-
-export type HydratedReportDocument = HydratedDocument<IReport, IReportMethods>
+export type HydratedReportDocument = HydratedDocument<IReport>;

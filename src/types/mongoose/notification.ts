@@ -15,10 +15,6 @@ export interface INotification {
     lastUpdated: number;
 }
 
-export interface INotificationMethods {}
+export type NotificationModel = Model<INotification>;
 
-interface INotificationQueryHelpers {}
-
-export interface NotificationModel extends Model<INotification, INotificationQueryHelpers, INotificationMethods> {}
-
-export type HydratedNotificationDocument = HydratedDocument<INotification, INotificationMethods>
+export type HydratedNotificationDocument = HydratedDocument<INotification>;

@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { IEndpoint, IEndpointMethods, EndpointModel } from '@/types/mongoose/endpoint';
+import { IEndpoint, EndpointModel } from '@/types/mongoose/endpoint';
 
-const endpointSchema = new Schema<IEndpoint, EndpointModel, IEndpointMethods>({
+const endpointSchema = new Schema<IEndpoint, EndpointModel>({
 	status: Number,
 	server_access_level: String,
 	topics: Boolean,
