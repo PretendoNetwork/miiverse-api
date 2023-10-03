@@ -48,7 +48,7 @@ export interface IPostMethods {
 	cleanedAppData(): string;
 	formatPainting(): PostPainting | undefined;
 	formatScreenshot(): PostScreenshot | undefined;
-	formatTopicTag(): PostTopicTag;
+	formatTopicTag(): PostTopicTag | undefined;
 	json(options: PostToJSONOptions, community?: HydratedCommunityDocument): PostData;
 }
 

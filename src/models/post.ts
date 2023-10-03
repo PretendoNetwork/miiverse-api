@@ -142,11 +142,13 @@ PostSchema.method<HydratedPostDocument>('formatScreenshot', function formatScree
 	}
 });
 
-PostSchema.method<HydratedPostDocument>('formatTopicTag', function formatTopicTag(): PostTopicTag {
-	return {
-		name: this.topic_tag,
-		title_id: this.title_id
-	};
+PostSchema.method<HydratedPostDocument>('formatTopicTag', function formatTopicTag(): PostTopicTag | undefined {
+	if (this.topic_tag?.trim()) {
+		return {
+			name: this.topic_tag,
+			title_id: this.title_id
+		};
+	}
 });
 
 PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSONOptions, community?: HydratedCommunityDocument): PostData {
