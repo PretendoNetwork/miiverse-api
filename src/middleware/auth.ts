@@ -86,6 +86,13 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return serverError(response, discovery);
 	}
 
+	// TODO - This is temp, testing something. Will be removed in the future
+	if (request.path !== '/v1/endpoint') {
+		if (user.serverAccessLevel !== 'test' && user.serverAccessLevel !== 'dev') {
+			return badAuth(response, 16, 'BAD_TOKEN');
+		}
+	}
+
 	// * This is a false positive from ESLint.
 	// * Since this middleware is only ever called
 	// * per every request instance
@@ -117,15 +124,15 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 	let error = 0;
 
 	switch (discovery.status) {
-		case 1 :
+		case 1:
 			message = 'SYSTEM_UPDATE_REQUIRED';
 			error = 1;
 			break;
-		case 2 :
+		case 2:
 			message = 'SETUP_NOT_COMPLETE';
 			error = 2;
 			break;
-		case 3 :
+		case 3:
 			message = 'SERVICE_MAINTENANCE';
 			error = 3;
 			break;
@@ -133,19 +140,19 @@ function serverError(response: express.Response, discovery: HydratedEndpointDocu
 			message = 'SERVICE_CLOSED';
 			error = 4;
 			break;
-		case 5 :
+		case 5:
 			message = 'PARENTAL_CONTROLS_ENABLED';
 			error = 5;
 			break;
-		case 6 :
+		case 6:
 			message = 'POSTING_LIMITED_PARENTAL_CONTROLS';
 			error = 6;
 			break;
-		case 7 :
+		case 7:
 			message = 'NNID_BANNED';
 			error = 7;
 			break;
-		default :
+		default:
 			message = 'SERVER_ERROR';
 			error = 15;
 			break;
