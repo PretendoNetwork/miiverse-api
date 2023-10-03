@@ -81,7 +81,12 @@ async function auth(request: express.Request, response: express.Response, next: 
 		return serverError(response, discovery);
 	}
 
+	// * This is a false positive from ESLint.
+	// * Since this middleware is only ever called
+	// * per every request instance
+	// eslint-disable-next-line require-atomic-updates
 	request.pid = pid;
+	// eslint-disable-next-line require-atomic-updates
 	request.paramPack = paramPackData;
 
 	return next();
