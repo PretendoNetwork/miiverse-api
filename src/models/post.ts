@@ -197,6 +197,11 @@ PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSO
 		post.community_id = community.community_id;
 	}
 
+	// * Some sanity checks
+	if (post.feeling_id < 5) {
+		post.feeling_id = 0;
+	}
+
 	return post;
 });
 
