@@ -23,15 +23,13 @@ export type WWPTopic = {
 	position: number;
 };
 
-export type WWPData = {
-	result: {
-		has_error: 0 | 1;
-		version: 1;
-		expire: string;
-		request_name: 'topics';
-		topics: {
-			topic: WWPTopic;
-		}[];
-	}
+export type WWPResult = {
+	has_error: 0 | 1;
+	version: 1;
+	expire: string;
+	request_name: 'topics';
+	topics: {
+		topic: WWPTopic;
+	}[];
 };
 

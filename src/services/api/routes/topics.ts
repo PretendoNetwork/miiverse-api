@@ -10,11 +10,11 @@ import { Community } from '@/models/community';
 import { IPost } from '@/types/mongoose/post';
 import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { WWPData, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
+import { WWPResult, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
 
 const router = express.Router();
 const ONE_HOUR = 60 * 60 * 1000;
-const WARA_WARA_PLAZA_CACHE = new Cache<WWPData>(ONE_HOUR);
+const WARA_WARA_PLAZA_CACHE = new Cache<WWPResult>(ONE_HOUR);
 
 /* GET post titles. */
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
@@ -54,8 +54,10 @@ router.get('/', async function (request: express.Request, response: express.Resp
 		WARA_WARA_PLAZA_CACHE.update(await generateTopicsData(communities));
 	}
 
-	const data = WARA_WARA_PLAZA_CACHE.get() || {};
-	const xml = xmlbuilder.create(data, {
+	const result = WARA_WARA_PLAZA_CACHE.get() || {};
+	const xml = xmlbuilder.create({
+		result: result
+	}, {
 		separateArrayItems: true
 	}).end({
 		pretty: true,
@@ -65,7 +67,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	response.send(xml);
 });
 
-async function generateTopicsData(communities: HydratedCommunityDocument[]): Promise<WWPData> {
+async function generateTopicsData(communities: HydratedCommunityDocument[]): Promise<WWPResult> {
 	const topics: {
 		topic: WWPTopic;
 	}[] = [];
@@ -139,13 +141,11 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 	}
 
 	return {
-		result: {
-			has_error: 0,
-			version: 1,
-			expire: moment().add(2, 'days').format('YYYY-MM-DD HH:MM:SS'),
-			request_name: 'topics',
-			topics
-		}
+		has_error: 0,
+		version: 1,
+		expire: moment().add(2, 'days').format('YYYY-MM-DD HH:MM:SS'),
+		request_name: 'topics',
+		topics
 	};
 }
 
