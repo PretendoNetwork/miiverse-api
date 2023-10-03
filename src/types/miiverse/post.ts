@@ -42,3 +42,12 @@ export type PostTopicTag = {
 	name: string;
 	title_id: string;
 };
+
+export type PostRepliesResult = {
+	has_error: 0 | 1;
+	version: 1;
+	request_name: 'replies';
+	posts: {
+		post: PostData;
+	}[];
+};

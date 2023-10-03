@@ -17,6 +17,7 @@ import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
 import { HydratedPostDocument } from '@/types/mongoose/post';
+import { PostRepliesResult } from '@/types/miiverse/post';
 
 const newPostSchema = z.object({
 	community_id: z.string().optional(),
@@ -133,17 +134,15 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		return;
 	}
 
-	const json: Record<string, any> = {
-		result: {
-			has_error: 0,
-			version: 1,
-			request_name: 'replies',
-			posts: []
-		}
+	const result: PostRepliesResult = {
+		has_error: 0,
+		version: 1,
+		request_name: 'replies',
+		posts: []
 	};
 
 	for (const post of posts) {
-		json.result.posts.push({
+		result.posts.push({
 			post: post.json({
 				with_mii: request.query.with_mii as string === '1',
 				topic_tag: true
@@ -151,7 +150,14 @@ router.get('/:post_id/replies', async function (request: express.Request, respon
 		});
 	}
 
-	response.send(xmlbuilder.create(json, { separateArrayItems: true }).end({ pretty: true, allowEmpty: true }));
+	response.send(xmlbuilder.create({
+		result
+	}, {
+		separateArrayItems: true
+	}).end({
+		pretty: true,
+		allowEmpty: true
+	}));
 });
 
 router.get('/', async function (request: express.Request, response: express.Response): Promise<void> {
