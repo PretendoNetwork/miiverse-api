@@ -11,6 +11,6 @@ declare module 'express-subdomain'{
 	 */
 	export default function subdomain(
 		subdomain: string,
-		fn: Router | ((req: Request, res: Response) => void | any)
+		fn: Router
 	): (req: Request, res: Response, next: () => void) => void | typeof fn;
 }
