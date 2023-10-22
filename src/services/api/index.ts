@@ -19,7 +19,7 @@ const api = express.Router();
 // Create subdomains
 LOG_INFO('[MIIVERSE] Creating \'api\' subdomain');
 router.use(subdomain('api.olv', api));
-router.use(subdomain('api-test.olv', api));
+router.use(subdomain('api-beta.olv', api));
 router.use(subdomain('api-dev.olv', api));
 
 // Setup routes
