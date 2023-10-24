@@ -27,10 +27,13 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	response.type('application/xml');
 
 	// TODO - Better error codes, maybe do defaults?
+	// TODO - This fails with drawings. Need to investigate more
 	const bodyCheck = sendMessageSchema.safeParse(request.body);
 
 	if (!bodyCheck.success) {
 		response.status(422);
+		LOG_WARN('[Messages] Body check failed');
+		response.sendStatus(400);
 		return;
 	}
 
@@ -42,6 +45,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 	if (isNaN(recipientPID)) {
 		response.status(422);
+		LOG_WARN('[Messages] PID is not a number');
+		response.sendStatus(400);
 		return;
 	}
 
@@ -52,6 +57,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	} catch (error) {
 		// TODO - Log this error
 		response.status(422);
+		LOG_WARN('[Messages] Cannot find sender');
+		response.sendStatus(400);
 		return;
 	}
 
@@ -59,16 +66,20 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		// * This should never happen, but TypeScript complains so check anyway
 		// TODO - Better errors
 		response.status(422);
+		LOG_WARN('[Messages] Mii does not exist or is invalid');
+		response.sendStatus(400);
 		return;
 	}
 
 	let recipient: GetUserDataResponse;
 
 	try {
-		recipient = await getUserAccountData(request.pid);
+		recipient = await getUserAccountData(recipientPID);
 	} catch (error) {
 		// TODO - Log this error
 		response.status(422);
+		LOG_WARN('[Messages] Cannot find recipient');
+		response.sendStatus(400);
 		return;
 	}
 
@@ -80,6 +91,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 		if (!sender || !recipient || userSettings || user2Settings) {
 			response.sendStatus(422);
+			LOG_WARN(`[Messages] Some data is missing:\n${!sender} ${!recipient} ${!userSettings} ${!user2Settings}`);
+			response.sendStatus(400);
 			return;
 		}
 
@@ -109,6 +122,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 	if (friendPIDs.indexOf(request.pid) === -1) {
 		response.sendStatus(422);
+		LOG_WARN('[Messages] Users are not friends');
+		response.sendStatus(400);
 		return;
 	}
 
@@ -141,6 +156,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 	if (messageBody === '' && painting === '' && screenshot === '') {
 		response.status(422);
+		LOG_WARN('[Messages] message content is empty');
 		response.redirect(`/friend_messages/${conversation.id}`);
 		return;
 	}
@@ -283,6 +299,7 @@ router.post('/:post_id/empathies', upload.none(), async function (_request: expr
 	const post = await getPostByID(req.params.post_id);
 	if(pid === null) {
 		res.sendStatus(403);
+		response.sendStatus(400);
 		return;
 	}
 	let user = await getUserByPID(pid);
