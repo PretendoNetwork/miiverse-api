@@ -13,11 +13,14 @@ import { Conversation } from '@/models/conversation';
 import { FormattedMessage } from '@/types/common/formatted-message';
 
 const sendMessageSchema = z.object({
-	message_to_pid: z.string().transform(Number),
-	body: z.string(),
+	body: z.string().optional(),
 	painting: z.string().optional(),
 	screenshot: z.string().optional(),
-	app_data: z.string().optional()
+	app_data: z.string().optional(),
+	feeling_id: z.string(),
+	is_autopost: z.string(),
+	number: z.string(),
+	message_to_pid: z.string().transform(Number),
 });
 
 const router = express.Router();
@@ -27,7 +30,6 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	response.type('application/xml');
 
 	// TODO - Better error codes, maybe do defaults?
-	// TODO - This fails with drawings. Need to investigate more
 	const bodyCheck = sendMessageSchema.safeParse(request.body);
 
 	if (!bodyCheck.success) {
@@ -38,7 +40,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	}
 
 	const recipientPID = bodyCheck.data.message_to_pid;
-	let messageBody = bodyCheck.data.body;
+	let messageBody = bodyCheck.data.body || '';
 	const painting = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
 	const screenshot = bodyCheck.data.screenshot?.trim().replace(/\0/g, '').trim() || '';
 	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
@@ -79,7 +81,18 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		// TODO - Log this error
 		response.status(422);
 		LOG_WARN('[Messages] Cannot find recipient');
-		response.sendStatus(400);
+		response.type('application/xml');
+		response.status(400);
+
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: 1,
+				version: 1,
+				code: 400,
+				error_code: 11,
+				message: 'User not Found'
+			}
+		}).end({ pretty: true }));
 		return;
 	}
 
