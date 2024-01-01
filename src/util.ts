@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { IncomingHttpHeaders } from 'node:http';
 import TGA from 'tga';
+import BMP from 'bmp-js';
 import pako from 'pako';
 import { PNG } from 'pngjs';
 import aws from 'aws-sdk';
@@ -104,15 +105,32 @@ export function processPainting(painting: string): Buffer | null {
 		return null;
 	}
 
-	const tga = new TGA(Buffer.from(output));
-	const png = new PNG({
-		width: tga.width,
-		height: tga.height
-	});
+	// 3DS is a BMP, Wii U is a TGA. God isn't real so we need to edit the
+	// alpha layer of the BMP to covert it to a PNG for the web app
+	if (output[0] === 66) {
+		const bitmap = BMP.decode(Buffer.from(output));
+		const png = new PNG({
+			width: bitmap.width,
+			height: bitmap.height
+		});
 
-	png.data = Buffer.from(tga.pixels);
+		const bpmBuffer = bitmap.getData();
+		bpmBuffer.swap32();
+		png.data = bpmBuffer;
+		for (let i = 3; i < bpmBuffer.length; i += 4) {
+			bpmBuffer[i] = 255;
+		}
+		return PNG.sync.write(png);
+	} else {
+		const tga = new TGA(Buffer.from(output));
+		const png = new PNG({
+			width: tga.width,
+			height: tga.height
+		});
 
-	return PNG.sync.write(png);
+		png.data = Buffer.from(tga.pixels);
+		return PNG.sync.write(png);
+	}
 }
 
 export async function uploadCDNAsset(bucket: string, key: string, data: Buffer, acl: string): Promise<void> {

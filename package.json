@@ -27,7 +27,9 @@
 	"license": "AGPL-3.0",
 	"dependencies": {
 		"@pretendonetwork/grpc": "^1.0.3",
+		"@types/bmp-js": "^0.1.2",
 		"aws-sdk": "^2.1204.0",
+		"bmp-js": "^0.1.0",
 		"colors": "^1.4.0",
 		"crc": "^4.3.2",
 		"dotenv": "^16.0.3",
