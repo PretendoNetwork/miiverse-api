@@ -26,7 +26,7 @@
 	],
 	"license": "AGPL-3.0",
 	"dependencies": {
-		"@pretendonetwork/grpc": "^1.0.3",
+		"@pretendonetwork/grpc": "^1.0.6",
 		"@types/bmp-js": "^0.1.2",
 		"aws-sdk": "^2.1204.0",
 		"bmp-js": "^0.1.0",
