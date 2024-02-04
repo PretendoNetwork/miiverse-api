@@ -56,6 +56,11 @@ export function getPIDFromServiceToken(token: string): number {
 
 		const unpackedToken = unpackToken(decryptedToken);
 
+		// * Only allow token types 1 (Wii U) and 2 (3DS)
+		if (unpackedToken.system_type !== 1 && unpackedToken.system_type !== 2) {
+			return 0;
+		}
+
 		return unpackedToken.pid;
 	} catch (e) {
 		console.error(e);
