@@ -288,10 +288,10 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	// TODO - Clean this up
-	// * Nesting this because of how manu checks there are, extremely unreadable otherwise
+	// * Nesting this because of how many checks there are, extremely unreadable otherwise
 	if (!(community.admins && community.admins.indexOf(request.pid) !== -1 && userSettings.account_status === 0)) {
-		if (community.type >= 2) {
-			if (!(parentPost && community.allows_comments && community.open)) {
+		if (community.type >= 2 || user.accessLevel < community.permissions.minimum_new_post_access_level) {
+			if (!(parentPost && user.accessLevel >= community.permissions.minimum_new_comment_access_level && community.permissions.open)) {
 				response.sendStatus(403);
 				return;
 			}
@@ -318,7 +318,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	if (messageBody) {
-		messageBody = messageBody.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}‛¨ƒºª«»“”„¿¡←→↑↓√§¶†‡¦–—⇒⇔¤¢€£¥™©®+×÷=±∞ˇ˘˙¸˛˜′″µ°¹²³♭♪•…¬¯‰¼½¾♡♥●◆■▲▼☆★♀♂,./?;:'"\\<>]/g, '');
+		messageBody = messageBody.replace(/[\p{L}\p{P}\d$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/g, '');
 	}
 
 	if (messageBody && messageBody.length > 280) {

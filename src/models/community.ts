@@ -1,6 +1,25 @@
 import { Schema, model } from 'mongoose';
 import { CommunityData } from '@/types/miiverse/community';
-import { ICommunity, ICommunityMethods, CommunityModel, HydratedCommunityDocument } from '@/types/mongoose/community';
+import { ICommunity, ICommunityMethods, CommunityModel, ICommunityPermissions, HydratedCommunityDocument } from '@/types/mongoose/community';
+
+const PermissionsSchema = new Schema<ICommunityPermissions>({
+	open: {
+		type: Boolean,
+		default: true
+	},
+	minimum_new_post_access_level: {
+		type: Number,
+		default: 0
+	},
+	minimum_new_comment_access_level: {
+		type: Number,
+		default: 0
+	},
+	minimum_new_community_access_level: {
+		type: Number,
+		default: 0
+	},
+});
 
 const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods>({
 	platform_id: Number,
@@ -68,7 +87,8 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 	user_favorites: {
 		type: [Number],
 		default: []
-	}
+	},
+	permissions: PermissionsSchema
 });
 
 CommunitySchema.method<HydratedCommunityDocument>('addUserFavorite', async function addUserFavorite(pid: number): Promise<void> {

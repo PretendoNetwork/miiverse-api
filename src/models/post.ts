@@ -107,7 +107,7 @@ PostSchema.method<HydratedPostDocument>('generatePostUID', async function genera
 });
 
 PostSchema.method<HydratedPostDocument>('cleanedBody', function cleanedBody(): string {
-	return this.body ? this.body.replace(/[^A-Za-z\d\s-_!@#$%^&*(){}+=,.<>/?;:'"[\]]/g, '').replace(/[\n\r]+/gm, '') : '';
+	return this.body ? this.body.replace(/[\p{L}\p{P}\d$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/g, '').replace(/[\n\r]+/gm, '') : '';
 });
 
 PostSchema.method<HydratedPostDocument>('cleanedMiiData', function cleanedMiiData(): string {

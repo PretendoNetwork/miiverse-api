@@ -8,10 +8,11 @@ import {
 	getCommunityByTitleID,
 	getUserContent,
 } from '@/database';
-import { getValueFromQueryString } from '@/util';
+import { getValueFromQueryString, getUserAccountData } from '@/util';
 import { LOG_WARN } from '@/logger';
 import { Community } from '@/models/community';
 import { Post } from '@/models/post';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { HydratedCommunityDocument } from '@/types/mongoose/community';
 import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
 import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
@@ -266,6 +267,29 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	const bodyCheck = createNewCommunitySchema.safeParse(request.body);
 	if (!bodyCheck.success) {
 		return respondCommunityError(response, 400, 20);
+	}
+
+	let pnid: GetUserDataResponse;
+
+	try {
+		pnid  = await getUserAccountData(request.pid);
+	} catch (error) {
+		// TODO - Log this error
+		response.sendStatus(403);
+		return;
+	}
+
+	if (pnid.accessLevel < parentCommunity.permissions.minimum_new_community_access_level) {
+		response.send(xmlbuilder.create({
+			result: {
+				has_error: '1',
+				version: '1',
+				code: '403',
+				error_code: '911',
+				message: 'NO_NEW_COMMUNITY'
+			}
+		}).end({ pretty: true, allowEmpty: true }));
+		return;
 	}
 
 	request.body.name = request.body.name.trim();

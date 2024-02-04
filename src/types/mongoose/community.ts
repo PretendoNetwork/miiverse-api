@@ -8,6 +8,13 @@ enum COMMUNITY_TYPE {
 	Private = 3
 }
 
+export interface ICommunityPermissions {
+	open: boolean;
+	minimum_new_post_access_level: number;
+	minimum_new_comment_access_level: number;
+	minimum_new_community_access_level: number;
+}
+
 export interface ICommunity {
 	platform_id: number;
 	name: string;
@@ -30,6 +37,7 @@ export interface ICommunity {
 	is_recommended: number;
 	app_data: string;
 	user_favorites: Types.Array<number>;
+	permissions: ICommunityPermissions
 }
 
 export interface ICommunityMethods {
