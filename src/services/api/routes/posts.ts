@@ -335,7 +335,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		return;
 	}
 
-	if ((!messageBody || messageBody === '') && painting === '' && screenshot === '') {
+	if (!messageBody?.trim() && !painting?.trim() && !screenshot?.trim()) {
 		response.status(400);
 		return;
 	}

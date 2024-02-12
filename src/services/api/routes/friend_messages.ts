@@ -169,7 +169,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		return;
 	}
 
-	if (messageBody === '' && painting === '' && screenshot === '') {
+	if (!messageBody?.trim() && !painting?.trim() && !screenshot?.trim()) {
 		response.status(422);
 		LOG_WARN('[Messages] message content is empty');
 		response.redirect(`/friend_messages/${conversation.id}`);
