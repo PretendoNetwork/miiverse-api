@@ -318,7 +318,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	if (messageBody) {
-		messageBody = messageBody.replace(/[\p{L}\p{P}\d$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/g, '');
+		messageBody = messageBody.replace(/[^\p{L}\p{P}\d\n\r~$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/gu, '');
 	}
 
 	if (messageBody && messageBody.length > 280) {

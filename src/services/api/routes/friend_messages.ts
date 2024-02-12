@@ -160,7 +160,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	}
 
 	if (messageBody) {
-		messageBody = messageBody.replace(/[\p{L}\p{P}\d$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/g, '');
+		messageBody = messageBody.replace(/[^\p{L}\p{P}\d\n\r~$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/gu, '');
 	}
 
 	if (messageBody.length > 280) {
