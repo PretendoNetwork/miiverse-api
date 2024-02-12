@@ -31,6 +31,9 @@ const s3 = new aws.S3({
 	secretAccessKey: config.s3.secret
 });
 
+// TODO - This doesn't really belong here
+export const INVALID_POST_BODY_REGEX = /[^\p{L}\p{P}\d\n\r$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<> ]/gu;
+
 export function decodeParamPack(paramPack: string): ParamPack {
 	const values = Buffer.from(paramPack, 'base64').toString().split('\\');
 	const entries = values.filter(value => value).reduce((entries: string[][], value: string, index: number) => {

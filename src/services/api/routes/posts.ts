@@ -3,7 +3,13 @@ import multer from 'multer';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
+import {
+	getUserAccountData,
+	processPainting,
+	uploadCDNAsset,
+	getValueFromQueryString,
+	INVALID_POST_BODY_REGEX
+} from '@/util';
 import {
 	getPostByID,
 	getUserContent,
@@ -235,7 +241,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	}
 
 	const communityID = bodyCheck.data.community_id || '';
-	let messageBody = bodyCheck.data.body;
+	const messageBody = bodyCheck.data.body?.trim();
 	const painting = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
 	const screenshot = bodyCheck.data.screenshot?.replace(/\0/g, '').trim() || '';
 	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
@@ -317,12 +323,16 @@ async function newPost(request: express.Request, response: express.Response): Pr
 			break;
 	}
 
-	if (messageBody) {
-		messageBody = messageBody.replace(/[^\p{L}\p{P}\d\n\r~$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/gu, '');
+	if (messageBody && INVALID_POST_BODY_REGEX.test(messageBody)) {
+		// TODO - Log this error
+		response.sendStatus(400);
+		return;
 	}
 
 	if (messageBody && messageBody.length > 280) {
-		messageBody = messageBody.substring(0, 280);
+		// TODO - Log this error
+		response.sendStatus(400);
+		return;
 	}
 
 	if ((!messageBody || messageBody === '') && painting === '' && screenshot === '') {

@@ -5,7 +5,14 @@ import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
 import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { getUserFriendPIDs, getUserAccountData, processPainting, uploadCDNAsset, getValueFromQueryString } from '@/util';
+import {
+	getUserFriendPIDs,
+	getUserAccountData,
+	processPainting,
+	uploadCDNAsset,
+	getValueFromQueryString,
+	INVALID_POST_BODY_REGEX
+} from '@/util';
 import { getConversationByUsers, getUserSettings, getFriendMessages } from '@/database';
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
@@ -39,7 +46,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	}
 
 	const recipientPID = bodyCheck.data.message_to_pid;
-	let messageBody = bodyCheck.data.body || '';
+	const messageBody = bodyCheck.data.body?.trim() || '';
 	const painting = bodyCheck.data.painting?.replace(/\0/g, '').trim() || '';
 	const screenshot = bodyCheck.data.screenshot?.trim().replace(/\0/g, '').trim() || '';
 	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
@@ -150,12 +157,16 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 			break;
 	}
 
-	if (messageBody) {
-		messageBody = messageBody.replace(/[^\p{L}\p{P}\d\n\r~$^¨←→↑↓√¦⇒⇔¤¢€£¥™©®+×÷=±∞˘˙¸˛˜°¹²³♭♪¬¯¼½¾♡♥●◆■▲▼☆★♀♂<>]/gu, '');
+	if (messageBody && INVALID_POST_BODY_REGEX.test(messageBody)) {
+		// TODO - Log this error
+		response.sendStatus(400);
+		return;
 	}
 
-	if (messageBody.length > 280) {
-		messageBody = messageBody.substring(0, 280);
+	if (messageBody && messageBody.length > 280) {
+		// TODO - Log this error
+		response.sendStatus(400);
+		return;
 	}
 
 	if (messageBody === '' && painting === '' && screenshot === '') {
