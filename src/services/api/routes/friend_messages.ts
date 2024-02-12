@@ -33,9 +33,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	const bodyCheck = sendMessageSchema.safeParse(request.body);
 
 	if (!bodyCheck.success) {
-		response.status(422);
 		LOG_WARN('[Messages] Body check failed');
-		response.sendStatus(400);
+		response.sendStatus(422);
 		return;
 	}
 
@@ -46,9 +45,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	const appData = bodyCheck.data.app_data?.replace(/[^A-Za-z0-9+/=\s]/g, '').trim() || '';
 
 	if (isNaN(recipientPID)) {
-		response.status(422);
 		LOG_WARN('[Messages] PID is not a number');
-		response.sendStatus(400);
+		response.sendStatus(422);
 		return;
 	}
 
@@ -57,19 +55,15 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	try {
 		sender = await getUserAccountData(request.pid);
 	} catch (error) {
-		// TODO - Log this error
-		response.status(422);
 		LOG_WARN('[Messages] Cannot find sender');
-		response.sendStatus(400);
+		response.sendStatus(422);
 		return;
 	}
 
 	if (!sender.mii) {
 		// * This should never happen, but TypeScript complains so check anyway
-		// TODO - Better errors
-		response.status(422);
 		LOG_WARN('[Messages] Mii does not exist or is invalid');
-		response.sendStatus(400);
+		response.sendStatus(422);
 		return;
 	}
 
@@ -79,10 +73,9 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		recipient = await getUserAccountData(recipientPID);
 	} catch (error) {
 		// TODO - Log this error
-		response.status(422);
 		LOG_WARN('[Messages] Cannot find recipient');
 		response.type('application/xml');
-		response.status(400);
+		response.status(422);
 
 		response.send(xmlbuilder.create({
 			result: {
@@ -103,9 +96,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		const user2Settings = await getUserSettings(recipient.pid);
 
 		if (!sender || !recipient || userSettings || user2Settings) {
-			response.sendStatus(422);
 			LOG_WARN(`[Messages] Some data is missing:\n${!sender} ${!recipient} ${!userSettings} ${!user2Settings}`);
-			response.sendStatus(400);
+			response.sendStatus(422);
 			return;
 		}
 
@@ -134,9 +126,8 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	const friendPIDs = await getUserFriendPIDs(recipient.pid);
 
 	if (friendPIDs.indexOf(request.pid) === -1) {
-		response.sendStatus(422);
 		LOG_WARN('[Messages] Users are not friends');
-		response.sendStatus(400);
+		response.sendStatus(422);
 		return;
 	}
 
