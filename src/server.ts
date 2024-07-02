@@ -1,4 +1,7 @@
 process.title = 'Pretendo - Miiverse';
+process.on('SIGTERM', () => {
+	process.exit(0);
+});
 
 import express from 'express';
 import morgan from 'morgan';
