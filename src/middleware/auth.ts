@@ -97,7 +97,9 @@ async function auth(request: express.Request, response: express.Response, next: 
 
 	const userSettings = await getUserSettings(request.pid);
 
-	if (!userSettings) {
+	if (!userSettings && request.path === '/v1/endpoint') {
+		return next();
+	} else if (!userSettings) {
 		return badAuth(response, 18, 'BAD_PARAM');
 	}
 
