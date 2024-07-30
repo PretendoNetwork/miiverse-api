@@ -8,7 +8,8 @@
 		"build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
 		"clean": "rimraf ./dist",
 		"start": "node --enable-source-maps .",
-		"test": "ts-node test/test.ts"
+		"test": "ts-node test/test.ts",
+		"dev": "npm run build && npm run start"
 	},
 	"keywords": [],
 	"author": "Pretendo Network",
