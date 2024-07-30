@@ -64,6 +64,11 @@ export function getPIDFromServiceToken(token: string): number {
 			return 0;
 		}
 
+		// * Check if the token is expired
+		if (unpackedToken.expire_time < Date.now()) {
+			return 0;
+		}
+
 		return unpackedToken.pid;
 	} catch (e) {
 		console.error(e);
