@@ -13,6 +13,8 @@ export interface Config {
 		endpoint: string;
 		key: string;
 		secret: string;
+		bucket: string;
+		region: string;
 	};
 	grpc: {
 		friends: {

@@ -28,7 +28,9 @@ export const config: Config = {
 	s3: {
 		endpoint: process.env.PN_MIIVERSE_API_CONFIG_S3_ENDPOINT || '',
 		key: process.env.PN_MIIVERSE_API_CONFIG_S3_ACCESS_KEY || '',
-		secret: process.env.PN_MIIVERSE_API_CONFIG_S3_ACCESS_SECRET || ''
+		secret: process.env.PN_MIIVERSE_API_CONFIG_S3_ACCESS_SECRET || '',
+		bucket: process.env.PN_MIIVERSE_API_CONFIG_S3_BUCKET || '',
+		region: process.env.PN_MIIVERSE_API_CONFIG_S3_REGION || ''
 	},
 	grpc: {
 		friends: {
@@ -74,6 +76,16 @@ if (!config.s3.key) {
 
 if (!config.s3.secret) {
 	LOG_ERROR('Failed to find s3 secret. Set the PN_MIIVERSE_API_CONFIG_S3_ACCESS_SECRET environment variable');
+	process.exit(0);
+}
+
+if (!config.s3.bucket) {
+	LOG_ERROR('Failed to find s3 bucket. Set the PN_MIIVERSE_API_CONFIG_S3_BUCKET environment variable');
+	process.exit(0);
+}
+
+if (!config.s3.region) {
+	LOG_ERROR('Failed to find s3 region. Set the PN_MIIVERSE_API_CONFIG_S3_REGION environment variable');
 	process.exit(0);
 }
 

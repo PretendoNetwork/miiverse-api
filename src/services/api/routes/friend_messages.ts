@@ -209,7 +209,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		const paintingBuffer = await processPainting(painting);
 
 		if (paintingBuffer) {
-			await uploadCDNAsset('pn-cdn', `paintings/${request.pid}/${post.id}.png`, paintingBuffer, 'public-read');
+			await uploadCDNAsset(`paintings/${request.pid}/${post.id}.png`, paintingBuffer, 'public-read');
 		} else {
 			LOG_WARN(`PAINTING FOR POST ${post.id} FAILED TO PROCESS`);
 		}
@@ -218,7 +218,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 	if (screenshot) {
 		const screenshotBuffer = Buffer.from(screenshot, 'base64');
 
-		await uploadCDNAsset('pn-cdn', `screenshots/${request.pid}/${post.id}.jpg`, screenshotBuffer, 'public-read');
+		await uploadCDNAsset(`screenshots/${request.pid}/${post.id}.jpg`, screenshotBuffer, 'public-read');
 
 		post.screenshot = `/screenshots/${request.pid}/${post.id}.jpg`;
 		post.screenshot_length = screenshot.length;

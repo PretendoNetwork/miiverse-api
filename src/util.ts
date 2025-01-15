@@ -146,11 +146,11 @@ export function processPainting(painting: string): Buffer | null {
 	}
 }
 
-export async function uploadCDNAsset(bucket: string, key: string, data: Buffer, acl: string): Promise<void> {
+export async function uploadCDNAsset(key: string, data: Buffer, acl: string): Promise<void> {
 	const awsPutParams = {
 		Body: data,
 		Key: key,
-		Bucket: bucket,
+		Bucket: config.s3.bucket,
 		ACL: acl
 	};
 
