@@ -1,7 +1,6 @@
 import express from 'express';
 import subdomain from 'express-subdomain';
 import { LOG_INFO } from '@/logger';
-
 import discoveryHandlers from '@/services/discovery/routes/discovery';
 
 // Main router for endpointsindex.js

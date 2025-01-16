@@ -19,6 +19,6 @@ export interface CommunityPostsQuery {
 		$in: number[];
 	};
 	parent?: {
-		$eq: null
+		$eq: null;
 	};
 }

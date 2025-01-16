@@ -4,9 +4,9 @@ import xmlbuilder from 'xmlbuilder';
 import Cache from '@/cache';
 import { Post } from '@/models/post';
 import { Community } from '@/models/community';
-import { IPost } from '@/types/mongoose/post';
-import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { WWPResult, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
+import type { IPost } from '@/types/mongoose/post';
+import type { HydratedCommunityDocument } from '@/types/mongoose/community';
+import type { WWPResult, WWPTopic } from '@/types/miiverse/wara-wara-plaza';
 
 const router = express.Router();
 const ONE_HOUR = 60 * 60 * 1000;
@@ -23,28 +23,28 @@ router.get('/', async function (request: express.Request, response: express.Resp
 	// * usable and thus break this request. This is
 	// * done as a quick/hacky fix around that
 	// TODO - Re-enable this and filter out the current users posts
-	//let user: GetUserDataResponse;
+	// let user: GetUserDataResponse;
 	//
-	//try {
+	// try {
 	//	user  = await getUserAccountData(request.pid);
-	//} catch (error) {
+	// } catch (error) {
 	//	// TODO - Log this error
 	//	response.sendStatus(403);
 	//	return;
-	//}
+	// }
 	//
-	//let discovery: HydratedEndpointDocument | null;
+	// let discovery: HydratedEndpointDocument | null;
 	//
-	//if (user) {
+	// if (user) {
 	//	discovery = await getEndpoint(user.serverAccessLevel);
-	//} else {
+	// } else {
 	//	discovery = await getEndpoint('prod');
-	//}
+	// }
 	//
-	//if (!discovery || !discovery.topics) {
+	// if (!discovery || !discovery.topics) {
 	//	response.sendStatus(404);
 	//	return;
-	//}
+	// }
 
 	if (!WARA_WARA_PLAZA_CACHE.valid()) {
 		const communities = await calculateMostPopularCommunities(24, 10);
@@ -80,7 +80,7 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 	for (let i = 0; i < communities.length; i++) {
 		const community = communities[i];
 
-		const empathies = await Post.aggregate<{ _id: null; total: number; }>([
+		const empathies = await Post.aggregate<{ _id: null; total: number }>([
 			{
 				$match: {
 					community_id: community.olive_community_id
@@ -109,10 +109,10 @@ async function generateTopicsData(communities: HydratedCommunityDocument[]): Pro
 			is_recommended: community.is_recommended ? 1 : 0,
 			name: community.name,
 			people: [],
-			position: i+1
+			position: i + 1
 		};
 
-		community.title_id.forEach(title_id => {
+		community.title_id.forEach((title_id) => {
 			// * Just in case
 			if (title_id) {
 				topic.title_ids.push({ title_id });
@@ -219,7 +219,7 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 		throw new Error('Invalid date');
 	}
 
-	const validCommunities = await Community.aggregate<{ _id: null; communities: string[]; }>([
+	const validCommunities = await Community.aggregate<{ _id: null; communities: string[] }>([
 		{
 			$match: {
 				type: 0,
@@ -242,7 +242,7 @@ async function calculateMostPopularCommunities(hours: number, limit: number): Pr
 		throw new Error('No communities found');
 	}
 
-	const popularCommunities = await Post.aggregate<{ _id: null; count: number; }>([
+	const popularCommunities = await Post.aggregate<{ _id: null; count: number }>([
 		{
 			$match: {
 				created_at: {

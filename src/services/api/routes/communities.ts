@@ -2,23 +2,23 @@ import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import multer from 'multer';
 import { z } from 'zod';
+import { Post } from '@/models/post';
+import { Community } from '@/models/community';
+import { LOG_WARN } from '@/logger';
+import { getValueFromQueryString, getUserAccountData } from '@/util';
 import {
 	getMostPopularCommunities,
 	getNewCommunities,
 	getCommunityByTitleID,
-	getUserContent,
+	getUserContent
 } from '@/database';
-import { getValueFromQueryString, getUserAccountData } from '@/util';
-import { LOG_WARN } from '@/logger';
-import { Community } from '@/models/community';
-import { Post } from '@/models/post';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
-import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
-import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
-import { ParamPack } from '@/types/common/param-pack';
-import { CommunitiesResult, CommunityPostsResult } from '@/types/miiverse/community';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { HydratedCommunityDocument } from '@/types/mongoose/community';
+import type { SubCommunityQuery } from '@/types/mongoose/subcommunity-query';
+import type { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
+import type { HydratedPostDocument, IPost } from '@/types/mongoose/post';
+import type { ParamPack } from '@/types/common/param-pack';
+import type { CommunitiesResult, CommunityPostsResult } from '@/types/miiverse/community';
 
 const createNewCommunitySchema = z.object({
 	name: z.string(),
@@ -46,7 +46,6 @@ function respondCommunityNotFound(response: express.Response): void {
 }
 
 async function commonGetSubCommunity(paramPack: ParamPack, communityID: string | undefined): Promise<HydratedCommunityDocument | null> {
-
 	const parentCommunity = await getCommunityByTitleID(paramPack.title_id);
 
 	if (!parentCommunity) {
@@ -191,7 +190,7 @@ router.get('/:communityID/posts', async function (request: express.Request, resp
 		query.is_spoiler = 0;
 	}
 
-	//TODO: There probably is a type for text and screenshots too, will have to investigate
+	// TODO: There probably is a type for text and screenshots too, will have to investigate
 	if (postType === 'memo') {
 		query.painting = { $ne: null };
 	}
@@ -272,8 +271,8 @@ router.post('/', multer().none(), async function (request: express.Request, resp
 	let pnid: GetUserDataResponse;
 
 	try {
-		pnid  = await getUserAccountData(request.pid);
-	} catch (error) {
+		pnid = await getUserAccountData(request.pid);
+	} catch (ignored) {
 		// TODO - Log this error
 		response.sendStatus(403);
 		return;
@@ -454,7 +453,6 @@ router.post('/:community_id.unfavorite', multer().none(), async function (reques
 		allowEmpty: true
 	}));
 });
-
 
 router.post('/:community_id', multer().none(), async function (request: express.Request, response: express.Response): Promise<void> {
 	response.type('application/xml');

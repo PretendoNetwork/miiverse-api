@@ -1,4 +1,4 @@
-import { PersonPosts } from '@/types/miiverse/people';
+import type { PersonPosts } from '@/types/miiverse/people';
 
 export type WWPTopic = {
 	empathy_count: number;
@@ -24,4 +24,3 @@ export type WWPResult = {
 		topic: WWPTopic;
 	}[];
 };
-

@@ -1,6 +1,5 @@
 import crypto from 'node:crypto';
 import newman from 'newman';
-import { Collection, CollectionDefinition } from 'postman-collection';
 import qs from 'qs';
 import axios from 'axios';
 import { create as parseXML } from 'xmlbuilder2';
@@ -8,9 +7,9 @@ import { table } from 'table';
 import ora from 'ora';
 import dotenv from 'dotenv';
 import colors from 'colors';
-
 import communitiesCollection from '../postman/collections/Communities.json';
 import peopleCollection from '../postman/collections/People.json';
+import type { Collection, CollectionDefinition } from 'postman-collection';
 
 const PeopleCollection: CollectionDefinition = peopleCollection as CollectionDefinition;
 const CommunitiesCollection: CollectionDefinition = communitiesCollection as CollectionDefinition;
@@ -24,7 +23,7 @@ interface TestResult {
 	url: string;
 	query: string;
 	assertion: string;
-	error?: string
+	error?: string;
 }
 
 const USERNAME = process.env.PN_MIIVERSE_API_TESTING_USERNAME?.trim() || '';
@@ -102,7 +101,7 @@ async function apiGetRequest(url: string, headers = {}): Promise<Record<string, 
 async function apiPostRequest(url: string, body: string): Promise<Record<string, any>> {
 	const response = await axios.post(url, body, {
 		headers: DEFAULT_HEADERS,
-		validateStatus: () => true,
+		validateStatus: () => true
 	});
 
 	const data: Record<string, any> = parseXML(response.data).end({ format: 'object' });
@@ -129,7 +128,7 @@ async function getAccessToken(username: string, passwordHash: string): Promise<s
 		grant_type: 'password',
 		user_id: username,
 		password: passwordHash,
-		password_type: 'hash',
+		password_type: 'hash'
 	});
 
 	const response = await apiPostRequest(ACCESS_TOKEN_URL, data);
@@ -140,7 +139,7 @@ async function getAccessToken(username: string, passwordHash: string): Promise<s
 async function getMiiverseServiceToken(accessToken: string): Promise<string> {
 	const response = await apiGetRequest(SERVICE_TOKEN_URL, {
 		'X-Nintendo-Title-ID': '0005001010040100',
-		Authorization: `Bearer ${accessToken}`
+		'Authorization': `Bearer ${accessToken}`
 	});
 
 	return response.service_token.token;
@@ -153,7 +152,7 @@ function runNewmanTest(collection: string | Collection | CollectionDefinition, v
 			reporters: ['json'],
 			envVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
 			globals: variables,
-			globalVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] })),
+			globalVar: Object.entries(variables).map(entry => ({ key: entry[0], value: entry[1] }))
 		}, (error, summary) => {
 			if (error) {
 				reject(error);
@@ -167,13 +166,13 @@ function runNewmanTest(collection: string | Collection | CollectionDefinition, v
 function communitiesRoutesTest(serviceToken: string): Promise<TestResult[]> {
 	// TODO - Make this more dynamic?
 	return runNewmanTest(CommunitiesCollection, {
-		DOMAIN: 'api.olv.pretendo.cc',
-		ServiceToken: serviceToken,
+		'DOMAIN': 'api.olv.pretendo.cc',
+		'ServiceToken': serviceToken,
 		// TODO - Change these names. Should not be game-specific
-		PP_Splatoon: 'XHRpdGxlX2lkXDE0MDczNzUxNTM1MjI5NDRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
-		PP_MarioVsDK: 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMzcwODhcYWNjZXNzX2tleVw2OTI0NzQ1MTBccGxhdGZvcm1faWRcMVxyZWdpb25faWRcMlxsYW5ndWFnZV9pZFwxXGNvdW50cnlfaWRcNDlcYXJlYV9pZFwwXG5ldHdvcmtfcmVzdHJpY3Rpb25cMFxmcmllbmRfcmVzdHJpY3Rpb25cMFxyYXRpbmdfcmVzdHJpY3Rpb25cMTdccmF0aW5nX29yZ2FuaXphdGlvblwxXHRyYW5zZmVyYWJsZV9pZFw3NjA4MjAyOTE2MDc1ODg0NDI1XHR6X25hbWVcUGFjaWZpYy9NaWR3YXlcdXRjX29mZnNldFwtMzk2MDBc',
-		PP_Bad_TID: 'XHRpdGxlX2lkXDEyMzRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
-		PP_ACPlaza: 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMjE0NzJcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
+		'PP_Splatoon': 'XHRpdGxlX2lkXDE0MDczNzUxNTM1MjI5NDRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
+		'PP_MarioVsDK': 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMzcwODhcYWNjZXNzX2tleVw2OTI0NzQ1MTBccGxhdGZvcm1faWRcMVxyZWdpb25faWRcMlxsYW5ndWFnZV9pZFwxXGNvdW50cnlfaWRcNDlcYXJlYV9pZFwwXG5ldHdvcmtfcmVzdHJpY3Rpb25cMFxmcmllbmRfcmVzdHJpY3Rpb25cMFxyYXRpbmdfcmVzdHJpY3Rpb25cMTdccmF0aW5nX29yZ2FuaXphdGlvblwxXHRyYW5zZmVyYWJsZV9pZFw3NjA4MjAyOTE2MDc1ODg0NDI1XHR6X25hbWVcUGFjaWZpYy9NaWR3YXlcdXRjX29mZnNldFwtMzk2MDBc',
+		'PP_Bad_TID': 'XHRpdGxlX2lkXDEyMzRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
+		'PP_ACPlaza': 'XHRpdGxlX2lkXDE0MDczNzUxNTMzMjE0NzJcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
 		'PP_Bad Format': 'XHR'
 	});
 }
@@ -184,7 +183,7 @@ function peopleRoutesTest(serviceToken: string): Promise<TestResult[]> {
 		DOMAIN: 'api.olv.pretendo.cc',
 		ServiceToken: serviceToken,
 		// TODO - Change this name. Should not be game-specific
-		PP_Splatoon: 'XHRpdGxlX2lkXDE0MDczNzUxNTM1MjI5NDRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc',
+		PP_Splatoon: 'XHRpdGxlX2lkXDE0MDczNzUxNTM1MjI5NDRcYWNjZXNzX2tleVwwXHBsYXRmb3JtX2lkXDFccmVnaW9uX2lkXDJcbGFuZ3VhZ2VfaWRcMVxjb3VudHJ5X2lkXDExMFxhcmVhX2lkXDBcbmV0d29ya19yZXN0cmljdGlvblwwXGZyaWVuZF9yZXN0cmljdGlvblwwXHJhdGluZ19yZXN0cmljdGlvblwyMFxyYXRpbmdfb3JnYW5pemF0aW9uXDBcdHJhbnNmZXJhYmxlX2lkXDEyNzU2MTQ0ODg0NDUzODk4NzgyXHR6X25hbWVcQW1lcmljYS9OZXdfWW9ya1x1dGNfb2Zmc2V0XC0xNDQwMFxyZW1hc3Rlcl92ZXJzaW9uXDBc'
 	});
 }
 
@@ -275,7 +274,7 @@ function createTestResults(summary: newman.NewmanRunSummary): TestResult[] {
 				collection: summary.collection.name,
 				name: execution.item.name,
 				url: `${request.url.protocol}://${request.url.host?.join('.')}/${request.url.path?.join('/')}`,
-				query: qs.stringify(request.url.query.all().reduce((object: Record<string, string>, item: { disabled?: boolean; key: string | null; value: string | null; }) => {
+				query: qs.stringify(request.url.query.all().reduce((object: Record<string, string>, item: { disabled?: boolean; key: string | null; value: string | null }) => {
 					if (!item.disabled && item.key && item.value) {
 						object[item.key] = item.value;
 					}

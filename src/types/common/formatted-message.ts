@@ -21,7 +21,7 @@ export interface FormattedMessage {
 		screen_name: string;
 		topic_tag: {
 			name: string;
-			title_id: number
+			title_id: number;
 		};
 		title_id: string;
 	};

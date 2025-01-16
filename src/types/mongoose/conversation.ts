@@ -1,17 +1,17 @@
-import { Model, Types, HydratedDocument } from 'mongoose';
+import type { Model, Types, HydratedDocument } from 'mongoose';
 
 export type ConversationUser = {
 	pid: number;
-    official: boolean;
-    read: boolean;
+	official: boolean;
+	read: boolean;
 };
 
 export interface IConversation {
 	id: string;
-    created_at: Date;
-    last_updated: Date;
-    message_preview: string,
-    users: Types.Array<ConversationUser>;
+	created_at: Date;
+	last_updated: Date;
+	message_preview: string;
+	users: Types.Array<ConversationUser>;
 }
 
 export interface IConversationMethods {

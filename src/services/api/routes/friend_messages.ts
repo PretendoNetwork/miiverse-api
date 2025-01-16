@@ -4,7 +4,6 @@ import { Snowflake } from 'node-snowflake';
 import moment from 'moment';
 import xmlbuilder from 'xmlbuilder';
 import { z } from 'zod';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import {
 	getUserFriendPIDs,
 	getUserAccountData,
@@ -17,8 +16,9 @@ import { getConversationByUsers, getUserSettings, getFriendMessages } from '@/da
 import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Conversation } from '@/models/conversation';
-import { FormattedMessage } from '@/types/common/formatted-message';
 import { config } from '@/config-manager';
+import type { FormattedMessage } from '@/types/common/formatted-message';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 
 const sendMessageSchema = z.object({
 	body: z.string().optional(),
@@ -28,7 +28,7 @@ const sendMessageSchema = z.object({
 	feeling_id: z.string(),
 	is_autopost: z.string(),
 	number: z.string(),
-	message_to_pid: z.string().transform(Number),
+	message_to_pid: z.string().transform(Number)
 });
 
 const router = express.Router();
@@ -62,7 +62,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 	try {
 		sender = await getUserAccountData(request.pid);
-	} catch (error) {
+	} catch (ignored) {
 		LOG_WARN('[Messages] Cannot find sender');
 		response.sendStatus(422);
 		return;
@@ -79,7 +79,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 
 	try {
 		recipient = await getUserAccountData(recipientPID);
-	} catch (error) {
+	} catch (ignored) {
 		// TODO - Log this error
 		LOG_WARN('[Messages] Cannot find recipient');
 		response.type('application/xml');
@@ -121,7 +121,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 					pid: recipient.pid,
 					official: (recipient.accessLevel === 2 || recipient.accessLevel === 3),
 					read: false
-				},
+				}
 			]
 		});
 	}

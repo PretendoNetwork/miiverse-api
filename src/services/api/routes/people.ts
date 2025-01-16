@@ -4,9 +4,9 @@ import moment from 'moment';
 import { getUserContent, getFollowedUsers } from '@/database';
 import { getValueFromQueryString, getUserFriendPIDs } from '@/util';
 import { Post } from '@/models/post';
-import { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
-import { HydratedPostDocument, IPost } from '@/types/mongoose/post';
-import { PeopleFollowingResult, PeoplePostsResult } from '@/types/miiverse/people';
+import type { CommunityPostsQuery } from '@/types/mongoose/community-posts-query';
+import type { HydratedPostDocument, IPost } from '@/types/mongoose/post';
+import type { PeopleFollowingResult, PeoplePostsResult } from '@/types/miiverse/people';
 
 const router = express.Router();
 
@@ -68,9 +68,9 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 		posts = unhydratedPosts.map((post: IPost) => Post.hydrate(post));
 	} else if (request.query.is_hot === '1') {
-		posts = await Post.find(query).sort({ empathy_count: -1}).limit(limit);
+		posts = await Post.find(query).sort({ empathy_count: -1 }).limit(limit);
 	} else {
-		posts = await Post.find(query).sort({ created_at: -1}).limit(limit);
+		posts = await Post.find(query).sort({ created_at: -1 }).limit(limit);
 	}
 
 	const result: PeoplePostsResult = {

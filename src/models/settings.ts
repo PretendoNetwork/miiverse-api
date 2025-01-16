@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
-import { SettingsData } from '@/types/miiverse/settings';
-import { HydratedSettingsDocument, ISettings, ISettingsMethods, SettingsModel } from '@/types/mongoose/settings';
+import type { SettingsData } from '@/types/miiverse/settings';
+import type { HydratedSettingsDocument, ISettings, ISettingsMethods, SettingsModel } from '@/types/mongoose/settings';
 
 const SettingsSchema = new Schema<ISettings, SettingsModel, ISettingsMethods>({
 	pid: Number,

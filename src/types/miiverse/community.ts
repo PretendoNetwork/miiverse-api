@@ -1,4 +1,4 @@
-import { PostData } from '@/types/miiverse/post';
+import type { PostData } from '@/types/miiverse/post';
 
 export type CommunityData = {
 	community_id: string;

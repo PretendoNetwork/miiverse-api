@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IReport, ReportModel } from '@/types/mongoose/report';
+import type { IReport, ReportModel } from '@/types/mongoose/report';
 
 const ReportSchema = new Schema<IReport, ReportModel>({
 	pid: String,

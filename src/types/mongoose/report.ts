@@ -1,10 +1,10 @@
-import { Model, HydratedDocument } from 'mongoose';
+import type { Model, HydratedDocument } from 'mongoose';
 
 export interface IReport {
 	pid: string;
-    post_id: string;
-    reason: number;
-    created_at: Date;
+	post_id: string;
+	reason: number;
+	created_at: Date;
 }
 
 export type ReportModel = Model<IReport>;

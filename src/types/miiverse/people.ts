@@ -1,12 +1,12 @@
-import { PostData } from '@/types/miiverse/post';
-import { SettingsData } from '@/types/miiverse/settings';
+import type { PostData } from '@/types/miiverse/post';
+import type { SettingsData } from '@/types/miiverse/settings';
 
 export type PersonPosts = {
 	person: {
 		posts: {
 			post: PostData;
 		}[];
-	}
+	};
 };
 
 export type PeoplePostsResult = {

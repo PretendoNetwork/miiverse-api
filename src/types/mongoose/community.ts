@@ -1,5 +1,5 @@
-import { Model, Types, HydratedDocument } from 'mongoose';
-import { CommunityData } from '@/types/miiverse/community';
+import type { Model, Types, HydratedDocument } from 'mongoose';
+import type { CommunityData } from '@/types/miiverse/community';
 
 enum COMMUNITY_TYPE {
 	Main = 0,
@@ -37,7 +37,7 @@ export interface ICommunity {
 	is_recommended: number;
 	app_data: string;
 	user_favorites: Types.Array<number>;
-	permissions: ICommunityPermissions
+	permissions: ICommunityPermissions;
 }
 
 export interface ICommunityMethods {

@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { LOG_INFO, LOG_WARN, LOG_ERROR } from '@/logger';
-import { Config } from '@/types/common/config';
+import type mongoose from 'mongoose';
+import type { Config } from '@/types/common/config';
 
 dotenv.config();
 
@@ -72,7 +72,7 @@ if (!config.cdn_url) {
 
 try {
 	new URL(config.cdn_url);
-} catch (e) {
+} catch {
 	LOG_ERROR('Invalid CDN URL, URL must be a valid URL with a protocol (http/https) and domain');
 	process.exit(0);
 }

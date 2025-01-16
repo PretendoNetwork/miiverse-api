@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { Snowflake } from 'node-snowflake';
-import { IConversation, IConversationMethods, ConversationModel, HydratedConversationDocument } from '@/types/mongoose/conversation';
+import type { IConversation, IConversationMethods, ConversationModel, HydratedConversationDocument } from '@/types/mongoose/conversation';
 
 const ConversationSchema = new Schema<IConversation, ConversationModel, IConversationMethods>({
 	id: {
@@ -9,11 +9,11 @@ const ConversationSchema = new Schema<IConversation, ConversationModel, IConvers
 	},
 	created_at: {
 		type: Date,
-		default: new Date(),
+		default: new Date()
 	},
 	last_updated: {
 		type: Date,
-		default: new Date(),
+		default: new Date()
 	},
 	message_preview: {
 		type: String,

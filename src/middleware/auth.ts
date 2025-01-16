@@ -1,11 +1,11 @@
-import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import moment from 'moment';
 import { z } from 'zod';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { getEndpoint, getUserSettings } from '@/database';
 import { getUserAccountData, getValueFromHeaders, decodeParamPack, getPIDFromServiceToken } from '@/util';
-import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
+import { getEndpoint, getUserSettings } from '@/database';
+import type express from 'express';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 
 const ParamPackSchema = z.object({
 	title_id: z.string(),
@@ -112,7 +112,6 @@ async function auth(request: express.Request, response: express.Response, next: 
 		} else {
 			return badAuth(response, 7, 'PNID_PERM_BAN');
 		}
-
 	}
 
 	return next();

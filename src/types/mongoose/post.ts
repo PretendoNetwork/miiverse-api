@@ -1,7 +1,7 @@
-import { Model, Types, HydratedDocument } from 'mongoose';
-import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
-import { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
+import type { Model, Types, HydratedDocument } from 'mongoose';
+import type { HydratedCommunityDocument } from '@/types/mongoose/community';
+import type { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
+import type { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
 
 export interface IPost {
 	id: string;

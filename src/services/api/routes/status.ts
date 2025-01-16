@@ -3,11 +3,11 @@ import { getEndpoints } from '@/database';
 
 const router = express.Router();
 
-router.get('/', function(_request: express.Request, response: express.Response): void {
+router.get('/', function (_request: express.Request, response: express.Response): void {
 	response.send('Pong!');
 });
 
-router.get('/database', async function(_request: express.Request, response: express.Response): Promise<void> {
+router.get('/database', async function (_request: express.Request, response: express.Response): Promise<void> {
 	const endpoints = await getEndpoints();
 
 	if (endpoints && endpoints.length <= 0) {

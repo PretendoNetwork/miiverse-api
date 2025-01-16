@@ -1,7 +1,6 @@
 import express from 'express';
 import subdomain from 'express-subdomain';
 import { LOG_INFO } from '@/logger';
-
 import postsHandlers from '@/services/api/routes/posts';
 import friendMessagesHandlers from '@/services/api/routes/friend_messages';
 import communitiesHandlers from '@/services/api/routes/communities';

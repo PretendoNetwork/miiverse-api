@@ -1,19 +1,17 @@
-process.title = 'Pretendo - Miiverse';
-process.on('SIGTERM', () => {
-	process.exit(0);
-});
-
 import express from 'express';
 import morgan from 'morgan';
 import xmlbuilder from 'xmlbuilder';
 import { connect as connectDatabase } from '@/database';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import auth from '@/middleware/auth';
-
 import discovery from '@/services/discovery';
 import api from '@/services/api';
-
 import { config } from '@/config-manager';
+
+process.title = 'Pretendo - Miiverse';
+process.on('SIGTERM', () => {
+	process.exit(0);
+});
 
 const { http: { port } } = config;
 const app = express();

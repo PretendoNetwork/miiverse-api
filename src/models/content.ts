@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IContent, ContentModel } from '@/types/mongoose/content';
+import type { IContent, ContentModel } from '@/types/mongoose/content';
 
 const ContentSchema = new Schema<IContent, ContentModel>({
 	pid: Number,

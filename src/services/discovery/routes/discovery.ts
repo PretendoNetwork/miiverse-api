@@ -1,9 +1,9 @@
 import express from 'express';
 import xmlbuilder from 'xmlbuilder';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getUserAccountData } from '@/util';
 import { getEndpoint } from '@/database';
-import { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { HydratedEndpointDocument } from '@/types/mongoose/endpoint';
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 
 	try {
 		user = await getUserAccountData(request.pid);
-	} catch (error) {
+	} catch (ignored) {
 		// TODO - Log this error
 		response.sendStatus(404);
 		return;
@@ -52,7 +52,7 @@ router.get('/', async function (request: express.Request, response: express.Resp
 				}
 			}).end({ pretty: true }));
 
-			return ;
+			return;
 		case 1:
 			message = 'SYSTEM_UPDATE_REQUIRED';
 			errorCode = 1;

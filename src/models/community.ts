@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
-import { CommunityData } from '@/types/miiverse/community';
-import { ICommunity, ICommunityMethods, CommunityModel, ICommunityPermissions, HydratedCommunityDocument } from '@/types/mongoose/community';
+import type { CommunityData } from '@/types/miiverse/community';
+import type { ICommunity, ICommunityMethods, CommunityModel, ICommunityPermissions, HydratedCommunityDocument } from '@/types/mongoose/community';
 
 const PermissionsSchema = new Schema<ICommunityPermissions>({
 	open: {
@@ -18,7 +18,7 @@ const PermissionsSchema = new Schema<ICommunityPermissions>({
 	minimum_new_community_access_level: {
 		type: Number,
 		default: 0
-	},
+	}
 });
 
 const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods>({
@@ -54,7 +54,7 @@ const CommunitySchema = new Schema<ICommunity, CommunityModel, ICommunityMethods
 	owner: Number,
 	created_at: {
 		type: Date,
-		default: new Date(),
+		default: new Date()
 	},
 	empathy_count: {
 		type: Number,

@@ -2,10 +2,10 @@ import crypto from 'node:crypto';
 import moment from 'moment';
 import { Schema, model } from 'mongoose';
 import { INVALID_POST_BODY_REGEX } from '@/util';
-import { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
-import { HydratedCommunityDocument } from '@/types/mongoose/community';
-import { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
-import { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
+import type { HydratedPostDocument, IPost, IPostMethods, PostModel } from '@/types/mongoose/post';
+import type { HydratedCommunityDocument } from '@/types/mongoose/community';
+import type { PostToJSONOptions } from '@/types/mongoose/post-to-json-options';
+import type { PostData, PostPainting, PostScreenshot, PostTopicTag } from '@/types/miiverse/post';
 
 const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 	id: String,
@@ -87,7 +87,6 @@ const PostSchema = new Schema<IPost, PostModel, IPostMethods>({
 }, {
 	id: false // * Disables the .id() getter used by Mongoose in TypeScript. Needed to have our own .id field
 });
-
 
 PostSchema.method<HydratedPostDocument>('del', async function del(reason: string) {
 	this.removed = true;
@@ -178,7 +177,7 @@ PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSO
 		screen_name: this.screen_name,
 		screenshot: this.formatScreenshot(),
 		topic_tag: undefined, // * Conditionally set later
-		title_id: this.title_id,
+		title_id: this.title_id
 	};
 
 	if (options.app_data) {
@@ -206,7 +205,7 @@ PostSchema.method<HydratedPostDocument>('json', function json(options: PostToJSO
 	return post;
 });
 
-PostSchema.pre('save', async function(next) {
+PostSchema.pre('save', async function (next) {
 	if (!this.id) {
 		await this.generatePostUID(21);
 	}
