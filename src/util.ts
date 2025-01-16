@@ -146,7 +146,7 @@ export function processPainting(painting: string): Buffer | null {
 	}
 }
 
-export async function uploadCDNAsset(key: string, data: Buffer, acl: string): Promise<void> {
+export async function uploadCDNAsset(key: string, data: Buffer, acl: string): Promise<boolean> {
 	const awsPutParams = {
 		Body: data,
 		Key: key,
@@ -154,7 +154,13 @@ export async function uploadCDNAsset(key: string, data: Buffer, acl: string): Pr
 		ACL: acl
 	};
 
-	await s3.putObject(awsPutParams).promise();
+	try {
+		await s3.putObject(awsPutParams).promise();
+		return true;
+	} catch (e) {
+		console.error(e);
+		return false;
+	}
 }
 
 export async function getUserFriendPIDs(pid: number): Promise<number[]> {

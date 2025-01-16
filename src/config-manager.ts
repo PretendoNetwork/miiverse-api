@@ -25,6 +25,7 @@ export const config: Config = {
 		connection_string: process.env.PN_MIIVERSE_API_CONFIG_MONGO_CONNECTION_STRING || '',
 		options: mongooseConnectOptionsMain
 	},
+	cdn_url: process.env.PN_MIIVERSE_API_CONFIG_CDN_URL || '',
 	s3: {
 		endpoint: process.env.PN_MIIVERSE_API_CONFIG_S3_ENDPOINT || '',
 		key: process.env.PN_MIIVERSE_API_CONFIG_S3_ACCESS_KEY || '',
@@ -63,6 +64,21 @@ if (!config.mongoose.connection_string) {
 	LOG_ERROR('Failed to find MongoDB connection string. Set the PN_MIIVERSE_API_CONFIG_MONGO_CONNECTION_STRING environment variable');
 	process.exit(0);
 }
+
+if (!config.cdn_url) {
+	LOG_ERROR('Failed to find CDN url. Set the PN_MIIVERSE_API_CONFIG_CDN_URL environment variable');
+	process.exit(0);
+}
+
+try {
+	new URL(config.cdn_url);
+} catch (e) {
+	LOG_ERROR('Invalid CDN URL, URL must be a valid URL with a protocol (http/https) and domain');
+	process.exit(0);
+}
+
+// Remove trailing slash from CDN URL
+config.cdn_url = config.cdn_url.replace(/\/$/, '');
 
 if (!config.s3.endpoint) {
 	LOG_ERROR('Failed to find s3 endpoint. Set the PN_MIIVERSE_API_CONFIG_S3_ENDPOINT environment variable');

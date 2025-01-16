@@ -24,6 +24,7 @@ import { Post } from '@/models/post';
 import { Community } from '@/models/community';
 import { HydratedPostDocument } from '@/types/mongoose/post';
 import { PostRepliesResult } from '@/types/miiverse/post';
+import { config } from '@/config-manager';
 
 const newPostSchema = z.object({
 	community_id: z.string().optional(),
@@ -218,7 +219,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 	let user: GetUserDataResponse;
 
 	try {
-		user  = await getUserAccountData(request.pid);
+		user = await getUserAccountData(request.pid);
 	} catch (error) {
 		// TODO - Log this error
 		response.sendStatus(403);
@@ -364,7 +365,7 @@ async function newPost(request: express.Request, response: express.Response): Pr
 		is_app_jumpable: (jumpable) ? 1 : 0,
 		language_id: languageID,
 		mii: user.mii.data,
-		mii_face_url: `https://mii.olv.pretendo.cc/mii/${user.pid}/${miiFace}`,
+		mii_face_url: `${config.cdn_url}/mii/${user.pid}/${miiFace}`,
 		pid: request.pid,
 		platform_id: platformID,
 		region_id: regionID,

@@ -18,6 +18,7 @@ import { LOG_WARN } from '@/logger';
 import { Post } from '@/models/post';
 import { Conversation } from '@/models/conversation';
 import { FormattedMessage } from '@/types/common/formatted-message';
+import { config } from '@/config-manager';
 
 const sendMessageSchema = z.object({
 	body: z.string().optional(),
@@ -195,7 +196,7 @@ router.post('/', upload.none(), async function (request: express.Request, respon
 		is_app_jumpable: request.body.is_app_jumpable,
 		language_id: request.body.language_id,
 		mii: sender.mii.data,
-		mii_face_url: `https://mii.olv.pretendo.cc/mii/${sender.pid}/${miiFace}`,
+		mii_face_url: `${config.cdn_url}/mii/${sender.pid}/${miiFace}`,
 		pid: request.pid,
 		platform_id: request.paramPack.platform_id,
 		region_id: request.paramPack.region_id,
