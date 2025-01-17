@@ -66,6 +66,7 @@
 		"newman": "^6.0.0",
 		"ora": "^5.4.1",
 		"postman-collection": "^4.1.7",
+		"rimraf": "^6.0.1",
 		"table": "^6.8.1",
 		"ts-unused-exports": "^9.0.4",
 		"tsc-alias": "^1.8.5",
