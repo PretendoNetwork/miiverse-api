@@ -4,8 +4,7 @@ export default [
 	...eslintConfig,
 	{
 		ignores: [
-			'scripts/*',
-			'dist/*'
+			'scripts/*'
 		]
 	}
 ];
