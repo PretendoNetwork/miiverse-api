@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import crypto from 'node:crypto';
 import newman from 'newman';
 import { Collection, CollectionDefinition } from 'postman-collection';
