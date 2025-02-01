@@ -51,7 +51,7 @@
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@pretendonetwork/eslint-config": "^0.0.5",
+		"@pretendonetwork/eslint-config": "^0.0.6",
 		"@types/bmp-js": "^0.1.2",
 		"@types/express": "^4.17.17",
 		"@types/fs-extra": "^11.0.1",
