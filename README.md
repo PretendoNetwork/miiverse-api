@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> ## DEPRECATED. NOW LIVES IN https://github.com/PretendoNetwork/juxtaposition
+
 # What is this?
 This is the Pretendo Network Miiverse API Server, which replaces the former Nintendo Network Miiverse API Server *.olv.nintendo.net
 # Install and usage
